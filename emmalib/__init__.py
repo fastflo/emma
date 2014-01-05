@@ -1839,7 +1839,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         aboutdialog.hide()
 
     def on_changelog_activate(self, item):
-        fp = file(os.path.join(emma_share_path, "changelog"))
+        fp = file(os.path.join(emma_path, "../changelog"))
         changelog = fp.read()
         fp.close()
         w = self.xml.get_widget("changelog_window")
