@@ -22,12 +22,12 @@ try:
     import _mysql_exceptions
 except:
     print "no mysql"
-    
+
 import sys
-import time
+import os
 import re
 import traceback
-from mysql_db import *
+from MySqlDb import *
 
 # as of mysql 5.1: http://dev.mysql.com/doc/mysqld-version-reference/en/mysqld-version-reference-reservedwords-5-1.html
 mysql_reserved_words = """
@@ -113,7 +113,8 @@ RANGE   READ_ONLY   READ_WRITE
 mysql_reserved_words = re.sub("\[.*?\]", "", mysql_reserved_words.strip())
 mysql_reserved_words = re.split("[ \r\n\t]+", mysql_reserved_words.lower())
 
-class mysql_host:
+
+class MySqlHost:
     def __init__(self, *args):
         if len(args) == 2:
             # unpickle
@@ -131,24 +132,30 @@ class mysql_host:
                     db.__init__(self)
                 self._use_db(db_name, True)
         else:
-            self.sql_log, self.msg_log, self.name, self.host, self.port, self.user, self.password, self.database, self.connect_timeout = args
+            self.sql_log, self.msg_log, self.name, self.host, self.port, self.user, self.password, \
+                self.database, self.connect_timeout = args
             self.connected = False
-            self.databases = {} # name -> db_object
+            self.databases = {}  # name -> db_object
             self.current_db = None
             self.expanded = False
             self.handle = None
-            
+
         self.processlist = None
         self.update_ui = None
         self.last_error = ""
-        
+        self.query_time = 0
+        self.update_ui_args = None
+        self.charset = "latin1"
+        self.variables = dict()
+        self.version = ""
+
     def __getstate__(self):
         d = dict(self.__dict__)
         for i in ["sql_log", "msg_log", "handle", "processlist", "update_ui", "update_ui_args"]:
             del d[i]
-        #print "host will pickle:", d
+            #print "host will pickle:", d
         return d
-        
+
     def get_connection_string(self):
         if self.port != "":
             output = "%s:%s" % (self.host, self.port)
@@ -156,18 +163,18 @@ class mysql_host:
             output = "%s" % self.host
         output += ",%s,%s,%s" % (self.user, self.password, self.database)
         return output
-        
+
     def set_update_ui(self, update_ui, *args):
         self.update_ui = update_ui
         self.update_ui_args = args
-    
+
     def connect(self):
         c = {
-            "host": self.host, 
-            "user": self.user, 
-            "passwd": self.password, 
+            "host": self.host,
+            "user": self.user,
+            "passwd": self.password,
             "connect_timeout": int(self.connect_timeout)
-            }
+        }
         if self.port:
             c["port"] = int(self.port)
         if self.database:
@@ -175,27 +182,29 @@ class mysql_host:
 
         try:
             self.handle = _mysql.connect(**c)
-        except: #  _mysql_exceptions.OperationalError:
+        except:  # mysql_exceptions.OperationalError:
             self.connected = False
             self.msg_log("%s: %s" % (sys.exc_type, sys.exc_value))
             return
-        self.connected = True       
+        self.connected = True
         self.version = self.handle.get_server_info()
         #if self.is_at_least_version("4.1.0"):
         #    self.query("set names 'utf8'") # request utf8 encoded names and result!
-        self.query("show variables") # get server variables
+        self.query("show variables")  # get server variables
         result = self.handle.store_result()
         self.variables = dict(result.fetch_row(0))
         if self.is_at_least_version("4.1.3"):
             self.charset = self.variables["character_set_server"]
         else:
-            self.charset = "latin1" # use config default_charset as fallback!
-            print "using default_charset %r for this database" % (self.charset) 
-        #print "server variables:"
-        #import pprint
+            self.charset = "latin1"  # use config default_charset as fallback!
+            print "using default_charset %r for this database" % self.charset
+            #print "server variables:"
+            #import pprint
         #pprint.pprint(self.variables)
         self.refresh()
-        if self.database: self._use_db(self.database)
+        if self.database:
+            self._use_db(self.database)
+
     def is_at_least_version(self, requested):
         requested = map(int, requested.split("."))
         real = self.version.replace("-", "_").split("_", 1)[0].split(".")
@@ -215,7 +224,7 @@ class mysql_host:
             self.connected = False
             self.msg_log(sys.exc_value[1])
             return False
-        
+
     def close(self):
         self.databases = {}
         self.processlist = None
@@ -225,7 +234,7 @@ class mysql_host:
         self.current_db = None
         self.connected = False
         if self.update_ui: self.update_ui(self, *self.update_ui_args)
-        
+
     def query(self, query, check_use=True, append_to_log=True, encoding=None):
         if not self.handle:
             self.msg_log("not connected! can't execute %s, %s, %s" % (query, str(self.handle), str(self)))
@@ -248,13 +257,16 @@ class mysql_host:
                 self.last_error = str(sys.exc_value)
             s = sys.exc_value[1]
             #print "error:", [s]
-            s = s.replace("You have an error in your SQL syntax.  Check the manual that corresponds to your MySQL server version for the right syntax to use near ", "MySQL syntax error at ")
+            s = s.replace(
+                "You have an error in your SQL syntax.  " +
+                "Check the manual that corresponds to your MySQL server version for the right syntax to use near ",
+                "MySQL syntax error at ")
             self.msg_log(s)
             if sys.exc_value[0] == 2013:
                 # lost connection
                 self.close()
             return False
-            
+
         if not check_use: return True
         match = re.match("(?is)^([ \r\n\t]*|#[^\n]*)*(use[ \r\n\t]*).*", query)
         if match:
@@ -264,18 +276,19 @@ class mysql_host:
             # reexecute to reset field_count and so on...
             self.handle.query(query)
         return True
-        
+
     def _use_db(self, name, do_query=True):
         if self.current_db and name == self.current_db.name: return
         if do_query: self.query("use `%s`" % name, False)
         try:
             self.current_db = self.databases[name]
         except KeyError:
-            print "Warning: used an unknown database %r! please refresh host!\n%s" % (name, "".join(traceback.format_stack()))
-        
+            print "Warning: used an unknown database %r! please refresh host!\n%s" % (
+                name, "".join(traceback.format_stack()))
+
     def select_database(self, db):
         self._use_db(db.name)
-        
+
     def refresh(self):
         self.query("show databases")
         result = self.handle.store_result()
@@ -283,26 +296,26 @@ class mysql_host:
         db_id = len(old)
         for row in result.fetch_row(0):
             if not row[0] in old:
-                self.databases[row[0]] = mysql_db(self, row[0])
+                self.databases[row[0]] = MySqlDb(self, row[0])
             else:
                 del old[row[0]]
         for db in old.keys():
             print "remove database", db
             del self.databases[db]
-        
+
     def refresh_processlist(self):
         if not self.query("show processlist"): return
         result = self.handle.store_result()
         self.processlist = (result.describe(), result.fetch_row(0))
-        
+
     def insert_id(self):
         return self.handle.insert_id()
-        
+
     def escape(self, s):
         if s is None:
             return s
         return self.handle.escape_string(s)
-    
+
     def escape_field(self, field):
         # todo encode unicode strings here!
         # if already encoded:
@@ -318,7 +331,7 @@ class mysql_host:
             rv = field
         print "escape field %r to %r" % (field, rv)
         return rv
-        
+
     def escape_table(self, table):
         not_allowed = "".join(filter(lambda s: s, [
             os.curdir,
@@ -329,8 +342,8 @@ class mysql_host:
             os.pathsep,
             os.linesep]))
         if set(table).intersection(set(not_allowed)):
-            raise Exception("before mysql 5.1.6 table names are not allowed to contain one of these chars: %r %r" % (not_allowed, table))
+            raise Exception("before mysql 5.1.6 table names are not allowed to contain one of these chars: %r %r" % (
+                not_allowed, table))
         if len(table) > 64:
             raise Exception("table name too long: %r / %d" % (table, len(table)))
         return self.escape_field(table)
-        

@@ -17,32 +17,26 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import sys
-import os
 from stat import *
-import time
-import re
 import gc
 import pickle
 import datetime
 import bz2
 import sql
-import traceback
 from query_regular_expression import *
 
 if __name__ != "__main__":
     from emmalib import __file__ as emmalib_file
-    from emmalib.mysql_host import *
-    from emmalib.mysql_query_tab import *
+    from emmalib.providers.mysql.MySqlHost import *
+    from emmalib.providers.mysql.MySqlQueryTab import *
 else:
     emmalib_file = __file__
-    from mysql_host import *
-    from mysql_query_tab import *
-
+    from providers.mysql.MySqlHost import *
+    from providers.mysql.MySqlQueryTab import *
 try:
     import pysqlite2.dbapi2 as sqlite3
     have_sqlite = True
-    from sqlite_host import *
+    from emmalib.providers.sqlite.SQLiteHost import *
 except:
     print traceback.format_exc()
     have_sqlite = False
@@ -55,10 +49,6 @@ try:
     import gtk.glade
 except:
     print "no gtk. you will not be able to start emma.", sys.exc_value
-
-
-
-import pprint
 
 version = "0.7"
 new_instance = None
@@ -132,7 +122,7 @@ class Emma:
         self.blob_view_visible = False
         
         # setup connections
-        self.connections_model = gtk.TreeStore(gobject.TYPE_PYOBJECT);
+        self.connections_model = gtk.TreeStore(gobject.TYPE_PYOBJECT)
         self.connections_tv = self.xml.get_widget("connections_tv")
         self.connections_tv.set_model(self.connections_model)
         col = gtk.TreeViewColumn("MySQL-Hosts")
@@ -155,8 +145,7 @@ class Emma:
         # processlist
         self.processlist_tv = self.xml.get_widget("processlist_treeview")
         self.processlist_model = None
-        
-        
+
         self.local_search_window = self.xml.get_widget("localsearch_window")
         self.local_search_entry = self.xml.get_widget("local_search_entry")
         self.local_search_entry.connect("activate", lambda *a: self.local_search_window.response(gtk.RESPONSE_OK));
@@ -190,7 +179,7 @@ class Emma:
             self.hosts = {}
             self.load_config()
             self.queries = []
-            self.add_query_tab(mysql_query_tab(self.xml, self.query_notebook))
+            self.add_query_tab(MySqlQueryTab(self.xml, self.query_notebook))
         else:
             self.hosts = self.state["hosts"]
             self.load_config(True)
@@ -1777,7 +1766,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         xml = gtk.glade.XML(self.glade_file, "first_query")
         tab_label_hbox = gtk.glade.XML(self.glade_file, "tab_label_hbox")
         new_page = xml.get_widget("first_query")
-        self.add_query_tab(mysql_query_tab(xml, self.query_notebook))
+        self.add_query_tab(MySqlQueryTab(xml, self.query_notebook))
         label = tab_label_hbox.get_widget("tab_label_hbox")
         qtlabel = tab_label_hbox.get_widget("query_tab_label")
         #qtlabel.set_text("query%d" % self.query_count)
@@ -2208,6 +2197,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
     
     def on_host_popup(self, item):
+
+        print "on_host_popup"
+
         path, column = self.connections_tv.get_cursor()
         if path:
             iter = self.connections_model.get_iter(path)
@@ -2251,7 +2243,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.save_config()
         elif what == "new_connection":
             for n in self.cw_props:
-                self.xml.get_widget("cw_%s" % n).set_text("")
+                widget = self.xml.get_widget("cw_%s" % n)
+                if widget:
+                    self.xml.get_widget("cw_%s" % n).set_text("")
             self.cw_mode = "new"
             self.connection_window.show()
         elif what == "new_sqlite_connection":
@@ -2262,7 +2256,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 self.add_sqlite(self.sqlite_connection_dialog.get_filename())
                 self.save_config()
 
-        
     def on_cw_apply(self, *args):
         if self.cw_mode == "new":
             data = []
@@ -3110,12 +3103,12 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         self.current_query.set_query_encoding(data[0])
         
     def add_mysql_host(self, name, hostname, port, user, password, database):
-        host = mysql_host(self.add_sql_log, self.add_msg_log, name, hostname, port, user, password, database, self.config["connect_timeout"])
+        host = MySqlHost(self.add_sql_log, self.add_msg_log, name, hostname, port, user, password, database, self.config["connect_timeout"])
         iter = self.connections_model.append(None, [host])
         host.set_update_ui(self.redraw_host, iter)
     
     def add_sqlite(self, filename):
-        host = sqlite_host(self.add_sql_log, self.add_msg_log, filename)
+        host = SQLiteHost(self.add_sql_log, self.add_msg_log, filename)
         iter = self.connections_model.append(None, [host])
         host.set_update_ui(self.redraw_host, iter)
     
@@ -3312,13 +3305,16 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def read_expression(self, query, start=0, concat=True, update_function=None, update_offset=0, icount=0):
         ## TODO!
         # r'(?is)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|([^ \r\n\t]*[ \r\n\t]*\()|(\))|([0-9]+(?:\\.[0-9]*)?)|([^ \r\n\t,()"\'`]+)|(,)')
-        try:    r = self.query_expr_re
-        except: r = self.query_expr_re = query_regular_expression
+        try:
+            r = self.query_expr_re
+        except:
+            r = self.query_expr_re = query_regular_expression
         
         # print "read expr in", query
         match = r.search(query, start)
         #if match: print match.groups()
-        if not match: return (None, None)
+        if not match:
+            return None, None
         for i in range(1, match.lastindex + 1):
             if match.group(i): 
                 t = match.group(i)
@@ -3333,18 +3329,24 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                         #print "at", [query[e:e+15]], "..."
                         exp, end = self.read_expression(query, e, False, update_function, update_offset, icount)
                         #print "got inner exp:", [exp]
-                        if not exp: break
+                        if not exp:
+                            break
                         e = end
                         if concat: 
                             t += " " + exp
                         if exp == ")": 
                             break
                         
-                return (t, e)
+                return t, e
         print "should not happen!"
-        return (None, None)
-        
-class output_handler:
+        return None, None
+    # def alert(self, text):
+    #     md = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE, text)
+    #     md.run()
+    #     md.destroy()
+
+
+class OutputHandler:
     def __init__(self, print_stdout=False, log_file=None, log_flush=False):
         self.stdout = sys.stdout
         self.print_stdout = print_stdout
@@ -3359,14 +3361,18 @@ class output_handler:
     def write(self, s):
         if self.print_stdout:
             self.stdout.write(s)
-            if self.log_flush: self.stdout.flush()
+            if self.log_flush:
+                self.stdout.flush()
         if self.log_fp:
             s = s.strip("\r\n")
-            if not s: # do not write empty lines to logfile
+            if not s:
+                # do not write empty lines to logfile
                 return 
             timestamp = str(datetime.datetime.now())[0:22]
             self.log_fp.write("%s %s\n" % (timestamp, s.replace("\n", "\n " + (" " * len(timestamp)))))
-            if self.log_flush: self.log_fp.flush()
+            if self.log_flush:
+                self.log_fp.flush()
+
 
 def usage():
     
@@ -3377,6 +3383,7 @@ def usage():
  -f|--flush    flush {stdout,log} after each write
 """
     sys.exit(0)
+
 
 def start(args):
     global new_instance
@@ -3404,7 +3411,7 @@ def start(args):
             usage()
 
     # this singleton will be accessible as sys.stdout!
-    output_handler(debug_output, log_file, log_flush)
+    OutputHandler(debug_output, log_file, log_flush)
 
     e = Emma()
 
