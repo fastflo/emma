@@ -233,7 +233,8 @@ class MySqlHost:
             self.handle = None
         self.current_db = None
         self.connected = False
-        if self.update_ui: self.update_ui(self, *self.update_ui_args)
+        if self.update_ui:
+            self.update_ui(self, *self.update_ui_args)
 
     def query(self, query, check_use=True, append_to_log=True, encoding=None):
         if not self.handle:
@@ -267,7 +268,8 @@ class MySqlHost:
                 self.close()
             return False
 
-        if not check_use: return True
+        if not check_use:
+            return True
         match = re.match("(?is)^([ \r\n\t]*|#[^\n]*)*(use[ \r\n\t]*).*", query)
         if match:
             dbname = query[match.end(2):].strip("`; \t\r\n")

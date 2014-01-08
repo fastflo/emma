@@ -66,14 +66,15 @@ class MySqlQueryTab:
 
             # sv config
             for pt, pn, pd in (
-            (bool, "show_line_numbers", True),
-            (bool, "show_line_markers", False),
-            (int, "tabs_width", 4),
-            (bool, "auto_indent", True),
-            (bool, "insert_spaces_instead_of_tabs", False),
-            (bool, "show_margin", True),
-            (int, "margin", 80),
-            (bool, "smart_home_end", True)):
+                (bool, "show_line_numbers", True),
+                (bool, "show_line_markers", False),
+                (int, "tabs_width", 4),
+                (bool, "auto_indent", True),
+                (bool, "insert_spaces_instead_of_tabs", False),
+                (bool, "show_margin", True),
+                (int, "margin", 80),
+                (bool, "smart_home_end", True)
+            ):
 
                 cn = "sourceview.%s" % pn
                 try:
