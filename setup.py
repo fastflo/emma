@@ -1,11 +1,8 @@
 #!/usr/bin/env python
-import os
-import os.path
-import sys
 from glob import glob
 from distutils.core import setup
 
-from emmalib import version 
+from emmalib import version
 
 icon_data = glob('icons/*.png')
 glade_data = ['emmalib/emma.glade', 'emmalib/plugins/table_editor/table_editor.glade']
@@ -20,18 +17,18 @@ setup(name="emma",
       author_email="flo@fastflo.de",
       url="http://emma.fastflo.de",
       scripts=['emma'],
-	  package_dir={'emmalib': 'emmalib'},
+      package_dir={'emmalib': 'emmalib'},
       packages=[
-            'emmalib', 
-            'emmalib.plugins.table_editor',
-            'emmalib.plugins.pretty_format',
+          'emmalib',
+          'emmalib.plugins.table_editor',
+          'emmalib.plugins.pretty_format',
       ],
       data_files=[
-		("share/emma/icons", icon_data),
-		("share/emma/glade", glade_data),
-		("share/emma/theme", theme_data),
-		("share/emma/theme/gtk-2.0", theme_gtk_data),
-		("share/emma", other_data),
+          ("share/emma/icons", icon_data),
+          ("share/emma/glade", glade_data),
+          ("share/emma/theme", theme_data),
+          ("share/emma/theme/gtk-2.0", theme_gtk_data),
+          ("share/emma", other_data),
       ],
       license="GPL",
       long_description="""
@@ -44,6 +41,6 @@ data can be edited by the user, if the sql statemant allows for it. the sql
 editor and resultset-view are grouped in tabs. results can be exported to csv 
 files. multiple simultanios opend mysql connections are possible. 
 Emma is the successor of yamysqlfront.
-"""
-      )
+""",
+      requires=['pyparsing'])
 
