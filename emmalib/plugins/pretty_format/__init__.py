@@ -89,7 +89,7 @@ def search_parenthesis_end(text, s):
         # must be a string
         delim = text[end]
         strend = search_string_end(text, delim, end + 1)
-        quoted_string = text[end:strend + 1]
+        #quoted_string = text[end:strend + 1]
         #print "quoted string: %r" % quoted_string
         s = strend + 1
     return s
@@ -98,7 +98,7 @@ def search_parenthesis_end(text, s):
 def get_token(text, p, allow_functions=False):
     ttype = "token"
     o = strspn(text, " \r\n\t", p)
-    p = p + o
+    p += o
     print "\nget token from %r" % text[p:p + 25]
     if not text[p:]:
         return ttype, "", len(text)
@@ -205,13 +205,15 @@ select * from user;
         button.show()
         self.toolbar_items.append((button, toolbar))
 
-    def get_query_text(self, q):
-        buffer = q.textview.get_buffer()
-        return buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter())
+    @staticmethod
+    def get_query_text(q):
+        buf = q.textview.get_buffer()
+        return buf.get_text(buf.get_start_iter(), buf.get_end_iter())
 
-    def set_query_text(self, q, text):
-        buffer = q.textview.get_buffer()
-        buffer.set_text(text)
+    @staticmethod
+    def set_query_text(q, text):
+        buf = q.textview.get_buffer()
+        buf.set_text(text)
 
     def on_pretty_format(self, button):
         q = self.emma.current_query
