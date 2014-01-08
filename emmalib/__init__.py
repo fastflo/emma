@@ -29,10 +29,12 @@ if __name__ != "__main__":
     from emmalib import __file__ as emmalib_file
     from emmalib.providers.mysql.MySqlHost import *
     from emmalib.providers.mysql.MySqlQueryTab import *
+    from emmalib.ConnectionWindow import *
 else:
     emmalib_file = __file__
     from providers.mysql.MySqlHost import *
     from providers.mysql.MySqlQueryTab import *
+    from ConnectionWindow import *
 try:
     import pysqlite2.dbapi2 as sqlite3
     have_sqlite = True
@@ -125,7 +127,7 @@ class Emma:
         self.connections_model = gtk.TreeStore(gobject.TYPE_PYOBJECT)
         self.connections_tv = self.xml.get_widget("connections_tv")
         self.connections_tv.set_model(self.connections_model)
-        col = gtk.TreeViewColumn("MySQL-Hosts")
+        col = gtk.TreeViewColumn("Hosts")
         
         pixbuf_renderer = gtk.CellRendererPixbuf()
         col.pack_start(pixbuf_renderer, False)
@@ -300,7 +302,8 @@ class Emma:
     def init_config(self):
         for i in ["HOME", "USERPROFILE"]: 
             filename = os.getenv(i)
-            if filename: break
+            if filename:
+                break
         if not filename:
             filename = "."
         filename = filename + "/.emma"
@@ -2176,7 +2179,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 self.redraw_host(host, self.get_host_iter(host))
         elif what == "new_table":
             name = self.input("new table", "please enter the name of the new table:")
-            if not name: return
+            if not name:
+                return
             if db.query("create table `%s` (`%s_id` int primary key auto_increment)" % (name, name)):
                 new_tables = db.refresh()
                 self.redraw_db(db, self.get_db_iter(db), new_tables)
@@ -2197,9 +2201,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
     
     def on_host_popup(self, item):
-
-        print "on_host_popup"
-
         path, column = self.connections_tv.get_cursor()
         if path:
             iter = self.connections_model.get_iter(path)
@@ -2210,29 +2211,28 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         what = item.name
         
         if "connection_window" not in self.__dict__:
-            self.connection_window = self.xml.get_widget("connection_window")
-            self.xml.get_widget("cw_apply_button").connect("clicked", self.on_cw_apply)
-            self.xml.get_widget("cw_test_button").connect("clicked", self.on_cw_test)
-            self.xml.get_widget("cw_abort_button").connect("clicked", lambda *a: self.connection_window.hide())
-            self.cw_props = ["name", "host", "port", "user", "password", "database"]
+            self.connection_window = ConnectionWindow(self)
+            # self.connection_window = self.xml.get_widget("connection_window")
+            # self.xml.get_widget("cw_apply_button").connect("clicked", self.on_cw_apply)
+            # self.xml.get_widget("cw_test_button").connect("clicked", self.on_cw_test)
+            # self.xml.get_widget("cw_abort_button").connect("clicked", lambda *a: self.connection_window.hide())
+            # self.cw_props = ["name", "host", "port", "user", "password", "database"]
         
         if what == "refresh_host":
             host.refresh()
             self.redraw_host(host, iter)
         elif what == "new_database":
-            name = self.input("new database", "please enter the name of the new database:")
-            if not name: return
-            if host.query("create database `%s`" % name):
+            name = self.input("New database", "Please enter the name of the new database:")
+            if not name:
+                return
+            if host.query("Create database `%s`" % name):
                 host.refresh()
                 self.redraw_host(host, iter)
         elif what == "modify_connection":
-            for n in self.cw_props:
-                self.xml.get_widget("cw_%s" % n).set_text(host.__dict__[n])
-            self.cw_mode = "edit"
-            self.cw_host = host
-            self.connection_window.show()
+            self.connection_window.host = host
+            self.connection_window.show("edit")
         elif what == "delete_connection":
-            if not self.confirm("delete host", "do you really want to drop the host <b>%s</b>?" % (host.name)):
+            if not self.confirm("Delete host", "Do you really want to drop the host <b>%s</b>?" % (host.name)):
                 return
             host.close()
             self.connections_model.remove(iter)
@@ -2242,12 +2242,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             host = None
             self.save_config()
         elif what == "new_connection":
-            for n in self.cw_props:
-                widget = self.xml.get_widget("cw_%s" % n)
-                if widget:
-                    self.xml.get_widget("cw_%s" % n).set_text("")
-            self.cw_mode = "new"
-            self.connection_window.show()
+            self.connection_window.show("new")
         elif what == "new_sqlite_connection":
             resp = self.sqlite_connection_dialog.run()
             self.sqlite_connection_dialog.hide()
@@ -2256,59 +2251,59 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 self.add_sqlite(self.sqlite_connection_dialog.get_filename())
                 self.save_config()
 
-    def on_cw_apply(self, *args):
-        if self.cw_mode == "new":
-            data = []
-            for n in self.cw_props:
-                data.append(self.xml.get_widget("cw_%s" % n).get_text())
-            if not data[0]:
-                self.connection_window.hide()
-                return
-            self.add_mysql_host(*data)
-        else:
-            for n in self.cw_props:
-                self.cw_host.__dict__[n] = self.xml.get_widget("cw_%s" % n).get_text()
-        self.connection_window.hide()
-        self.save_config()
-        
-    def on_cw_test(self, *args):
-        import _mysql;
-        data = {
-            "connect_timeout": 6
-        }
-        widget_map = {
-            "password": "passwd"
-        }
-        for n in ["host", "user", "password", "port:int"]:
-            if ":" in n:
-                n, typename = n.split(":", 1)
-                data[widget_map.get(n, n)] = eval("%s(%r)" % (typename, self.xml.get_widget("cw_%s" % n).get_text()))
-            else:
-                data[widget_map.get(n, n)] = self.xml.get_widget("cw_%s" % n).get_text()
-            
-            
-        try:
-            handle = _mysql.connect(**data)
-        except:
-            self.show_message(
-                "test connection", 
-                "could not connect to host <b>%s</b> with user <b>%s</b> and password <b>%s</b>:\n<i>%s</i>" % (
-                    data["host"], 
-                    data["user"], 
-                    data["passwd"], 
-                    sys.exc_value
-                    ),
-                window=self.connection_window
-                )
-            return
-        self.show_message(
-            "test connection", 
-            "successfully connected to host <b>%s</b> with user <b>%s</b>!" % (
-                data["host"], 
-                data["user"]
-                ),
-            window=self.connection_window)
-        handle.close()
+    # def on_cw_apply(self, *args):
+    #     if self.cw_mode == "new":
+    #         data = []
+    #         for n in self.cw_props:
+    #             data.append(self.xml.get_widget("cw_%s" % n).get_text())
+    #         if not data[0]:
+    #             self.connection_window.hide()
+    #             return
+    #         self.add_mysql_host(*data)
+    #     else:
+    #         for n in self.cw_props:
+    #             self.cw_host.__dict__[n] = self.xml.get_widget("cw_%s" % n).get_text()
+    #     self.connection_window.hide()
+    #     self.save_config()
+    #
+    # def on_cw_test(self, *args):
+    #     import _mysql;
+    #     data = {
+    #         "connect_timeout": 6
+    #     }
+    #     widget_map = {
+    #         "password": "passwd"
+    #     }
+    #     for n in ["host", "user", "password", "port:int"]:
+    #         if ":" in n:
+    #             n, typename = n.split(":", 1)
+    #             data[widget_map.get(n, n)] = eval("%s(%r)" % (typename, self.xml.get_widget("cw_%s" % n).get_text()))
+    #         else:
+    #             data[widget_map.get(n, n)] = self.xml.get_widget("cw_%s" % n).get_text()
+    #
+    #
+    #     try:
+    #         handle = _mysql.connect(**data)
+    #     except:
+    #         self.show_message(
+    #             "test connection",
+    #             "could not connect to host <b>%s</b> with user <b>%s</b> and password <b>%s</b>:\n<i>%s</i>" % (
+    #                 data["host"],
+    #                 data["user"],
+    #                 data["passwd"],
+    #                 sys.exc_value
+    #                 ),
+    #             window=self.connection_window
+    #             )
+    #         return
+    #     self.show_message(
+    #         "test connection",
+    #         "successfully connected to host <b>%s</b> with user <b>%s</b>!" % (
+    #             data["host"],
+    #             data["user"]
+    #             ),
+    #         window=self.connection_window)
+    #     handle.close()
 
     def get_db_iter(self, db):
         return self.get_connections_object_at_depth(db, 1)
@@ -2357,8 +2352,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         self.execution_timer_running = True
         self.execution_timer_interval = value
         gobject.timeout_add(int(value * 1000), self.on_execution_timeout, button)
-        
-        
+
     def on_blob_update_clicked(self, button):
         q = self.current_query
         path, column = q.treeview.get_cursor()

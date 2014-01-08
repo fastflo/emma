@@ -1443,7 +1443,7 @@ successor of yamysqlfront</property>
     <child>
       <widget class="GtkImageMenuItem" id="refresh_host">
         <property name="visible">True</property>
-        <property name="label" translatable="yes">refresh</property>
+        <property name="label" translatable="yes">Refresh</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_host_popup"/>
         <child internal-child="image">
@@ -1458,7 +1458,7 @@ successor of yamysqlfront</property>
     <child>
       <widget class="GtkImageMenuItem" id="modify_connection">
         <property name="visible">True</property>
-        <property name="label" translatable="yes">modify connection</property>
+        <property name="label" translatable="yes">Modify connection</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_host_popup"/>
         <child internal-child="image">
@@ -1473,7 +1473,7 @@ successor of yamysqlfront</property>
     <child>
       <widget class="GtkImageMenuItem" id="delete_connection">
         <property name="visible">True</property>
-        <property name="label" translatable="yes">delete connection</property>
+        <property name="label" translatable="yes">Delete connection</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_host_popup"/>
         <child internal-child="image">
@@ -1488,7 +1488,7 @@ successor of yamysqlfront</property>
     <child>
       <widget class="GtkImageMenuItem" id="new_connection">
         <property name="visible">True</property>
-        <property name="label" translatable="yes">new connection</property>
+        <property name="label" translatable="yes">New connection</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_host_popup"/>
         <child internal-child="image">
@@ -1515,7 +1515,7 @@ successor of yamysqlfront</property>
     <child>
       <widget class="GtkImageMenuItem" id="new_database">
         <property name="visible">True</property>
-        <property name="label" translatable="yes">new database</property>
+        <property name="label" translatable="yes">New database</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_host_popup"/>
         <child internal-child="image">
