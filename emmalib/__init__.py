@@ -30,11 +30,13 @@ if __name__ != "__main__":
     from emmalib.providers.mysql.MySqlHost import *
     from emmalib.providers.mysql.MySqlQueryTab import *
     from emmalib.ConnectionWindow import *
+    import emmalib.dialogs
 else:
     emmalib_file = __file__
     from providers.mysql.MySqlHost import *
     from providers.mysql.MySqlQueryTab import *
     from ConnectionWindow import *
+    import dialogs
 try:
     import sqlite3
     have_sqlite = True
@@ -433,7 +435,7 @@ class Emma:
         tables = map(lambda s: s.strip(), table_list.split(","))
         
         if len(tables) > 1:
-            self.show_message("store table order", "can't store table order of multi-table queries!")
+            dialogs.show_message("store table order", "can't store table order of multi-table queries!")
             return
         table = tables[0]
         
@@ -759,7 +761,7 @@ class Emma:
             query_text = fp.read().decode(self.current_query.encoding, "ignore")
             fp.close()
         except:
-            self.show_message("load blob contents", "loading blob contents from file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message("load blob contents", "loading blob contents from file %s: %s" % (filename, sys.exc_value))
             return
         self.blob_tv.get_buffer().set_text(query_text)
         
@@ -775,9 +777,11 @@ class Emma:
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
-                self.show_message("save blob contents", "%s already exists and is not a file!" % filename)
+                dialogs.show_message("save blob contents", "%s already exists and is not a file!" % filename)
                 return
-            if not self.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename):
+            if not dialogs.confirm(
+                    "overwrite file?", "%s already exists! do you want to overwrite it?" % filename,
+                    self.mainwindow):
                 return
         b = self.blob_tv.get_buffer()
         new_value = b.get_text(b.get_start_iter(), b.get_end_iter()).encode(self.current_query.encoding, "ignore")
@@ -786,7 +790,7 @@ class Emma:
             fp.write(new_value)
             fp.close()
         except:
-            self.show_message("save blob contents", "error writing query to file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message("save blob contents", "error writing query to file %s: %s" % (filename, sys.exc_value))
         
     def on_delete_record_tool_clicked(self, button):
         q = self.current_query
@@ -947,7 +951,7 @@ class Emma:
             
     def on_execute_query_from_disk_activate(self, button, filename=None):
         if not self.current_host:
-            self.show_message("execute query from disk", "no host selected!")
+            dialogs.show_message("execute query from disk", "no host selected!")
             return
             
         d = self.get_widget("execute_query_from_disk")
@@ -1060,17 +1064,17 @@ class Emma:
             try:
                 exclude_regex = re.compile(exclude_regex, re.DOTALL)
             except:
-                self.show_message("execute query from disk", "error compiling your regular expression: %s" % (sys.exc_value))
+                dialogs.show_message("execute query from disk", "error compiling your regular expression: %s" % (sys.exc_value))
                 return
         
         filename = fc.get_filename()
         try:
             sbuf = os.stat(filename)
         except:
-            self.show_message("execute query from disk", "%s does not exists!" % filename)
+            dialogs.show_message("execute query from disk", "%s does not exists!" % filename)
             return
         if not S_ISREG(sbuf.st_mode):
-            self.show_message("execute query from disk", "%s exists, but is not a regular file!" % filename)
+            dialogs.show_message("execute query from disk", "%s exists, but is not a regular file!" % filename)
             return
         
         size = sbuf.st_size
@@ -1088,7 +1092,7 @@ class Emma:
                 fp = file(filename, "rb")
                 self.last_query_line = fp.readline()
             except:
-                self.show_message("execute query from disk", "error opening query from file %s: %s" % (filename, sys.exc_value))
+                dialogs.show_message("execute query from disk", "error opening query from file %s: %s" % (filename, sys.exc_value))
                 return
         d.hide()
         
@@ -1176,7 +1180,7 @@ class Emma:
                 if exclude and exclude_regex.match(query):
                     print "skipping query %r" % query[0:80]
                 elif not host.query(query, True, append_to_log) and stop_on_error:
-                    self.show_message("execute query from disk", "an error occoured. maybe remind the line number and press cancel to close this dialog!")
+                    dialogs.show_message("execute query from disk", "an error occoured. maybe remind the line number and press cancel to close this dialog!")
                     self.query_from_disk = False
                     break
                 #print "exec", [query]
@@ -1184,10 +1188,10 @@ class Emma:
         update_ui(True, fp.tell())
         fp.close()
         if not self.query_from_disk:
-            self.show_message("execute query from disk", "aborted by user whish - click cancel again to close window")
+            dialogs.show_message("execute query from disk", "aborted by user whish - click cancel again to close window")
             return
         else:
-            self.show_message("execute query from disk", "done!")
+            dialogs.show_message("execute query from disk", "done!")
         p.hide()
         
     def on_cancel_execute_from_disk_clicked(self, button):
@@ -1209,7 +1213,7 @@ class Emma:
         
         self.current_host = host = q.current_host
         if not host:
-            self.show_message(
+            dialogs.show_message(
                 "error executing this query!",
                 "could not execute query, because there is no selected host!"
             )
@@ -1219,9 +1223,9 @@ class Emma:
         if q.current_db:
             host.select_database(q.current_db)
         elif host.current_db:
-            if not self.confirm("query without selected db",
+            if not dialogs.confirm("query without selected db",
 """warning: this query tab has no database selected but the host-connection already has the database '%s' selected.
-the author knows no way to deselect this database. do you want to continue?""" % host.current_db.name):
+the author knows no way to deselect this database. do you want to continue?""" % host.current_db.name, self.mainwindow):
                 return
             
         update = False
@@ -1475,9 +1479,9 @@ the author knows no way to deselect this database. do you want to continue?""" %
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
-                self.show_message("save results", "%s already exists and is not a file!" % filename)
+                dialogs.show_message("save results", "%s already exists and is not a file!" % filename)
                 return
-            if not self.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename):
+            if not dialogs.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
                 return
         q = self.current_query
         iter = q.model.get_iter_first()
@@ -1500,7 +1504,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
                 iter = q.model.iter_next(iter)
             fp.close()
         except:
-            self.show_message("save results", "error writing query to file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message("save results", "error writing query to file %s: %s" % (filename, sys.exc_value))
         
 
     def on_save_result_sql_clicked(self, button):
@@ -1518,9 +1522,9 @@ the author knows no way to deselect this database. do you want to continue?""" %
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
-                self.show_message(title, "%s already exists and is not a file!" % filename)
+                dialogs.show_message(title, "%s already exists and is not a file!" % filename)
                 return
-            if not self.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename):
+            if not dialogs.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
                 return
         q = self.current_query
         iter = q.model.get_iter_first()
@@ -1533,11 +1537,13 @@ the author knows no way to deselect this database. do you want to continue?""" %
         if result:
             table_list = result.group(7)
             table_list = table_list.replace(" join ", ",")
-            table_list = re.sub("(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)", "", table_list)
+            table_list = re.sub("(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)", "",
+                                table_list)
             table_list = table_list.replace("`", "")
             tables = map(lambda s: s.strip(), table_list.split(","))
             table_name = "_".join(tables)
-        table_name = self.input(title, "please enter the name of the target table:", table_name)
+        table_name = dialogs.input_dialog(title, "Please enter the name of the target table:", table_name,
+                                          self.mainwindow)
         if table_name is None:
             return
         table_name = self.current_host.escape_table(table_name)
@@ -1563,7 +1569,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
             fp.write("\n;\n")
             fp.close()
         except:
-            self.show_message(title, "error writing to file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message(title, "error writing to file %s: %s" % (filename, sys.exc_value))
 
     def assign_once(self, name, creator, *args):
         try:
@@ -1588,9 +1594,9 @@ the author knows no way to deselect this database. do you want to continue?""" %
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
-                self.show_message("save query", "%s already exists and is not a file!" % filename)
+                dialogs.show_message("save query", "%s already exists and is not a file!" % filename)
                 return
-            if not self.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename):
+            if not dialogs.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
                 return
         b = self.current_query.textview.get_buffer()
         query_text = b.get_text(b.get_start_iter(), b.get_end_iter())
@@ -1599,7 +1605,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
             fp.write(query_text)
             fp.close()
         except:
-            self.show_message("save query", "error writing query to file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message("save query", "error writing query to file %s: %s" % (filename, sys.exc_value))
         
     def on_load_query_clicked(self, button):
         if not self.current_query:
@@ -1618,21 +1624,21 @@ the author knows no way to deselect this database. do you want to continue?""" %
         try:
             sbuf = os.stat(filename)
         except:
-            self.show_message("load query", "%s does not exists!" % filename)
+            dialogs.show_message("load query", "%s does not exists!" % filename)
             return
         if not S_ISREG(sbuf.st_mode):
-            self.show_message("load query", "%s exists, but is not a file!" % filename)
+            dialogs.show_message("load query", "%s exists, but is not a file!" % filename)
             return
         
         size = sbuf.st_size
         max = int(self.config["ask_execute_query_from_disk_min_size"])
         if size > max:
-            if self.confirm("load query", """
+            if dialogs.confirm("load query", """
 <b>%s</b> is very big (<b>%.2fMB</b>)!
 opening it in the normal query-view may need a very long time!
 if you just want to execute this skript file without editing and
 syntax-highlighting, i can open this file using the <b>execute file from disk</b> function.
-<b>shall i do this?</b>""" % (filename, size / 1024.0 / 1000.0)):
+<b>shall i do this?</b>""" % (filename, size / 1024.0 / 1000.0), self.mainwindow):
                 self.on_execute_query_from_disk_activate(None, filename)
                 return
         try:
@@ -1640,7 +1646,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             query_text = fp.read()
             fp.close()
         except:
-            self.show_message("save query", "error writing query to file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message("save query", "error writing query to file %s: %s" % (filename, sys.exc_value))
             return
         self.current_query.textview.get_buffer().set_text(query_text)
         
@@ -1656,16 +1662,16 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
-                self.show_message("save workspace", "%s already exists and is not a file!" % filename)
+                dialogs.show_message("save workspace", "%s already exists and is not a file!" % filename)
                 return
-            if not self.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename):
+            if not dialogs.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
                 return
         try:
             fp = file(filename, "wb")
             pickle.dump(self, fp)
             fp.close()
         except:
-            self.show_message("save workspace", "error writing workspace to file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
+            dialogs.show_message("save workspace", "error writing workspace to file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
         
     def on_restore_workspace_activate(self, button):
         global new_instance
@@ -1679,10 +1685,10 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if not answer == gtk.RESPONSE_ACCEPT: return
         filename = d.get_filename()
         if not os.path.exists(filename):
-            self.show_message("restore workspace", "%s does not exists!" % filename)
+            dialogs.show_message("restore workspace", "%s does not exists!" % filename)
             return
         if not os.path.isfile(filename):
-            self.show_message("restore workspace", "%s exists, but is not a file!" % filename)
+            dialogs.show_message("restore workspace", "%s exists, but is not a file!" % filename)
             return
             
         try:
@@ -1692,7 +1698,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             print "got new instance:", new_instance
             fp.close()
         except:
-            self.show_message("restore workspace", "error restoring workspace from file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
+            dialogs.show_message("restore workspace", "error restoring workspace from file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
         self.mainwindow.destroy()
 
     def __setstate__(self, state):
@@ -1741,7 +1747,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                     query_view.grab_focus()
                     return
             start = tm.iter_next(start)
-        self.show_message("local regex search", "sorry, no match found!\ntry to search from the beginning or execute a less restrictive query...")
+        dialogs.show_message("local regex search", "sorry, no match found!\ntry to search from the beginning or execute a less restrictive query...")
         
     def on_query_font_clicked(self, button):
         d = self.assign_once("query text font", gtk.FontSelectionDialog, "select query font")
@@ -1803,8 +1809,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
     def on_rename_query_tab_clicked(self, button):
         label = self.current_query.get_label()
-        new_name = self.input("rename tab", "please enter the new name of this tab:",
-            label.get_text()
+        new_name = dialogs.input_dialog("Rename tab", "Please enter the new name of this tab:",
+            label.get_text(),
+            self.mainwindow
         )
         if new_name is None:
             return
@@ -1861,7 +1868,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         iter = self.processlist_model.get_iter(path)
         process_id = self.processlist_model.get_value(iter, 0)
         if not self.current_host.query("kill %s" % process_id):
-            self.show_message("sorry", "there was an error while trying to kill process_id %s!" % process_id)
+            dialogs.show_message("sorry", "there was an error while trying to kill process_id %s!" % process_id)
     
     def on_sql_log_activate(self, *args):
         if len(args) == 1:
@@ -2135,14 +2142,14 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.redraw_table(table, iter)
             self.update_table_view()
         elif what == "truncate_table":
-            if not self.confirm("truncate table", "do you really want to truncate the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name)):
+            if not dialogs.confirm("truncate table", "do you really want to truncate the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name), self.mainwindow):
                 return
             if table.db.query("truncate `%s`" % (table.name)):
                 table.refresh()
                 self.redraw_table(table, iter)
                 self.update_table_view()
         elif what == "drop_table":
-            if not self.confirm("drop table", "do you really want to DROP the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name)):
+            if not dialogs.confirm("drop table", "do you really want to DROP the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name), self.mainwindow):
                 return
             db = table.db
             if db.query("drop table `%s`" % (table.name)):
@@ -2171,14 +2178,14 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.redraw_db(db, iter, new_tables)
             self.redraw_tables()
         elif what == "drop_database":
-            if not self.confirm("drop database", "do you really want to drop the <b>%s</b> database on <b>%s</b>?" % (db.name, db.host.name)):
+            if not dialogs.confirm("drop database", "do you really want to drop the <b>%s</b> database on <b>%s</b>?" % (db.name, db.host.name), self.mainwindow):
                 return
             host = db.host
             if host.query("drop database`%s`" % (db.name)):
                 host.refresh()
                 self.redraw_host(host, self.get_host_iter(host))
         elif what == "new_table":
-            name = self.input("new table", "please enter the name of the new table:")
+            name = dialogs.input_dialog("New table", "Please enter the name of the new table:", window=self.mainwindow)
             if not name:
                 return
             if db.query("create table `%s` (`%s_id` int primary key auto_increment)" % (name, name)):
@@ -2222,7 +2229,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             host.refresh()
             self.redraw_host(host, iter)
         elif what == "new_database":
-            name = self.input("New database", "Please enter the name of the new database:")
+            name = dialogs.input_dialog("New database", "Please enter the name of the new database:", window=self.mainwindow)
             if not name:
                 return
             if host.query("Create database `%s`" % name):
@@ -2232,7 +2239,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.connection_window.host = host
             self.connection_window.show("edit")
         elif what == "delete_connection":
-            if not self.confirm("Delete host", "Do you really want to drop the host <b>%s</b>?" % (host.name)):
+            if not dialogs.confirm("Delete host", "Do you really want to drop the host <b>%s</b>?" % (host.name), self.mainwindow):
                 return
             host.close()
             self.connections_model.remove(iter)
@@ -2742,24 +2749,24 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if not res: return False
         self.xml.get_widget("processlist_popup").popup(None, None, None, event.button, event.time)
         
-    def show_message(self, title, message, window=None):
-        if window is None:
-            window = self.mainwindow
-        dialog = gtk.MessageDialog(window, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, message)
-        dialog.label.set_property("use-markup", True)
-        dialog.set_title(title)
-        dialog.run()
-        dialog.hide()
+    # def show_message(self, title, message, window=None):
+    #     if window is None:
+    #         window = self.mainwindow
+    #     dialog = gtk.MessageDialog(window, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, message)
+    #     dialog.label.set_property("use-markup", True)
+    #     dialog.set_title(title)
+    #     dialog.run()
+    #     dialog.hide()
         
-    def confirm(self, title, message, window=None):
-        if window is None:
-            window = self.mainwindow
-        dialog = gtk.MessageDialog(window, gtk.DIALOG_MODAL, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, message)
-        dialog.label.set_property("use-markup", True)
-        dialog.set_title(title)
-        answer = dialog.run()
-        dialog.hide()
-        return answer == gtk.RESPONSE_YES
+    # def confirm(self, title, message, window=None):
+    #     if window is None:
+    #         window = self.mainwindow
+    #     dialog = gtk.MessageDialog(window, gtk.DIALOG_MODAL, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, message)
+    #     dialog.label.set_property("use-markup", True)
+    #     dialog.set_title(title)
+    #     answer = dialog.run()
+    #     dialog.hide()
+    #     return answer == gtk.RESPONSE_YES
         
     def input(self, title, message, default="", window=None):
         if window is None:
@@ -2807,9 +2814,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 cell.set_property("text", o.name)
             else:
                 cell.set_property("text", "(%s)" % o.name)
-        elif d == 3: #fields are only strings
+        elif d == 3:  # fields are only strings
             cell.set_property("text", "%s %s" % (o[0], o[1]))
-        else: # everything else has a name
+        else:  # everything else has a name
             cell.set_property("text", o.name)
             #print "unknown depth", d," for render_connections_pixbuf with object", o
             
@@ -2843,14 +2850,14 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             try:
                 os.mkdir(self.config_path)
             except:
-                self.show_message("save config file", "could create config directory %r: %s" % (self.config_path, sys.exc_value))
+                dialogs.show_message("save config file", "could create config directory %r: %s" % (self.config_path, sys.exc_value))
                 return
             
         filename = os.path.join(self.config_path, self.config_file)
         try:
             fp = file(filename, "w")
         except:
-            self.show_message("save config file", "could not open %s for writing: %s" % (filename, sys.exc_value))
+            dialogs.show_message("save config file", "could not open %s for writing: %s" % (filename, sys.exc_value))
             return
             
         keys = self.config.keys()
