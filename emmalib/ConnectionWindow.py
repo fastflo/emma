@@ -2,6 +2,7 @@ import os
 import gtk
 import gtk.glade
 import sys
+import dialogs
 
 
 class ConnectionWindow:
@@ -11,7 +12,7 @@ class ConnectionWindow:
         self.host = None
         self.emma = emma
         self.cw_mode = None
-        self.cw_props = ["name", "host", "port", "user", "password", "database"]
+        self.text_fields = ["name", "host", "port", "user", "password", "database"]
         self.glade_file = os.path.join(emma_path, "ConnectionWindow.glade")
         self.glade = gtk.glade.XML(self.glade_file)
         self.window = self.gw('connection_window')
@@ -38,20 +39,31 @@ class ConnectionWindow:
         return False
 
     def show_mysql(self):
+        self.gw("lb_provider_name").set_text('MySQL')
         self.gw("cmb_connection_type").set_active(0)
         for n in ['host', 'port', 'user', 'password', 'database']:
             self.gw("lb_%s" % n).show()
             self.gw("tb_%s" % n).show()
         self.gw("lb_datafile").hide()
         self.gw("fcb_datafile").hide()
+        self.gw("lb_datafile_current").hide()
+        self.gw("lb_datafile_current_path").hide()
 
     def show_sqlite(self):
+        self.gw("lb_provider_name").set_text('SQLite')
         self.gw("cmb_connection_type").set_active(1)
         for n in ['host', 'port', 'user', 'password', 'database']:
             self.gw("lb_%s" % n).hide()
             self.gw("tb_%s" % n).hide()
         self.gw("lb_datafile").show()
         self.gw("fcb_datafile").show()
+        self.gw("lb_datafile_current").show()
+        self.gw("lb_datafile_current_path").show()
+
+    def cleanup(self):
+        self.gw("lb_provider_name").set_text('')
+        for n in self.text_fields:
+            self.gw("tb_%s" % n).set_text('')
 
     def on_connection_type_changed(self, cmb):
         if cmb.get_active() == 0:
@@ -63,7 +75,10 @@ class ConnectionWindow:
         return self.glade.get_widget(wn)
 
     def show(self, mode):
+        self.cleanup()
         if mode == "edit":
+            self.gw("cmb_connection_type").hide()
+            self.gw("lb_provider_name").show()
             self.window.set_title('Edit connection')
             if self.host.__class__.__name__ == 'MySqlHost':
                 self.gw("tb_name").set_text(self.host.name)
@@ -74,9 +89,11 @@ class ConnectionWindow:
                 self.gw("tb_database").set_text(self.host.database)
                 self.show_mysql()
             else:
-                self.gw("fcb_datafile").set_title(self.host.name)
+                self.gw("lb_datafile_current_path").set_title(self.host.name)
                 self.show_sqlite()
         else:
+            self.gw("cmb_connection_type").show()
+            self.gw("lb_provider_name").hide()
             self.window.set_title('New connection')
             for n in ['name', 'host', 'port', 'user', 'password', 'database']:
                 self.gw("tb_%s" % n).set_text('')
@@ -86,7 +103,7 @@ class ConnectionWindow:
 
     def validate_mysql(self):
         if not self.gw('tb_name').get_text():
-            self.alert('Please enter connection name!')
+            dialogs.alert('Please enter connection name!')
             return False
 
         #all is fine
@@ -98,7 +115,7 @@ class ConnectionWindow:
                 return
             if self.cw_mode == "new":
                 data = []
-                for n in self.cw_props:
+                for n in self.text_fields:
                     data.append(self.gw("tb_%s" % n).get_text())
                 print data
                 if not data[0]:
@@ -114,7 +131,7 @@ class ConnectionWindow:
                 self.host.password = self.gw("tb_password").get_text()
                 self.host.database = self.gw("tb_database").get_text()
         else:
-            self.alert('Save SQLite')
+            dialogs.alert('Save SQLite')
 
         self.window.hide()
 
@@ -143,8 +160,7 @@ class ConnectionWindow:
             try:
                 handle = _mysql.connect(**data)
             except _mysql.DatabaseError as err:
-                self.alert(err.message)
-                self.alert(
+                dialogs.alert(
                     "could not connect to host <b>%s</b> with user <b>%s</b> and password <b>%s</b>:\n<i>%s</i>" % (
                         data["host"],
                         data["user"],
@@ -153,7 +169,7 @@ class ConnectionWindow:
                     )
                 )
                 return
-            self.alert(
+            dialogs.alert(
                 "successfully connected to host <b>%s</b> with user <b>%s</b>!" % (
                     data["host"],
                     data["user"]
@@ -161,13 +177,7 @@ class ConnectionWindow:
             )
             handle.close()
         else:
-            self.alert('Test SQLite')
-
-    @staticmethod
-    def alert(text):
-        md = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_OTHER, gtk.BUTTONS_CLOSE, text)
-        md.run()
-        md.destroy()
+            dialogs.alert('Test SQLite')
 
 
 if __name__ == "__main__":

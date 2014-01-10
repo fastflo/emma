@@ -21,7 +21,7 @@
           <widget class="GtkTable" id="table4">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="n_rows">8</property>
+            <property name="n_rows">9</property>
             <property name="n_columns">2</property>
             <child>
               <widget class="GtkEntry" id="tb_port">
@@ -264,6 +264,19 @@
               </packing>
             </child>
             <child>
+              <widget class="GtkLabel" id="lb_provider_name">
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">Provider name</property>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="x_padding">5</property>
+                <property name="y_padding">5</property>
+              </packing>
+            </child>
+            <child>
               <widget class="GtkComboBox" id="cmb_connection_type">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -279,14 +292,46 @@ SQLite</property>
               </packing>
             </child>
             <child>
+              <widget class="GtkLabel" id="lb_datafile_current">
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">Current file:</property>
+              </widget>
+              <packing>
+                <property name="top_attach">7</property>
+                <property name="bottom_attach">8</property>
+                <property name="x_options">GTK_FILL</property>
+                <property name="y_options"></property>
+                <property name="x_padding">5</property>
+                <property name="y_padding">5</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="lb_datafile_current_path">
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="label">...</property>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">7</property>
+                <property name="bottom_attach">8</property>
+                <property name="x_options">GTK_FILL</property>
+                <property name="y_options"></property>
+                <property name="x_padding">5</property>
+                <property name="y_padding">5</property>
+              </packing>
+            </child>
+            <child>
               <widget class="GtkLabel" id="lb_datafile">
                 <property name="can_focus">False</property>
                 <property name="xalign">0</property>
                 <property name="label" translatable="yes">Database file:</property>
               </widget>
               <packing>
-                <property name="top_attach">7</property>
-                <property name="bottom_attach">8</property>
+                <property name="top_attach">8</property>
+                <property name="bottom_attach">9</property>
                 <property name="x_options">GTK_FILL</property>
                 <property name="y_options"></property>
                 <property name="x_padding">5</property>
@@ -300,8 +345,8 @@ SQLite</property>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
-                <property name="top_attach">7</property>
-                <property name="bottom_attach">8</property>
+                <property name="top_attach">8</property>
+                <property name="bottom_attach">9</property>
                 <property name="x_padding">5</property>
                 <property name="y_padding">5</property>
               </packing>
