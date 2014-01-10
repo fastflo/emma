@@ -20,6 +20,7 @@
 import pango
 import gtk
 import traceback
+import gtksourceview2
 
 
 class MySqlQueryTab:
@@ -28,21 +29,21 @@ class MySqlQueryTab:
         self.nb = nb
 
         renameload = {
-        "textview": "query_text",
-        "treeview": "query_view",
-        "save_result": "save_result",
-        "save_result_sql": "save_result_sql",
-        "add_record": "add_record_tool",
-        "delete_record": "delete_record_tool",
-        "apply_record": "apply_record_tool",
-        "local_search": "local_search_button",
-        "remove_order": "remove_order",
-        "label": "query_label",
-        "page": "first_query",
-        "query_bottom_label": "query_bottom_label",
-        "query_db_label": "query_db_label",
-        "query_text_sw": "query_text_sw",
-        "toolbar": "inner_query_toolbar"
+            "textview": "query_text",
+            "treeview": "query_view",
+            "save_result": "save_result",
+            "save_result_sql": "save_result_sql",
+            "add_record": "add_record_tool",
+            "delete_record": "delete_record_tool",
+            "apply_record": "apply_record_tool",
+            "local_search": "local_search_button",
+            "remove_order": "remove_order",
+            "label": "query_label",
+            "page": "first_query",
+            "query_bottom_label": "query_bottom_label",
+            "query_db_label": "query_db_label",
+            "query_text_sw": "query_text_sw",
+            "toolbar": "inner_query_toolbar"
         }
 
         for attribute, xmlname in renameload.iteritems():
@@ -53,59 +54,73 @@ class MySqlQueryTab:
         # replace textview with gtksourcevice
         try:
             org_tv = self.textview
-            manager = gtksourceview.SourceLanguagesManager()
-            language = manager.get_language_from_mime_type("text/x-sql")
+            manager = gtksourceview2.language_manager_get_default()
+            language = manager.get_language("sql")
 
-            sb = gtksourceview.SourceBuffer()
+            sb = gtksourceview2.Buffer()
+            sb.set_highlight_syntax(True)
             sb.set_language(language)
-            sv = self.textview = gtksourceview.SourceView(sb)
+            sv = self.textview = gtksourceview2.View(sb)
 
             self.query_text_sw.remove(org_tv)
             self.query_text_sw.add(sv)
             sv.show()
 
+            sv.set_show_line_numbers(True)
+            sv.set_show_line_marks(True)
+            sv.set_tab_width(4)
+            sv.set_auto_indent(True)
+            sv.set_insert_spaces_instead_of_tabs(False)
+            sv.set_show_right_margin(True)
+            sv.set_smart_home_end(True)
+            sv.set_right_margin_position(40)
+
             # sv config
-            for pt, pn, pd in (
-                (bool, "show_line_numbers", True),
-                (bool, "show_line_markers", False),
-                (int, "tabs_width", 4),
-                (bool, "auto_indent", True),
-                (bool, "insert_spaces_instead_of_tabs", False),
-                (bool, "show_margin", True),
-                (int, "margin", 80),
-                (bool, "smart_home_end", True)
-            ):
+            # for pt, pn, pd in (
+            #     (bool, "show_line_numbers", True),
+            #     #(bool, "show_line_markers", False),
+            #     #(int, "tabs_width", 4),
+            #     (bool, "auto_indent", True),
+            #     (bool, "insert_spaces_instead_of_tabs", False),
+            #     #(bool, "show_margin", True),
+            #     #(int, "margin", 80),
+            #     (bool, "smart_home_end", True)
+            # ):
+            #
+            #     cn = "sourceview.%s" % pn
+            #     try:
+            #         v = self.emma.config[cn]
+            #         if pt == bool:
+            #             v = v == "1" or v.lower() == "true" or v.lower() == "yes"
+            #         else:
+            #             v = pt(v)
+            #     except:
+            #         v = pd
+            #     method = getattr(sv, "set_%s" % pn)
+            #     method(v)
 
-                cn = "sourceview.%s" % pn
-                try:
-                    v = self.emma.config[cn]
-                    if pt == bool:
-                        v = v == "1" or v.lower() == "true" or v.lower() == "yes"
-                    else:
-                        v = pt(v)
-                except:
-                    v = pd
-                method = getattr(sv, "set_%s" % pn)
-                method(v)
+
+
             # sb config
-            for pt, pn, pd in (
-            (bool, "check_brackets", True),
-            (bool, "highlight", True),
-            (int, "max_undo_levels", 15)):
-
-                cn = "sourceview.%s" % pn
-                try:
-                    v = self.emma.config[cn]
-                    if pt == bool:
-                        v = v == "1" or v.lower() == "true" or v.lower() == "yes"
-                    else:
-                        v = pt(v)
-                except:
-                    v = pd
-                method = getattr(sb, "set_%s" % pn)
-                method(v)
+            # for pt, pn, pd in (
+            #     (bool, "check_brackets", True),
+            #     (bool, "highlight", True),
+            #     (int, "max_undo_levels", 15)
+            # ):
+            #     cn = "sourceview.%s" % pn
+            #     try:
+            #         v = self.emma.config[cn]
+            #         if pt == bool:
+            #             v = v == "1" or v.lower() == "true" or v.lower() == "yes"
+            #         else:
+            #             v = pt(v)
+            #     except:
+            #         v = pd
+            #     method = getattr(sb, "set_%s" % pn)
+            #     method(v)
         except:
-            print "error inserting gtksourceview:\n%s" % traceback.format_exc()
+            from emmalib.dialogs import alert
+            alert(traceback.format_exc())
 
         self.current_host = None
         self.current_db = None
@@ -122,8 +137,8 @@ class MySqlQueryTab:
     def __getstate__(self):
         b = self.textview.get_buffer()
         d = {
-        "name": self.nb.get_tab_label_text(self.page),
-        "query": b.get_text(b.get_start_iter(), b.get_end_iter())
+            "name": self.nb.get_tab_label_text(self.page),
+            "query": b.get_text(b.get_start_iter(), b.get_end_iter())
         }
         print "query will pickle:", d
         return d
