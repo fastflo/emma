@@ -29,13 +29,15 @@ if __name__ != "__main__":
     from emmalib import __file__ as emmalib_file
     from emmalib.providers.mysql.MySqlHost import *
     from emmalib.providers.mysql.MySqlQueryTab import *
-    from emmalib.ConnectionWindow import *
+    from emmalib.ConnectionWindow import ConnectionWindow
+    from emmalib.OutputHandler import OutputHandler
     import emmalib.dialogs
 else:
     emmalib_file = __file__
     from providers.mysql.MySqlHost import *
     from providers.mysql.MySqlQueryTab import *
-    from ConnectionWindow import *
+    from ConnectionWindow import ConnectionWindow
+    from OutputHandler import OutputHandler
     import dialogs
 try:
     import sqlite3
@@ -3347,34 +3349,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     #     md.destroy()
 
 
-class OutputHandler:
-    def __init__(self, print_stdout=False, log_file=None, log_flush=False):
-        self.stdout = sys.stdout
-        self.print_stdout = print_stdout
-        self.log_flush = log_flush
-        sys.stdout = self
-        if log_file:
-            self.log_fp = file(log_file, "a+")
-        else:
-            self.log_fp = None
-        self.debug = print_stdout or log_file
-
-    def write(self, s):
-        if self.print_stdout:
-            self.stdout.write(s)
-            if self.log_flush:
-                self.stdout.flush()
-        if self.log_fp:
-            s = s.strip("\r\n")
-            if not s:
-                # do not write empty lines to logfile
-                return 
-            timestamp = str(datetime.datetime.now())[0:22]
-            self.log_fp.write("%s %s\n" % (timestamp, s.replace("\n", "\n " + (" " * len(timestamp)))))
-            if self.log_flush:
-                self.log_fp.flush()
-
-
 def usage():
     
     print """usage: emma [-h|--help] [-d|--debug] [-l output_log [-f|--flush]]
@@ -3419,7 +3393,8 @@ def start(args):
     while True:
         gtk.main()
         del e
-        if not new_instance: break
+        if not new_instance:
+            break
         e = new_instance
         new_instance = None
         e.__init__()
