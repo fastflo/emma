@@ -28,7 +28,7 @@ class Config:
     def get(self, name):
         return self.config[name]
 
-    def config_get_bool(self, name):
+    def get_bool(self, name):
         value = self.get(name).lower()
         if value == "yes":
             return True
@@ -42,7 +42,7 @@ class Config:
             return True
         return False
 
-    def save_config(self):
+    def save(self):
         if not os.path.exists(self.config_path):
             print "try to create config path %r" % self.config_path
             try:
@@ -77,7 +77,7 @@ class Config:
                 itr = self.connections_model.iter_next(itr)
             fp.close()
 
-    def load_config(self, unpickled=False):
+    def load(self, unpickled=False):
         filename = os.path.join(self.config_path, self.config_file)
         # todo get_charset(self.config["db_codeset"]);
         # printf("system charset: '%s'\n", self.config["db_codeset"].c_str());
@@ -262,7 +262,7 @@ class Config:
 
 if __name__ != 'main':
     c = Config()
-    c.load_config()
-    c.save_config()
+    c.load()
+    c.save()
     print c.__dict__
 
