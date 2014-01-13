@@ -31,6 +31,7 @@ if __name__ != "__main__":
     from emmalib.providers.mysql.MySqlQueryTab import *
     from emmalib.ConnectionWindow import ConnectionWindow
     from emmalib.OutputHandler import OutputHandler
+    from emmalib.Config import Config
     import emmalib.dialogs
 else:
     emmalib_file = __file__
@@ -38,7 +39,9 @@ else:
     from providers.mysql.MySqlQueryTab import *
     from ConnectionWindow import ConnectionWindow
     from OutputHandler import OutputHandler
+    from Config import Config
     import dialogs
+
 try:
     import sqlite3
     have_sqlite = True
@@ -66,7 +69,7 @@ re_src_query_order = "(?is)(.*order[ \r\n\t]+by[ \r\n\t]+)(.*?)([ \r\n\t]*" + re
 
 emmalib_file = os.path.abspath(emmalib_file)
     
-print "sys prefix:", sys.prefix
+#print "sys prefix:", sys.prefix
 
 emma_path = os.path.dirname(emmalib_file)
 
@@ -154,7 +157,7 @@ class Emma:
 
         self.local_search_window = self.xml.get_widget("localsearch_window")
         self.local_search_entry = self.xml.get_widget("local_search_entry")
-        self.local_search_entry.connect("activate", lambda *a: self.local_search_window.response(gtk.RESPONSE_OK));
+        self.local_search_entry.connect("activate", lambda *a: self.local_search_window.response(gtk.RESPONSE_OK))
         self.local_search_start_at_first_row = self.xml.get_widget("search_start_at_first_row")
         self.local_search_case_sensitive = self.xml.get_widget("search_case_sensitive")
 
@@ -179,16 +182,16 @@ class Emma:
         self.current_processlist_host = None
         self.processlist_timer_running = False
         
-        self.init_config()
+        self.config = Config(self)
         
         if not hasattr(self, "state"):
             self.hosts = {}
-            self.load_config()
+            self.config.load()
             self.queries = []
             self.add_query_tab(MySqlQueryTab(self.xml, self.query_notebook))
         else:
             self.hosts = self.state["hosts"]
-            self.load_config(True)
+            self.config.load(True)
             self.queries = []
             first = True
             for q in self.state["queries"]:
@@ -209,9 +212,74 @@ class Emma:
                     label.show()
                     self.query_notebook.append_page(new_page, label)
 
-        if int(self.config["ping_connection_interval"]) > 0:
+        for h in self.hosts:
+            h.__init__(self.add_sql_log, self.add_msg_log)
+            _iter = self.connections_model.append(None, [h])
+            h.set_update_ui(self.redraw_host, _iter)  # call before init!
+            self.redraw_host(h, _iter)
+            self.current_host = h
+
+        self.first_template = None
+        keys = self.config.config.keys()
+        keys.sort()
+
+        toolbar = self.xml.get_widget("query_toolbar")
+        toolbar.set_style(gtk.TOOLBAR_ICONS)
+        for child in toolbar.get_children():
+            if not child.name.startswith("template_"):
+                continue
+            toolbar.remove(child)
+
+        template_count = 0
+        for name in keys:
+            value = self.config.config[name]
+            if not self.config.unpickled:
+                prefix = "connection_"
+                if name.startswith(prefix) and value == "::sqlite::":
+                    filename = name[len(prefix):]
+                    self.add_sqlite(filename)
+                    continue
+                if name.startswith(prefix):
+                    v = value.split(",")
+                    port = ""
+                    p = v[0].rsplit(":", 1)
+                    if len(p) == 2:
+                        port = p[1]
+                        v[0] = p[0]
+                    self.add_mysql_host(name[len(prefix):], v[0], port, v[1], v[2], v[3])
+                    pass
+
+            prefix = "template"
+            if name.startswith(prefix):
+                value = value.replace("`$primary_key$`", "$primary_key$")
+                value = value.replace("`$table$`", "$table$")
+                value = value.replace("`$field_conditions$`", "$field_conditions$")
+                self.config.config[name] = value
+                if not self.first_template:
+                    self.first_template = value
+                p = name.split("_", 1)
+                template_count += 1
+
+                button = gtk.ToolButton(gtk.STOCK_EXECUTE)
+                button.set_name("template_%d" % template_count)
+                button.set_tooltip(self.tooltips, "%s\n%s" % (p[1], value))
+                button.connect("clicked", self.on_template, value)
+                toolbar.insert(button, -1)
+                button.show()
+
+        # menu = self.xml.get_widget("query_encoding_menu")
+        # for child in menu.get_children():
+        #     menu.remove(child)
+
+        # for coding, index_desc in enumerate(self.config.codings):
+        #     item = gtk.MenuItem(coding, False)
+        #     item.connect("activate", self.on_query_encoding_changed, (coding, index_desc(0)))
+        #     menu.append(item)
+        #     item.show()
+
+        if int(self.config.get("ping_connection_interval")) > 0:
             gobject.timeout_add(
-                int(self.config["ping_connection_interval"]) * 1000,
+                int(self.config.get("ping_connection_interval")) * 1000,
                 self.on_connection_ping
             )
         self.init_plugins()
@@ -263,6 +331,7 @@ class Emma:
                     print "could not load plugin %r:\n%s" % (
                         plugin_name,
                         traceback.format_exc())
+
     def unload_plugins(self):
         """ not really an unload - i just asks the module to cleanup """
         for plugin_name, plugin in self.plugins.iteritems():
@@ -272,7 +341,7 @@ class Emma:
         
     def init_plugins(self):
         plugins_pathes = [
-            os.path.join(self.config_path, "plugins"),
+            os.path.join(self.config.config_path, "plugins"),
             os.path.join(emma_path, "plugins")
         ]
         self.plugin_pathes = []
@@ -303,31 +372,14 @@ class Emma:
         
         return {"hosts": hosts, "queries": self.queries, "sql_logs": sql_logs}
     
-    def init_config(self):
-        for i in ["HOME", "USERPROFILE"]: 
-            filename = os.getenv(i)
-            if filename:
-                break
-        if not filename:
-            filename = "."
-        filename = filename + "/.emma"
-        if os.path.isfile(filename):
-            print "detected emma config file %r. converting to directory" % filename
-            temp_dir = filename + "_temp"
-            os.mkdir(temp_dir)
-            os.rename(filename, os.path.join(temp_dir, "emmarc"))
-            os.rename(temp_dir, filename)
-        self.config_path = filename
-        self.config_file = "emmarc"
-        
     def add_query_tab(self, qt):
         self.query_count += 1
         self.current_query = qt
         self.queries.append(qt)
-        qt.set_query_encoding(self.config["db_encoding"])
-        qt.set_query_font(self.config["query_text_font"])
-        qt.set_result_font(self.config["query_result_font"])
-        if self.config_get_bool("query_text_wrap"):
+        qt.set_query_encoding(self.config.get("db_encoding"))
+        qt.set_query_font(self.config.get("query_text_font"))
+        qt.set_result_font(self.config.get("query_result_font"))
+        if self.config.get_bool("query_text_wrap"):
             qt.set_wrap_mode(gtk.WRAP_WORD)
         else:
             qt.set_wrap_mode(gtk.WRAP_NONE)
@@ -443,11 +495,11 @@ class Emma:
         
         print "table: %s order: %s" % (table, current_order)
         config_name = "stored_order_db_%s_table_%s" % (self.current_host.current_db.name, table)
-        self.config[config_name] = str(current_order)
+        self.config.config[config_name] = str(current_order)
         if not self.current_host.current_db.name in self.stored_orders:
             self.stored_orders[self.current_host.current_db.name] = {}
         self.stored_orders[self.current_host.current_db.name][table] = current_order
-        self.save_config()
+        self.config.save()
         
     def get_field_list(self, s):
         # todo USE IT!
@@ -510,7 +562,7 @@ class Emma:
         for field in fields:
             if field.find("*") != -1:
                 wildcard = True
-                break;
+                break
         
         # find table handle!
         tries = 0
@@ -530,7 +582,7 @@ class Emma:
         # does this field really exist in this table?
         c = 0
         possible_primary = possible_unique = ""
-        unique = primary = "";
+        unique = primary = ""
         pri_okay = uni_okay = 0
         
         for i in new_tables:
@@ -589,9 +641,9 @@ class Emma:
         if uni_okay < 1 and pri_okay < 1:
             possible_key = "(i can't see any key-fields in this table...)"
             if possible_primary:
-                possible_key = "e.g.'%s' would be useful!" % possible_primary;
+                possible_key = "e.g.'%s' would be useful!" % possible_primary
             elif possible_unique:
-                possible_key = "e.g.'%s' would be useful!" % possible_unique;
+                possible_key = "e.g.'%s' would be useful!" % possible_unique
             print "no edit-key found. try to name a key-field in your select-clause. (%r)" % possible_key
             return (table, None, None, None, None)
         
@@ -679,7 +731,7 @@ class Emma:
             new_query = re.sub("(?i)order[ \r\n\t]+by[ \r\n\t]+", "", before + after)
         self.current_query.set(new_query)
     
-        if self.config["result_view_column_sort_timeout"] <= 0:
+        if self.config.get("result_view_column_sort_timeout") <= 0:
             on_execute_query_clicked()
             
         new_order = dict(new_order)
@@ -699,10 +751,10 @@ class Emma:
         if not self.sort_timer_running:
             self.sort_timer_running = True
             gobject.timeout_add(
-                100 + int(self.config["result_view_column_sort_timeout"]),
+                100 + int(self.config.get("result_view_column_sort_timeout")),
                 self.on_sort_timer
             )
-        self.sort_timer_execute = time.time() + int(self.config["result_view_column_sort_timeout"]) / 1000.
+        self.sort_timer_execute = time.time() + int(self.config.get("result_view_column_sort_timeout")) / 1000.
         
     def on_sort_timer(self):
         if not self.sort_timer_running:
@@ -1254,7 +1306,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
         download_time = 0
         display_time = 0
         query_count = 0
-        total_start = time.time();
+        total_start = time.time()
         
         # cleanup last query model and treeview
         for col in q.treeview.get_columns():
@@ -1267,7 +1319,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
             # search query end
             query_start, end = self.read_query(text, start)
             if query_start is None:
-                break;
+                break
             thisquery = text[query_start:end]
             print "about to execute query %r" % thisquery
             start = end + 1
@@ -1306,7 +1358,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
                             break
                         p = thisquery.find("\n", line_pos)
                         if p == -1:
-                            break;
+                            break
                         line_pos = p + 1
                         
                 i = q.textview.get_buffer().get_iter_at_offset(query_start + line_pos)
@@ -1317,14 +1369,14 @@ the author knows no way to deselect this database. do you want to continue?""" %
                     #print "search for ->%s<-" % match.group(1)
                     pos = text.find(match.group(1), query_start + line_pos, query_start + len(thisquery))
                     if not pos == -1:
-                        i.set_offset(pos);
+                        i.set_offset(pos)
                 else:
                     match = re.match("Unknown column '(.*?')", message)
                     if match:
                         # set focus and cursor!
                         pos = thisquery.find(match.group(1))
                         if not pos == 1:
-                            i.set_offset(query_start + pos);
+                            i.set_offset(query_start + pos)
                             
                 q.textview.get_buffer().place_cursor(i)
                 q.textview.scroll_to_iter(i, 0.0)
@@ -1335,7 +1387,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
             field_count = host.handle.field_count()
             if field_count == 0:
                 # query without result
-                update = True;
+                update = True
                 affected_rows += host.handle.affected_rows()
                 last_insert_id = host.handle.insert_id()
                 continue
@@ -1365,7 +1417,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
             download_time = time.time() - start_download
             if download_time < 0: download_time = 0
     
-            q.label.set_text("displaying resultset...");
+            q.label.set_text("displaying resultset...")
             q.label.window.process_updates(False)
             
             # store field info
@@ -1390,12 +1442,12 @@ the author knows no way to deselect this database. do you want to continue?""" %
                 
                 col = q.treeview.get_column(l - 1)
                 
-                if self.config_get_bool("result_view_column_resizable"): 
+                if self.config.get_bool("result_view_column_resizable"):
                     col.set_resizable(True)
                 else:
-                    col.set_resizable(False);
-                    col.set_min_width(int(self.config["result_view_column_width_min"]))
-                    col.set_max_width(int(self.config["result_view_column_width_max"]))
+                    col.set_resizable(False)
+                    col.set_min_width(int(self.config.get("result_view_column_width_min")))
+                    col.set_max_width(int(self.config.get("result_view_column_width_max")))
                 
                 if sortable:
                     col.set_clickable(True)
@@ -1462,7 +1514,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
         self.blob_tv.set_editable(q.editable)
         self.get_widget("blob_update").set_sensitive(q.editable)
         self.get_widget("blob_load").set_sensitive(q.editable)
-        # todo update_buttons();    
+        # todo update_buttons()
         gc.collect()
         return True
         
@@ -1488,8 +1540,8 @@ the author knows no way to deselect this database. do you want to continue?""" %
         q = self.current_query
         iter = q.model.get_iter_first()
         indices = range(q.model.get_n_columns())
-        field_delim = self.config["save_result_as_csv_delim"]
-        line_delim = self.config["save_result_as_csv_line_delim"]
+        field_delim = self.config.get("save_result_as_csv_delim")
+        line_delim = self.config.get("save_result_as_csv_line_delim")
         try:
             fp = file(filename, "wb")
             for search, replace in {"\\n": "\n", "\\r": "\r", "\\t": "\t", "\\0": "\0"}.iteritems():
@@ -1633,7 +1685,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
             return
         
         size = sbuf.st_size
-        max = int(self.config["ask_execute_query_from_disk_min_size"])
+        max = int(self.config.get("ask_execute_query_from_disk_min_size"))
         if size > max:
             if dialogs.confirm("load query", """
 <b>%s</b> is very big (<b>%.2fMB</b>)!
@@ -1719,7 +1771,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             if not answer == gtk.RESPONSE_OK: return
         regex = self.local_search_entry.get_text()
         if self.local_search_case_sensitive.get_active():
-            regex = "(?i)" + regex;
+            regex = "(?i)" + regex
         tm = self.current_query.model
         fields = tm.get_n_columns()
         start = tm.get_iter_root()
@@ -1740,7 +1792,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 v = tm.get_value(start, k)
                 if v is None: continue
                 if re.search(regex, v):
-                    path = tm.get_path(start);
+                    path = tm.get_path(start)
                     if start_path and start_path == path and k <= start_column_index:
                         continue # skip!
                     column = query_view.get_column(k)
@@ -1753,25 +1805,25 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
     def on_query_font_clicked(self, button):
         d = self.assign_once("query text font", gtk.FontSelectionDialog, "select query font")
-        d.set_font_name(self.config["query_text_font"])
+        d.set_font_name(self.config.get("query_text_font"))
         answer = d.run()
         d.hide()
         if not answer == gtk.RESPONSE_OK: return
         font_name = d.get_font_name()
         self.current_query.set_query_font(font_name)
-        self.config["query_text_font"] = font_name
-        self.save_config()
+        self.config.config["query_text_font"] = font_name
+        self.config.save()
 
     def on_query_result_font_clicked(self, button):
         d = self.assign_once("query result font", gtk.FontSelectionDialog, "select result font")
-        d.set_font_name(self.config["query_result_font"])
+        d.set_font_name(self.config.get("query_result_font"))
         answer = d.run()
         d.hide()
         if not answer == gtk.RESPONSE_OK: return
         font_name = d.get_font_name()
         self.current_query.set_result_font(font_name)
-        self.config["query_result_font"] = font_name
-        self.save_config()
+        self.config.config["query_result_font"] = font_name
+        self.config.save()
         
     def on_newquery_button_clicked(self, button):
         xml = gtk.glade.XML(self.glade_file, "first_query")
@@ -1896,14 +1948,15 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
     def on_sql_log_button_press(self, tv, event):
         if not event.button == 3: return False
-        res = tv.get_path_at_pos(int(event.x), int(event.y));
+        res = tv.get_path_at_pos(int(event.x), int(event.y))
         if not res: return False
-        self.xml.get_widget("sqllog_popup").popup(None, None, None, event.button, event.time);
+        self.xml.get_widget("sqllog_popup").popup(None, None, None, event.button, event.time)
         return True
         
     def on_connections_button_release(self, tv, event):
-        if not event.button == 3: return False
-        res = tv.get_path_at_pos(int(event.x), int(event.y));
+        if not event.button == 3:
+            return False
+        res = tv.get_path_at_pos(int(event.x), int(event.y))
         menu = None
         if not res or len(res[0]) == 1: 
             self.xml.get_widget("modify_connection").set_sensitive(not not res)
@@ -1911,8 +1964,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             connected_host = False
             if res:
                 model = self.connections_model
-                iter = model.get_iter(res[0])
-                host = model.get_value(iter, 0)
+                _iter = model.get_iter(res[0])
+                host = model.get_value(_iter, 0)
                 connected_host = host.connected
             self.xml.get_widget("new_database").set_sensitive(connected_host)
             self.xml.get_widget("refresh_host").set_sensitive(connected_host)
@@ -1926,7 +1979,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             menu = self.xml.get_widget("database_popup")
         elif len(res[0]) == 3:
             menu = self.xml.get_widget("table_popup")
-        else: print "no popup at path depth %d\n" % res[0].size()
+
         if menu:
             menu.popup(None, None, None, event.button, event.time)
         return True
@@ -2072,7 +2125,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             table = o
             if self.current_query:
                 self.current_query.set_current_db(table.db)
-            if not table.fields or (time.time() - table.last_field_read) > self.config["autorefresh_interval_table"]:
+            if not table.fields or (time.time() - table.last_field_read) > self.config.get("autorefresh_interval_table"):
                 table.refresh()
                 self.redraw_table(o, iter)
                 
@@ -2083,7 +2136,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 nb.set_current_page(3)              
             
             #self.connections_tv.expand_row(path, False)
-            # todo update_query_db();
+            # todo update_query_db()
             # todo if(!doubleclick) update_table(e, i)
         else:
             print "No Handler for tree-depth", depth
@@ -2110,7 +2163,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             
     def on_query_view_button_release_event(self, tv, event):
         if not event.button == 3: return False
-        res = tv.get_path_at_pos(int(event.x), int(event.y));
+        res = tv.get_path_at_pos(int(event.x), int(event.y))
         menu = self.xml.get_widget("result_popup")
         if res:
             sensitive = True
@@ -2247,9 +2300,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.connections_model.remove(iter)
             if self.current_host == host:
                 self.current_host = None
-            del self.config["connection_%s" % host.name]
+            del self.config.config["connection_%s" % host.name]
             host = None
-            self.save_config()
+            self.config.save()
         elif what == "new_connection":
             self.connection_window.show("new")
         elif what == "new_sqlite_connection":
@@ -2258,61 +2311,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             print "resp:", resp
             if resp:
                 self.add_sqlite(self.sqlite_connection_dialog.get_filename())
-                self.save_config()
-
-    # def on_cw_apply(self, *args):
-    #     if self.cw_mode == "new":
-    #         data = []
-    #         for n in self.cw_props:
-    #             data.append(self.xml.get_widget("cw_%s" % n).get_text())
-    #         if not data[0]:
-    #             self.connection_window.hide()
-    #             return
-    #         self.add_mysql_host(*data)
-    #     else:
-    #         for n in self.cw_props:
-    #             self.cw_host.__dict__[n] = self.xml.get_widget("cw_%s" % n).get_text()
-    #     self.connection_window.hide()
-    #     self.save_config()
-    #
-    # def on_cw_test(self, *args):
-    #     import _mysql;
-    #     data = {
-    #         "connect_timeout": 6
-    #     }
-    #     widget_map = {
-    #         "password": "passwd"
-    #     }
-    #     for n in ["host", "user", "password", "port:int"]:
-    #         if ":" in n:
-    #             n, typename = n.split(":", 1)
-    #             data[widget_map.get(n, n)] = eval("%s(%r)" % (typename, self.xml.get_widget("cw_%s" % n).get_text()))
-    #         else:
-    #             data[widget_map.get(n, n)] = self.xml.get_widget("cw_%s" % n).get_text()
-    #
-    #
-    #     try:
-    #         handle = _mysql.connect(**data)
-    #     except:
-    #         self.show_message(
-    #             "test connection",
-    #             "could not connect to host <b>%s</b> with user <b>%s</b> and password <b>%s</b>:\n<i>%s</i>" % (
-    #                 data["host"],
-    #                 data["user"],
-    #                 data["passwd"],
-    #                 sys.exc_value
-    #                 ),
-    #             window=self.connection_window
-    #             )
-    #         return
-    #     self.show_message(
-    #         "test connection",
-    #         "successfully connected to host <b>%s</b> with user <b>%s</b>!" % (
-    #             data["host"],
-    #             data["user"]
-    #             ),
-    #         window=self.connection_window)
-    #     handle.close()
+                self.config.save()
 
     def get_db_iter(self, db):
         return self.get_connections_object_at_depth(db, 1)
@@ -2386,8 +2385,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
     def on_msg_tv_button_press_event(self, tv, event):
         if not event.button == 3: return False
-        res = tv.get_path_at_pos(int(event.x), int(event.y));
-        self.xml.get_widget("messages_popup").popup(None, None, None, event.button, event.time);
+        res = tv.get_path_at_pos(int(event.x), int(event.y))
+        self.xml.get_widget("messages_popup").popup(None, None, None, event.button, event.time)
         return True
         
     def on_query_popup(self, item):
@@ -2410,7 +2409,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             col_max = q.model.get_n_columns()
             value = ""
             for col_num in range(col_max):
-                if value: value += self.config["copy_record_as_csv_delim"]
+                if value: value += self.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(iter, col_num)
                 if not v is None: value += v
             self.clipboard.set_text(value)
@@ -2419,7 +2418,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             col_max = q.model.get_n_columns()
             value = ""
             for col_num in range(col_max):
-                if value: value += self.config["copy_record_as_csv_delim"]
+                if value: value += self.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(iter, col_num)
                 if not v is None: 
                     v = v.replace("\"", "\\\"")
@@ -2437,7 +2436,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             value = ""
             iter = q.model.get_iter_first()
             while iter:
-                if value: value += self.config["copy_record_as_csv_delim"]
+                if value: value += self.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(iter, col_num)
                 if not v is None: value += v
                 iter = q.model.iter_next(iter)
@@ -2454,7 +2453,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             value = ""
             iter = q.model.get_iter_first()
             while iter:
-                if value: value += self.config["copy_record_as_csv_delim"]
+                if value: value += self.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(iter, col_num)
                 if not v is None: 
                     v = v.replace("\"", "\\\"")
@@ -2465,7 +2464,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         elif item.name == "copy_column_names":
             value = ""
             for col in q.treeview.get_columns():
-                if value: value += self.config["copy_record_as_csv_delim"]
+                if value: value += self.config.get("copy_record_as_csv_delim")
                 value += col.get_title().replace("__", "_")
             self.clipboard.set_text(value)
             self.pri_clipboard.set_text(value)
@@ -2556,7 +2555,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
     def on_template(self, button, t):
         current_table = self.get_selected_table()
-        current_fc_table = current_table;
+        current_fc_table = current_table
         
         if t.find("$table$") != -1:
             if not current_table:
@@ -2637,12 +2636,12 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                         self.fc_logic_combobox[i - 1].append_text("OR")
                         table.attach(self.fc_logic_combobox[i - 1], 0, 1, i + 1, i + 2)
                         self.fc_logic_combobox[i - 1].show()
-                    table.attach(self.fc_combobox[i], 1, 2, i + 1, i + 2);
+                    table.attach(self.fc_combobox[i], 1, 2, i + 1, i + 2)
                     table.attach(self.fc_op_combobox[i], 2, 3, i + 1, i + 2)
-                    table.attach(self.fc_entry[i], 3, 4, i + 1, i + 2);
-                    self.fc_combobox[i].show();
-                    self.fc_op_combobox[i].show();
-                    self.fc_entry[i].show();
+                    table.attach(self.fc_entry[i], 3, 4, i + 1, i + 2)
+                    self.fc_combobox[i].show()
+                    self.fc_op_combobox[i].show()
+                    self.fc_entry[i].show()
             if not current_table:
                 show_message("info", "no table selected!\nyou can't execute a template with $field_conditions$ in it, if you have no table selected!")
                 return
@@ -2747,50 +2746,10 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
 
     def on_processlist_button_release(self, tv, event):
         if not event.button == 3: return False
-        res = tv.get_path_at_pos(int(event.x), int(event.y));
+        res = tv.get_path_at_pos(int(event.x), int(event.y))
         if not res: return False
         self.xml.get_widget("processlist_popup").popup(None, None, None, event.button, event.time)
         
-    # def show_message(self, title, message, window=None):
-    #     if window is None:
-    #         window = self.mainwindow
-    #     dialog = gtk.MessageDialog(window, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, message)
-    #     dialog.label.set_property("use-markup", True)
-    #     dialog.set_title(title)
-    #     dialog.run()
-    #     dialog.hide()
-        
-    # def confirm(self, title, message, window=None):
-    #     if window is None:
-    #         window = self.mainwindow
-    #     dialog = gtk.MessageDialog(window, gtk.DIALOG_MODAL, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, message)
-    #     dialog.label.set_property("use-markup", True)
-    #     dialog.set_title(title)
-    #     answer = dialog.run()
-    #     dialog.hide()
-    #     return answer == gtk.RESPONSE_YES
-        
-    def input(self, title, message, default="", window=None):
-        if window is None:
-            window = self.mainwindow
-        dialog = gtk.Dialog(title, window, gtk.DIALOG_MODAL, 
-            (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-             gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
-        label = gtk.Label(message)
-        label.set_property("use-markup", True)
-        dialog.vbox.pack_start(label, True, True, 2)
-        entry = gtk.Entry()
-        entry.connect("activate", lambda *a: dialog.response(gtk.RESPONSE_ACCEPT))
-        dialog.vbox.pack_start(entry, False, True, 2)
-        label.show()
-        entry.show()
-        entry.set_text(default)
-        answer = dialog.run()
-        dialog.hide()
-        if answer != gtk.RESPONSE_ACCEPT:
-            return None
-        return entry.get_text()
-
     def render_connections_pixbuf(self, column, cell, model, iter):
         d = model.iter_depth(iter)
         o = model.get_value(iter, 0)
@@ -2833,229 +2792,15 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 cell.set_property("text", o[0:256] + "...")
                 cell.set_property("editable", False)
         else:
-            cell.set_property("background", self.config["null_color"])
+            cell.set_property("background", self.config.get("null_color"))
             cell.set_property("text", "")
             cell.set_property("editable", True)
         
-    def config_get_bool(self, name):
-        value = self.config[name].lower()
-        if value == "yes": return True
-        if value == "y": return True
-        if value == "1": return True
-        if value == "true": return True
-        if value == "t": return True
-        return False
-        
-    def save_config(self):
-        if not os.path.exists(self.config_path):
-            print "try to create config path %r" % self.config_path
-            try:
-                os.mkdir(self.config_path)
-            except:
-                dialogs.show_message("save config file", "could create config directory %r: %s" % (self.config_path, sys.exc_value))
-                return
-            
-        filename = os.path.join(self.config_path, self.config_file)
-        try:
-            fp = file(filename, "w")
-        except:
-            dialogs.show_message("save config file", "could not open %s for writing: %s" % (filename, sys.exc_value))
-            return
-            
-        keys = self.config.keys()
-        keys.sort()
-        for name in keys:
-            if name.startswith("connection_"):
-                continue
-            value = self.config[name]
-            fp.write("%s=%s\n" % (name, value))
-            
-        iter = self.connections_model.get_iter_root()
-        while iter:
-            host = self.connections_model.get_value(iter, 0)
-            fp.write("connection_%s=%s\n" % (host.name, host.get_connection_string()))
-            iter = self.connections_model.iter_next(iter)
-        fp.close()
-        
     def on_reread_config_activate(self, item):
-        self.load_config()
+        self.config.load()
         
-    def load_config(self, unpickled=False):
-        filename = os.path.join(self.config_path, self.config_file)
-        # todo get_charset(self.config["db_codeset"]);
-        # printf("system charset: '%s'\n", self.config["db_codeset"].c_str());
-        # syntax_highlight_functions: grep -E -e "^[ \\t]+<code class=\"literal[^>]*>[^\(<90-9]+\(" mysql_fun.html fun*.html | sed -r -e "s/^[^<]*<code[^>]+>//" -e "s/\(.*$/,/" | tr "[:upper:]" "[:lower:]" | sort | uniq | xargs echo
-        self.config = {
-            "null_color": "#00eeaa",
-            "autorefresh_interval_table": "300",
-            "column_sort_use_newline": "true",
-            "query_text_font": "Monospace 8",
-            "query_text_wrap": "false",
-            "query_result_font": "Monospace 8",
-            "query_log_max_entry_length": "1024",
-            "result_view_column_width_min": "70",
-            "result_view_column_width_max": "300",
-            "result_view_column_resizable": "false",
-            "result_view_column_sort_timeout": "750",
-            "syntax_highlight_keywords": "lock, unlock, tables, kill, truncate table, alter table, host, database, field, comment, show table status, show index, add index, drop index, add primary key, add unique, drop primary key, show create table, values, insert into, into, select, show databases, show tables, show processlist, show tables, from, where, order by, group by, limit, left, join, right, inner, after, alter, as, asc, before, begin, case, column, change column, commit, create table, default, delete, desc, describe, distinct, drop, table, first, grant, having, insert, interval, insert into, limit, null, order, primary key, primary, auto_increment, rollback, set, start, temporary, union, unique, update, create database, use, key, type, uniqe key, on, type, not, unsigned",
-            "syntax_highlight_functions": "date_format, now, floor, rand, hour, if, minute, month, right, year, isnull",
-            "syntax_highlight_functions": "abs, acos, adddate, addtime, aes_decrypt, aes_encrypt, ascii, asin, atan, benchmark, bin, bit_length, ceil, ceiling, char, character_length, char_length, charset, coercibility, collation, compress, concat, concat_ws, connection_id, conv, convert_tz, cos, cot, crypt, curdate, current_date, current_time, current_timestamp, current_user, curtime, database, date, date_add, datediff, date_format, date_sub, day, dayname, dayofmonth, dayofweek, dayofyear, decode, default, degrees, des_decrypt, des_encrypt, elt, encode, encrypt, exp, export_set, extract, field, find_in_set, floor, format, found_rows, from_days, from_unixtime, get_format, get_lock, hex, hour, if, ifnull, inet_aton, inet_ntoa, insert, instr, is_free_lock, is_used_lock, last_day, last_insert_id, lcase, left, length, ln, load_file, localtime, localtimestamp, locate, log, lower, lpad, ltrim, makedate, make_set, maketime, master_pos_wait, microsecond, mid, minute, mod, month, monthname, mysql_insert_id, now, nullif, oct, octet_length, old_password, ord, order by rand, password, period_add, period_diff, pi, position, pow, power, quarter, quote, radians, rand, release_lock, repeat, replace, reverse, right, round, row_count, rpad, rtrim, schema, second, sec_to_time, session_user, sha, sign, sin, sleep, soundex, space, sqrt, str_to_date, subdate, substr, substring, substring_index, subtime, sysdate, system_user, tan, time, timediff, time_format, timestamp, timestampadd, timestampdiff, time_to_sec, to_days, trim, truncate, ucase, uncompress, uncompressed_length, unhex, unix_timestamp, upper, user, utc_date, utc_time, utc_timestamp, uuid, version, week, weekday, weekofyear, year, yearweek",
-            "syntax_highlight_datatypes": "binary, bit, blob, boolean, char, character, dec, decimal, double, float, int, integer, numeric, smallint, timestamp, varchar, datetime, text, mediumint, bigint, tinyint, date",
-            "syntax_highlight_operators": "not, and, or, like, \\<, \\>",
-            "syntax_highlight_fg_keyword": "#00007F",
-            "syntax_highlight_fg_function": "darkblue",
-            "syntax_highlight_fg_datatype": "#AA00AA",
-            "syntax_highlight_fg_operator": "#0000aa",
-            "syntax_highlight_fg_double-quoted-string": "#7F007F",
-            "syntax_highlight_fg_single-quoted-string": "#9F007F",
-            "syntax_highlight_fg_backtick-quoted-string": "#BF007F",
-            "syntax_highlight_fg_number": "#007F7F",
-            "syntax_highlight_fg_comment": "#007F00",
-            "syntax_highlight_fg_error": "red",
-            "pretty_print_uppercase_keywords": "false",
-            "pretty_print_uppercase_operators": "false",
-            "template1_last 150 records": "select * from $table$ order by $primary_key$ desc limit 150",
-            "template2_500 records in fs-order": "select * from $table$ limit 500",
-            "template3_quick filter 500": "select * from $table$ where $field_conditions$ limit 500",
-            "copy_record_as_csv_delim": ",",
-            "save_result_as_csv_delim": ",",
-            "save_result_as_csv_line_delim": "\\n",
-            "ping_connection_interval": "300",
-            "ask_execute_query_from_disk_min_size": "1024000",
-            "connect_timeout": "7",
-            "db_encoding": "latin1",
-            "supported_db_encodings": 
-                "latin1 (iso8859-1, cp819); "
-                "latin2 (iso8859-2); "
-                "iso8859_15 (iso8859-15); "
-                "utf8;"
-                "utf7;"
-                "utf16; "
-                "ascii (646);"
-                "cp437 (IBM437);" 
-                "cp500 (EBCDIC-CP-BE); "
-                "cp850 (IBM850); "
-                "cp1140 (ibm1140); "
-                "cp1252 (windows-1252); "
-                "mac_latin2; mac_roman"
-        }
-        first = False
-        if not os.path.exists(filename):
-            print "no config file %r found. using defaults." % filename
-            self.config["connection_localhost"] = "localhost,root,,"
-        else:
-            try:
-                fp = file(filename, "r")
-                line_no = 0
-                for line in fp:
-                    line_no += 1
-                    line.lstrip(" \t\r\n")
-                    if not line: continue
-                    if line[0] == '#': continue
-                    varval = line.split("=", 1)
-                    name, value = map(lambda a: a.strip("\r\n \t"), varval)
-                    value = varval[1].strip("\r\n \t")
-                    self.config[name] = value
-                    #setattr(self, "cfg_%s" % name, value)
-                fp.close()
-            except:
-                print "could not load config file %r: %s" % (filename, sys.exc_value)
-                self.config["connection_localhost"] = "localhost,root,,"
-
-        # split supported encodings in list
-        self.supported_db_encodings = map(lambda e: e.strip(), self.config["supported_db_encodings"].split(";"))
-        
-        menu = self.xml.get_widget("query_encoding_menu")
-        for child in menu.get_children():
-            menu.remove(child)
-        self.codings = {}
-        for index, coding in enumerate(self.supported_db_encodings):
-            try:
-                c, description = coding.split(" ", 1)
-            except:
-                c = coding
-                description = ""
-            self.codings[c] = (index, description)
-            item = gtk.MenuItem(coding, False)
-            item.connect("activate", self.on_query_encoding_changed, (c, index))
-            menu.append(item)
-            item.show()
-            
-        try:
-            coding = self.config["db_encoding"]
-            index = self.codings[coding][0]
-        except:
-            index = 0
-            coding, description = self.supported_db_encodings[index].split(" ", 1)
-            self.config["db_encoding"] = coding
-        
-        # stored orders
-        self.stored_orders = {}
-        for name in self.config.keys():
-            if not name.startswith("stored_order_db_"):
-                continue
-            words = name.split("_")
-            db = words[3]
-            table = words[5]
-            if not db in self.stored_orders:
-                self.stored_orders[db] = {}
-            self.stored_orders[db][table] = eval(self.config[name])
-            
-        
-        self.first_template = None
-        keys = self.config.keys()
-        keys.sort()
-        toolbar = self.xml.get_widget("query_toolbar")
-        toolbar.set_style(gtk.TOOLBAR_ICONS)
-        for child in toolbar.get_children():
-            if not child.name.startswith("template_"):
-                continue
-            toolbar.remove(child)
-        template_count = 0
-        for name in keys:
-            value = self.config[name]
-            if not unpickled:
-                prefix = "connection_"
-                if name.startswith(prefix) and value == "::sqlite::":
-                    filename = name[len(prefix):]
-                    self.add_sqlite(filename)
-                    continue
-                if name.startswith(prefix):
-                    v = value.split(",")
-                    port = ""
-                    p = v[0].rsplit(":", 1)
-                    if len(p) == 2:
-                        port = p[1]
-                        v[0] = p[0]
-                    self.add_mysql_host(name[len(prefix):], v[0], port, v[1], v[2], v[3])
-            
-            prefix = "template";
-            if name.startswith(prefix):
-                value = value.replace("`$primary_key$`", "$primary_key$")
-                value = value.replace("`$table$`", "$table$")
-                value = value.replace("`$field_conditions$`", "$field_conditions$")
-                self.config[name] = value
-                if not self.first_template:
-                    self.first_template = value
-                p = name.split("_", 1)
-                template_count += 1
-                button = gtk.ToolButton(gtk.STOCK_EXECUTE)
-                button.set_name("template_%d" % template_count)
-                button.set_tooltip(self.tooltips, "%s\n%s" % (p[1], value))
-                button.connect("clicked", self.on_template, value)
-                toolbar.insert(button, -1)
-                button.show()
-    
-        if not unpickled: return
-        for h in self.hosts:
-            h.__init__(self.add_sql_log, self.add_msg_log)
-            iter = self.connections_model.append(None, [h])
-            h.set_update_ui(self.redraw_host, iter) # call before init!
-            self.redraw_host(h, iter)
-            self.current_host = h
-
     def on_query_bottom_eventbox_button_press_event(self, ebox, event):
-        self.xml.get_widget("query_encoding_menu").popup(None, None, None, event.button, event.time);
+        self.xml.get_widget("query_encoding_menu").popup(None, None, None, event.button, event.time)
         
     def on_query_db_eventbox_button_press_event(self, ebox, event):
         q = self.current_query
@@ -3106,34 +2851,34 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         self.current_query.set_query_encoding(data[0])
         
     def add_mysql_host(self, name, hostname, port, user, password, database):
-        host = MySqlHost(self.add_sql_log, self.add_msg_log, name, hostname, port, user, password, database, self.config["connect_timeout"])
-        iter = self.connections_model.append(None, [host])
-        host.set_update_ui(self.redraw_host, iter)
+        host = MySqlHost(self.add_sql_log, self.add_msg_log, name, hostname, port, user, password, database,
+                         self.config.get("connect_timeout"))
+        _iter = self.connections_model.append(None, [host])
+        host.set_update_ui(self.redraw_host, _iter)
     
     def add_sqlite(self, filename):
         host = SQLiteHost(self.add_sql_log, self.add_msg_log, filename)
-        iter = self.connections_model.append(None, [host])
-        host.set_update_ui(self.redraw_host, iter)
+        _iter = self.connections_model.append(None, [host])
+        host.set_update_ui(self.redraw_host, _iter)
     
     def add_sql_log(self, log):
         olog = log
-        max_len = int(self.config["query_log_max_entry_length"])
+        max_len = int(self.config.get("query_log_max_entry_length"))
         if len(log) > max_len:
-            log = log[0:max_len] + "\n/* query with length of %d bytes truncated. */" % len(log);
+            log = log[0:max_len] + "\n/* query with length of %d bytes truncated. */" % len(log)
         
-        # query = db_to_utf8(log);
-        # query = syntax_highlight_markup(query);
-        # query = rxx.replace(query, "[\r\n\t ]+", " ", Regexx::global);
-        if not log: return
+        if not log:
+            return
             
         now = time.time()
         now = int((now - int(now)) * 100)
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        if now: timestamp = "%s.%02d" % (timestamp, now)
+        if now:
+            timestamp = "%s.%02d" % (timestamp, now)
         log = log.replace("<", "&lt;")
         log = log.replace(">", "&gt;")
-        iter = self.sql_log_model.append((timestamp, log, olog))
-        self.sql_log_tv.scroll_to_cell(self.sql_log_model.get_path(iter))
+        _iter = self.sql_log_model.append((timestamp, log, olog))
+        self.sql_log_tv.scroll_to_cell(self.sql_log_model.get_path(_iter))
         #self.xml.get_widget("message_notebook").set_current_page(0)
         self.process_events()
         
@@ -3142,7 +2887,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             gtk.main_iteration(False)
 
     def add_msg_log(self, log):
-        if not log: return
+        if not log:
+            return
         
         log.replace(
             "You have an error in your SQL syntax.  Check the manual that corresponds to your MySQL server version for the right syntax to use near",
@@ -3151,17 +2897,18 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         now = time.time()
         now = int((now - int(now)) * 100)
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        if now: timestamp = "%s.%02d" % (timestamp, now)
-        iter = self.msg_model.append((timestamp, log))
-        self.msg_tv.scroll_to_cell(self.msg_model.get_path(iter))
+        if now:
+            timestamp = "%s.%02d" % (timestamp, now)
+        _iter = self.msg_model.append((timestamp, log))
+        self.msg_tv.scroll_to_cell(self.msg_model.get_path(_iter))
         self.xml.get_widget("message_notebook").set_current_page(1)
 
     def get_selected_table(self):
         path, column = self.connections_tv.get_cursor()
         depth = len(path)
-        iter = self.connections_model.get_iter(path)
+        _iter = self.connections_model.get_iter(path)
         if depth == 3:
-            return self.connections_model.get_value(iter, 0)
+            return self.connections_model.get_value(_iter, 0)
         return None
 
     def load_icons(self):
@@ -3186,19 +2933,21 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             
         if self.current_processlist_host != self.current_host:
             self.current_processlist_host = self.current_host
-            self.xml.get_widget("version_label").set_text("  server version: %s" % self.current_host.handle.get_server_info());
+            self.xml.get_widget("version_label").set_text(
+                "  server version: %s" % self.current_host.handle.get_server_info())
             
             for col in self.processlist_tv.get_columns():
                 self.processlist_tv.remove_column(col)
             
             columns = [gobject.TYPE_STRING] * len(fields)
-            self.processlist_model = gtk.ListStore(*columns);
-            self.processlist_tv.set_model(self.processlist_model);
-            self.processlist_tv.set_headers_clickable(True);
+            self.processlist_model = gtk.ListStore(*columns)
+            self.processlist_tv.set_model(self.processlist_model)
+            self.processlist_tv.set_headers_clickable(True)
             id = 0
             for field in fields:
                 title = field[0].replace("_", "__")
-                self.processlist_tv.insert_column_with_data_func(-1, title, gtk.CellRendererText(), self.render_mysql_string, id)
+                self.processlist_tv.insert_column_with_data_func(-1, title, gtk.CellRendererText(),
+                                                                 self.render_mysql_string, id)
                 id += 1
             
         for proc in rows:
@@ -3228,12 +2977,13 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             columns = [gobject.TYPE_STRING] * len(fields)
             if not columns:
                 return
-            self.tables_model = gtk.ListStore(*columns);
-            self.tables_tv.set_model(self.tables_model);
+            self.tables_model = gtk.ListStore(*columns)
+            self.tables_tv.set_model(self.tables_model)
             id = 0
             for field in fields:
                 title = field.replace("_", "__")
-                self.tables_tv.insert_column_with_data_func(-1, title, gtk.CellRendererText(), self.render_mysql_string, id)
+                self.tables_tv.insert_column_with_data_func(-1, title, gtk.CellRendererText(),
+                                                            self.render_mysql_string, id)
                 id += 1
             self.tables_count = 0
         
@@ -3247,12 +2997,13 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             table = db.tables[name]
             self.tables_model.append(table.props)
     
-    def redraw_host(self, host, iter, expand = False):
+    def redraw_host(self, host, _iter, expand=False):
         #print "redraw host", host.name
-        if host.expanded: expand = True
+        if host.expanded:
+            expand = True
             
         # first remove exiting children of that node
-        i = self.connections_model.iter_children(iter)
+        i = self.connections_model.iter_children(_iter)
         while i and self.connections_model.iter_is_valid(i):
             self.connections_model.remove(i)
         
@@ -3261,21 +3012,21 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         keys.sort()
         for name in keys:
             db = host.databases[name]
-            i = self.connections_model.append(iter, (db,))
+            i = self.connections_model.append(_iter, (db,))
             if expand:
-                self.connections_tv.expand_row(self.connections_model.get_path(iter), False)
+                self.connections_tv.expand_row(self.connections_model.get_path(_iter), False)
                 expand = False
             self.redraw_db(db, i)
             
-    def redraw_db(self, db, iter, new_tables = None, force_expand = False):
+    def redraw_db(self, db, _iter, new_tables=None, force_expand=False):
         #print "redraw db", db.name
-        if not iter:
-            print "Error: invalid db-iterator:", iter
+        if not _iter:
+            print "Error: invalid db-iterator:", _iter
             return
-        path = self.connections_model.get_path(iter)
+        path = self.connections_model.get_path(_iter)
         if db.expanded: 
             force_expand = True
-        i = self.connections_model.iter_children(iter)
+        i = self.connections_model.iter_children(_iter)
         while i and self.connections_model.iter_is_valid(i): 
             self.connections_model.remove(i)
         keys = db.tables.keys()
@@ -3283,7 +3034,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         iterators = {}
         for name in keys:
             table = db.tables[name]
-            i = self.connections_model.append(iter, (table,))
+            i = self.connections_model.append(_iter, (table,))
             if force_expand: 
                 self.connections_tv.expand_row(path, False)
                 force_expand = False
@@ -3296,14 +3047,14 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.redraw_table(table, iterators[name])
             self.process_events()
             
-    def redraw_table(self, table, iter):
+    def redraw_table(self, table, _iter):
         #print "redraw table", table.name
-        if table.expanded: self.connections_tv.expand_row(self.connections_model.get_path(iter), False)
-        i = self.connections_model.iter_children(iter)
+        if table.expanded: self.connections_tv.expand_row(self.connections_model.get_path(_iter), False)
+        i = self.connections_model.iter_children(_iter)
         while i and self.connections_model.iter_is_valid(i): 
             self.connections_model.remove(i)
         for field in table.field_order:
-            i = self.connections_model.append(iter, (table.fields[field],))
+            i = self.connections_model.append(_iter, (table.fields[field],))
 
     def read_expression(self, query, start=0, concat=True, update_function=None, update_offset=0, icount=0):
         ## TODO!

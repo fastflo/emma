@@ -148,7 +148,7 @@ class ConnectionWindow:
         self.window.hide()
 
         if self.emma:
-            self.emma.save_config()
+            self.emma.config.save()
 
     def on_test_button_clicked(self, *args):
         if self.cmb_connection_type.get_active() == 0:

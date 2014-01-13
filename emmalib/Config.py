@@ -7,6 +7,7 @@ import dialogs
 class Config:
     def __init__(self, emma=None):
         self.emma = emma
+        self.unpickled = False
         filename = False
         for i in ["HOME", "USERPROFILE"]:
             filename = os.getenv(i)
@@ -22,67 +23,11 @@ class Config:
             os.mkdir(temp_dir)
             os.rename(filename, os.path.join(temp_dir, "emmarc"))
             os.rename(temp_dir, filename)
+        self.supported_db_encodings = {}
+        self.codings = {}
+        self.stored_orders = {}
         self.config_path = filename
         self.config_file = "emmarc"
-
-    def get(self, name):
-        return self.config[name]
-
-    def get_bool(self, name):
-        value = self.get(name).lower()
-        if value == "yes":
-            return True
-        if value == "y":
-            return True
-        if value == "1":
-            return True
-        if value == "true":
-            return True
-        if value == "t":
-            return True
-        return False
-
-    def save(self):
-        if not os.path.exists(self.config_path):
-            print "try to create config path %r" % self.config_path
-            try:
-                os.mkdir(self.config_path)
-            except:
-                dialogs.show_message("save config file",
-                                     "could create config directory %r: %s" % (self.config_path, sys.exc_value))
-                return
-
-        filename = os.path.join(self.config_path, self.config_file)
-        try:
-            fp = file(filename, "w")
-        except:
-            dialogs.show_message("save config file", "could not open %s for writing: %s" % (filename, sys.exc_value))
-            return
-
-        keys = self.config.keys()
-        keys.sort()
-        for name in keys:
-            if name.startswith("connection_"):
-                continue
-            value = self.config[name]
-            fp.write("%s=%s\n" % (name, value))
-
-        if self.emma:
-            itr = self.connections_model.get_iter_root()
-            while itr:
-                host = self.connections_model.get_value(itr, 0)
-                _str_to_write = "connection_%s=%s\n" % (host.name, host.get_connection_string())
-                print _str_to_write
-                # fp.write(_str_to_write)
-                itr = self.connections_model.iter_next(itr)
-            fp.close()
-
-    def load(self, unpickled=False):
-        filename = os.path.join(self.config_path, self.config_file)
-        # todo get_charset(self.config["db_codeset"]);
-        # printf("system charset: '%s'\n", self.config["db_codeset"].c_str());
-        # syntax_highlight_functions: grep -E -e "^[ \\t]+<code class=\"literal[^>]*>[^\(<90-9]+\(" mysql_fun.html fun*.html | sed -r -e "s/^[^<]*<code[^>]+>//" -e "s/\(.*$/,/" | tr "[:upper:]" "[:lower:]" | sort | uniq | xargs echo
-
         self.config = {
             "null_color": "#00eeaa",
             "autorefresh_interval_table": "300",
@@ -138,6 +83,13 @@ class Config:
                 "mac_latin2; mac_roman"
         }
 
+    def load(self, unpickled=False):
+        self.unpickled = unpickled
+        filename = os.path.join(self.config_path, self.config_file)
+        # todo get_charset(self.config["db_codeset"]);
+        # printf("system charset: '%s'\n", self.config["db_codeset"].c_str());
+        # syntax_highlight_functions: grep -E -e "^[ \\t]+<code class=\"literal[^>]*>[^\(<90-9]+\(" mysql_fun.html fun*.html | sed -r -e "s/^[^<]*<code[^>]+>//" -e "s/\(.*$/,/" | tr "[:upper:]" "[:lower:]" | sort | uniq | xargs echo
+
         if not os.path.exists(filename):
             print "no config file %r found. using defaults." % filename
             self.config["connection_localhost"] = "localhost,root,,"
@@ -163,22 +115,13 @@ class Config:
         # split supported encodings in list
         self.supported_db_encodings = map(lambda e: e.strip(), self.config["supported_db_encodings"].split(";"))
 
-        # menu = self.xml.get_widget("query_encoding_menu")
-        # for child in menu.get_children():
-        #     menu.remove(child)
-
-        self.codings = {}
         for index, coding in enumerate(self.supported_db_encodings):
             try:
-                c, description = coding.split(" ", 1)
+                _c, description = coding.split(" ", 1)
             except:
-                c = coding
+                _c = coding
                 description = ""
-            self.codings[c] = (index, description)
-            # item = gtk.MenuItem(coding, False)
-            # item.connect("activate", self.on_query_encoding_changed, (c, index))
-            # menu.append(item)
-            # item.show()
+            self.codings[_c] = (index, description)
 
         try:
             coding = self.config["db_encoding"]
@@ -189,7 +132,6 @@ class Config:
             self.config["db_encoding"] = coding
 
         # stored orders
-        self.stored_orders = {}
         for name in self.config.keys():
             if not name.startswith("stored_order_db_"):
                 continue
@@ -200,69 +142,64 @@ class Config:
                 self.stored_orders[db] = {}
             self.stored_orders[db][table] = eval(self.config[name])
 
-
-        self.first_template = None
-        keys = self.config.keys()
-        keys.sort()
-
-        # toolbar = self.xml.get_widget("query_toolbar")
-        # toolbar.set_style(gtk.TOOLBAR_ICONS)
-        # for child in toolbar.get_children():
-        #     if not child.name.startswith("template_"):
-        #         continue
-        #     toolbar.remove(child)
-
-        template_count = 0
-        for name in keys:
-            value = self.config[name]
-            if not unpickled:
-                prefix = "connection_"
-                if name.startswith(prefix) and value == "::sqlite::":
-                    # filename = name[len(prefix):]
-                    # self.add_sqlite(filename)
-                    continue
-                if name.startswith(prefix):
-                    # v = value.split(",")
-                    # port = ""
-                    # p = v[0].rsplit(":", 1)
-                    # if len(p) == 2:
-                    #     port = p[1]
-                    #     v[0] = p[0]
-                    # self.add_mysql_host(name[len(prefix):], v[0], port, v[1], v[2], v[3])
-                    pass
-
-            prefix = "template"
-            if name.startswith(prefix):
-                value = value.replace("`$primary_key$`", "$primary_key$")
-                value = value.replace("`$table$`", "$table$")
-                value = value.replace("`$field_conditions$`", "$field_conditions$")
-                self.config[name] = value
-                if not self.first_template:
-                    self.first_template = value
-                p = name.split("_", 1)
-                template_count += 1
-
-                # button = gtk.ToolButton(gtk.STOCK_EXECUTE)
-                # button.set_name("template_%d" % template_count)
-                # button.set_tooltip(self.tooltips, "%s\n%s" % (p[1], value))
-                # button.connect("clicked", self.on_template, value)
-                # toolbar.insert(button, -1)
-                # button.show()
-
         if not unpickled:
             return
 
-        for h in self.hosts:
-            h.__init__(self.add_sql_log, self.add_msg_log)
-            iter = self.connections_model.append(None, [h])
-            h.set_update_ui(self.redraw_host, iter)  # call before init!
-            self.redraw_host(h, iter)
-            self.current_host = h
+    def get(self, name):
+        return self.config[name]
 
+    def get_bool(self, name):
+        value = self.get(name).lower()
+        if value == "yes":
+            return True
+        if value == "y":
+            return True
+        if value == "1":
+            return True
+        if value == "true":
+            return True
+        if value == "t":
+            return True
+        return False
 
-if __name__ != 'main':
-    c = Config()
-    c.load()
-    c.save()
-    print c.__dict__
+    def save(self):
+        self.emma.add_msg_log('config.save')
+        if not os.path.exists(self.config_path):
+            print "try to create config path %r" % self.config_path
+            try:
+                os.mkdir(self.config_path)
+            except:
+                dialogs.show_message("save config file",
+                                     "could create config directory %r: %s" % (self.config_path, sys.exc_value))
+                return
+
+        filename = os.path.join(self.config_path, self.config_file)
+        try:
+            fp = file(filename, "w")
+        except:
+            dialogs.show_message("save config file", "could not open %s for writing: %s" % (filename, sys.exc_value))
+            return
+
+        keys = self.config.keys()
+        keys.sort()
+        for name in keys:
+            if name.startswith("connection_"):
+                continue
+            value = self.config[name]
+            fp.write("%s=%s\n" % (name, value))
+
+        if self.emma:
+            itr = self.emma.connections_model.get_iter_root()
+            while itr:
+                host = self.emma.connections_model.get_value(itr, 0)
+                _str_to_write = "connection_%s=%s\n" % (host.name, host.get_connection_string())
+                fp.write(_str_to_write)
+                itr = self.emma.connections_model.iter_next(itr)
+            fp.close()
+
+# if __name__ != 'main':
+#     c = Config()
+#     c.load()
+#     c.save()
+#     print c.__dict__
 
