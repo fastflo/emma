@@ -1,8 +1,11 @@
 Emma is a graphical database assistant
 ===
-Now it supports:
+v0.7 supports:
 * MySQL
 * SQLite
+
+v0.6 supports:
+* MySQL
 
 Website
 * http://www.emma-assistant.org
