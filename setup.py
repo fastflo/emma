@@ -5,9 +5,11 @@ from distutils.core import setup
 from emmalib import version
 
 icon_data = glob('icons/*.png')
-glade_data = ['emmalib/emma.glade', 'emmalib/plugins/table_editor/table_editor.glade']
-theme_data = ["theme/README.html"]
-theme_gtk_data = glob("theme/gtk-2.0/*")
+glade_data = [
+    'emmalib/emma.glade',
+    'emmalib/plugins/table_editor/table_editor.glade',
+    'emmalib/ConnectionWindow.glade'
+]
 other_data = ['changelog']
 
 setup(name="emma",
@@ -22,12 +24,14 @@ setup(name="emma",
           'emmalib',
           'emmalib.plugins.table_editor',
           'emmalib.plugins.pretty_format',
+          'emmalib.dialogs',
+          'emmalib.providers',
+          'emmalib.providers.mysql',
+          'emmalib.providers.sqlite',
       ],
       data_files=[
           ("share/emma/icons", icon_data),
           ("share/emma/glade", glade_data),
-          ("share/emma/theme", theme_data),
-          ("share/emma/theme/gtk-2.0", theme_gtk_data),
           ("share/emma", other_data),
       ],
       license="GPL",
