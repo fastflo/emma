@@ -8,6 +8,7 @@ class Config:
     def __init__(self, emma=None):
         self.emma = emma
         self.unpickled = False
+        self.have_sqlite = False
         filename = False
         for i in ["HOME", "USERPROFILE"]:
             filename = os.getenv(i)
@@ -16,7 +17,7 @@ class Config:
         if not filename:
             filename = "."
         filename += "/.emma"
-        print filename
+        #print filename
         if os.path.isfile(filename):
             print "detected emma config file %r. converting to directory" % filename
             temp_dir = filename + "_temp"

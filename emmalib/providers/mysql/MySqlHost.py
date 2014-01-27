@@ -306,7 +306,8 @@ class MySqlHost:
             del self.databases[db]
 
     def refresh_processlist(self):
-        if not self.query("show processlist"): return
+        if not self.query("show processlist"):
+            return
         result = self.handle.store_result()
         self.processlist = (result.describe(), result.fetch_row(0))
 
