@@ -42,8 +42,12 @@ class ConnectionsTreeView(gtk.TreeView):
 
         self.pop_up_host = widgets.PopUpHost()
         self.pop_up_host.connect('item-selected', self.on_host_popup)
+        self.pop_up_database = widgets.PopUpDatabase()
+        self.pop_up_database.connect('item-selected', self.on_db_popup)
+        self.pop_up_table = widgets.PopUpTable()
+        self.pop_up_table.connect('item-selected', self.on_table_popup)
 
-        self.connection_window = ConnectionWindow(self)
+        self.connection_window = ConnectionWindow(emma)
 
         self.load_from_config()
 
@@ -92,8 +96,7 @@ class ConnectionsTreeView(gtk.TreeView):
                 if nb:
                     nb.set_current_page(1)
             self.redraw_host(host, _iter, True)
-            if self.emma.current_query:
-                self.emma.current_query.set_current_host(self.current_host)
+            self.emma.current_query.set_current_host(self.current_host)
 
         elif depth == 2:
             self.current_host = o.host
@@ -101,15 +104,13 @@ class ConnectionsTreeView(gtk.TreeView):
             self.redraw_db(o, _iter, new_tables, True)
             self.emma.redraw_tables()
             o.host.select_database(o)
-            if self.emma.current_query:
-                self.emma.current_query.set_current_db(o)
+            self.emma.current_query.set_current_db(o)
 
         elif depth == 3:
             self.current_host = host = o.db.host
             host.select_database(o.db)
             table = o
-            if self.emma.current_query:
-                self.emma.current_query.set_current_db(table.db)
+            self.emma.current_query.set_current_db(table.db)
             ait = self.emma.config.get("autorefresh_interval_table")
             if not table.fields or (time.time() - table.last_field_read) > ait:
                 table.refresh()
@@ -170,7 +171,6 @@ class ConnectionsTreeView(gtk.TreeView):
         if not event.button == 3:
             return False
         res = tv.get_path_at_pos(int(event.x), int(event.y))
-        menu = None
         if not res or len(res[0]) == 1:
             self.emma.xml.get_widget("modify_connection").set_sensitive(not not res)
             self.emma.xml.get_widget("delete_connection").set_sensitive(not not res)
@@ -182,15 +182,11 @@ class ConnectionsTreeView(gtk.TreeView):
                 connected_host = host.connected
             self.emma.xml.get_widget("new_database").set_sensitive(connected_host)
             self.emma.xml.get_widget("refresh_host").set_sensitive(connected_host)
-            #menu = self.emma.xml.get_widget("connection_menu")
             self.pop_up_host.popup(None, None, None, event.button, event.time)
         elif len(res[0]) == 2:
-            menu = self.emma.xml.get_widget("database_popup")
+            self.pop_up_database.popup(None, None, None, event.button, event.time)
         elif len(res[0]) == 3:
-            menu = self.emma.xml.get_widget("table_popup")
-
-        if menu:
-            menu.popup(None, None, None, event.button, event.time)
+            self.pop_up_table.popup(None, None, None, event.button, event.time)
 
         return True
 
@@ -347,9 +343,9 @@ class ConnectionsTreeView(gtk.TreeView):
             self.xml.get_widget("main_notebook").set_current_page(4)
             self.on_execute_query_clicked(None, "repair table `%s`" % table.name)
 
-    def on_db_popup(self, item):
+    def on_db_popup(self, popup, item):
         self.emma.add_msg_log('on_db_popup')
-        path, column = self.connections_tv.get_cursor()
+        path, column = self.get_cursor()
         _iter = self.connections_model.get_iter(path)
         what = item.name
         db = self.connections_model.get_value(_iter, 0)
@@ -357,38 +353,38 @@ class ConnectionsTreeView(gtk.TreeView):
         if what == "refresh_database":
             new_tables = db.refresh()
             self.redraw_db(db, _iter, new_tables)
-            self.redraw_tables()
+            self.emma.redraw_tables()
         elif what == "drop_database":
             if not dialogs.confirm("drop database", "do you really want to drop the <b>%s</b> database on <b>%s</b>?" % (db.name, db.host.name), self.emma.mainwindow):
                 return
             host = db.host
             if host.query("drop database`%s`" % (db.name)):
                 host.refresh()
-                self.redraw_host(host, self.get_host_iter(host))
+                self.redraw_host(host, self.emma.get_host_iter(host))
         elif what == "new_table":
             name = dialogs.input_dialog("New table", "Please enter the name of the new table:", window=self.emma.mainwindow)
             if not name:
                 return
             if db.query("create table `%s` (`%s_id` int primary key auto_increment)" % (name, name)):
                 new_tables = db.refresh()
-                self.redraw_db(db, self.get_db_iter(db), new_tables)
-                self.redraw_tables()
+                self.redraw_db(db, self.emma.get_db_iter(db), new_tables)
+                self.emma.redraw_tables()
         elif what == "check_tables":
             self.current_host = db.host
             self.current_host.select_database(db)
-            self.xml.get_widget("main_notebook").set_current_page(4)
-            self.on_execute_query_clicked(
+            self.emma.xml.get_widget("main_notebook").set_current_page(4)
+            self.emma.on_execute_query_clicked(
                 None,
                 "check table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
         elif what == "repair_tables":
             self.current_host = db.host
             self.current_host.select_database(db)
-            self.xml.get_widget("main_notebook").set_current_page(4)
-            self.on_execute_query_clicked(
+            self.emma.xml.get_widget("main_notebook").set_current_page(4)
+            self.emma.on_execute_query_clicked(
                 None,
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
 
-    def on_host_popup(self, pop_up_host_object , item):
+    def on_host_popup(self, popup, item):
         self.emma.add_msg_log('on_db_popup')
         path, column = self.get_cursor()
         if path:

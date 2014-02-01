@@ -190,12 +190,12 @@ class Config:
             fp.write("%s=%s\n" % (name, value))
 
         if self.emma:
-            itr = self.emma.connections_model.get_iter_root()
+            itr = self.emma.connection_tv.connections_model.get_iter_root()
             while itr:
-                host = self.emma.connections_model.get_value(itr, 0)
+                host = self.emma.connection_tv.connections_model.get_value(itr, 0)
                 _str_to_write = "connection_%s=%s\n" % (host.name, host.get_connection_string())
                 fp.write(_str_to_write)
-                itr = self.emma.connections_model.iter_next(itr)
+                itr = self.emma.connection_tv.connections_model.iter_next(itr)
             fp.close()
 
 # if __name__ != 'main':

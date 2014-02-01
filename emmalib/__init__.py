@@ -165,9 +165,14 @@ class Emma:
         self.current_processlist_host = None
         self.processlist_timer_running = False
         
+        self.hosts = {}
+        self.queries = []
+
         self.config = Config(self)
         self.config.have_sqlite = have_sqlite
         self.config.load()
+
+        self.add_query_tab(MySqlQueryTab(self.xml, self.query_notebook))
 
         # if not hasattr(self, "state"):
         #     self.hosts = {}
@@ -1260,7 +1265,9 @@ class Emma:
         self.query_from_disk = False
         
     def on_execute_query_clicked(self, button=None, query=None):
-        if not self.current_query: return
+        if not self.current_query:
+            self.add_msg_log('no current_query')
+            return
         q = self.current_query
         if not query:
             b = q.textview.get_buffer()
@@ -1406,7 +1413,8 @@ the author knows no way to deselect this database. do you want to continue?""" %
             sortable = True # todo
             current_order = self.get_order_from_query(thisquery)
             sens = False
-            if len(current_order) > 0: sens = True
+            if len(current_order) > 0:
+                sens = True
             q.remove_order.set_sensitive(sens and sortable)
             
             sort_fields = dict()
@@ -1418,7 +1426,8 @@ the author knows no way to deselect this database. do you want to continue?""" %
             start_download = time.time()
             result = host.handle.store_result()
             download_time = time.time() - start_download
-            if download_time < 0: download_time = 0
+            if download_time < 0:
+                download_time = 0
     
             q.label.set_text("displaying resultset...")
             q.label.window.process_updates(False)
@@ -1860,7 +1869,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                     f, traceback.format_exc())
     
     def on_closequery_button_clicked(self, button):
-        if len(self.queries) == 1: return
+        if len(self.queries) == 1:
+            return
         self.current_query.destroy()
         self.del_query_tab(self.current_query)
         self.query_notebook.remove_page(self.query_notebook.get_current_page())
@@ -1869,9 +1879,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def on_rename_query_tab_clicked(self, button):
         label = self.current_query.get_label()
         new_name = dialogs.input_dialog("Rename tab", "Please enter the new name of this tab:",
-            label.get_text(),
-            self.mainwindow
-        )
+                                        label.get_text(),
+                                        self.mainwindow)
         if new_name is None:
             return
         if new_name == "":
@@ -1896,7 +1905,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             else:
                 self.fc_combobox[i].set_active(-1)
                 self.fc_op_combobox[i].set_active(-1)
-            if i: self.fc_logic_combobox[i - 1].set_active(0)
+            if i:
+                self.fc_logic_combobox[i - 1].set_active(0)
     
     def on_quit_activate(self, item):
         gtk.main_quit()
@@ -1917,13 +1927,14 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         w.connect('delete-event', self.on_changelog_delete)
         w.show()
         
-    def on_changelog_delete(self, _window, event):
+    def on_changelog_delete(self, window, event):
         window.hide()
         return True
         
     def on_kill_process(self, button):
         path, column = self.processlist_tv.get_cursor()
-        if not path or not self.current_host: return
+        if not path or not self.current_host:
+            return
         _iter = self.processlist_model.get_iter(path)
         process_id = self.processlist_model.get_value(_iter, 0)
         if not self.current_host.query("kill %s" % process_id):
@@ -1952,9 +1963,11 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         return True
         
     def on_sql_log_button_press(self, tv, event):
-        if not event.button == 3: return False
+        if not event.button == 3:
+            return False
         res = tv.get_path_at_pos(int(event.x), int(event.y))
-        if not res: return False
+        if not res:
+            return False
         self.xml.get_widget("sqllog_popup").popup(None, None, None, event.button, event.time)
         return True
         

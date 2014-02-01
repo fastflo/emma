@@ -131,7 +131,7 @@ class ConnectionWindow:
                     self.window.hide()
                     return
                 if self.emma:
-                    self.emma.add_mysql_host(*data)
+                    self.emma.connection_tv.add_mysql_host(*data)
             else:
                 self.host.name = self.tb_name.get_text()
                 self.host.host = self.tb_host.get_text()
@@ -143,7 +143,7 @@ class ConnectionWindow:
             if self.cw_mode == "new":
                 pass
             else:
-                self.emma.add_sqlite(self.fcb_datafile.get_filename())
+                self.emma.connection_tv.add_sqlite(self.fcb_datafile.get_filename())
 
         self.window.hide()
 
