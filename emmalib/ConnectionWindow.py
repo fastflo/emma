@@ -7,13 +7,13 @@ import dialogs
 
 class ConnectionWindow:
     def __init__(self, emma=None):
-        from emmalib import emma_path
+        import emmalib
 
         self.host = None
         self.emma = emma
         self.cw_mode = None
         self.text_fields = ["name", "host", "port", "user", "password", "database"]
-        self.glade_file = os.path.join(emma_path, "ConnectionWindow.glade")
+        self.glade_file = os.path.join(emmalib.emma_path, "ConnectionWindow.glade")
         self.glade = gtk.glade.XML(self.glade_file)
         self.window = self.connection_window
         self.cw_apply_button.connect("clicked", self.on_apply_button_clicked)
@@ -131,7 +131,7 @@ class ConnectionWindow:
                     self.window.hide()
                     return
                 if self.emma:
-                    self.emma.add_mysql_host(*data)
+                    self.emma.connection_tv.add_mysql_host(*data)
             else:
                 self.host.name = self.tb_name.get_text()
                 self.host.host = self.tb_host.get_text()
@@ -143,7 +143,7 @@ class ConnectionWindow:
             if self.cw_mode == "new":
                 pass
             else:
-                self.emma.add_sqlite(self.fcb_datafile.get_filename())
+                self.emma.connection_tv.add_sqlite(self.fcb_datafile.get_filename())
 
         self.window.hide()
 

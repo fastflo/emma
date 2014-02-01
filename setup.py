@@ -36,7 +36,7 @@ setup(name="emma",
       ],
       license="GPL",
       long_description="""
-Emma is a graphical toolkit for MySQL database developers and administrators
+Emma is a graphical toolkit for database developers and administrators
 It provides dialogs to create or modify mysql databases, tables and 
 associated indexes. it has a built-in syntax highlighting sql editor with 
 table- and fieldname tab-completion and automatic sql statement formatting. 

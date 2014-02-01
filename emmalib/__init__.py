@@ -18,37 +18,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 from stat import *
+import os
 import gc
 import pickle
 import datetime
 import bz2
 import sql
+import traceback
 from query_regular_expression import *
-
-if __name__ != "__main__":
-    from emmalib import __file__ as emmalib_file
-    from emmalib.providers.mysql.MySqlHost import *
-    from emmalib.providers.mysql.MySqlQueryTab import *
-    from emmalib.ConnectionWindow import ConnectionWindow
-    from emmalib.OutputHandler import OutputHandler
-    from emmalib.Config import Config
-    import emmalib.dialogs
-else:
-    emmalib_file = __file__
-    from providers.mysql.MySqlHost import *
-    from providers.mysql.MySqlQueryTab import *
-    from ConnectionWindow import ConnectionWindow
-    from OutputHandler import OutputHandler
-    from Config import Config
-    import dialogs
-
-try:
-    import sqlite3
-    have_sqlite = True
-    from emmalib.providers.sqlite.SQLiteHost import *
-except:
-    print traceback.format_exc()
-    have_sqlite = False
 
 try:
     import gtk
@@ -58,6 +35,31 @@ try:
     import gtk.glade
 except:
     print "no gtk. you will not be able to start emma.", sys.exc_value
+
+if __name__ != "__main__":
+    from emmalib import __file__ as emmalib_file
+    from emmalib.providers.mysql.MySqlHost import *
+    from emmalib.providers.mysql.MySqlQueryTab import *
+    from emmalib.ConnectionWindow import ConnectionWindow
+    from emmalib.OutputHandler import OutputHandler
+    from emmalib.Config import Config
+    from emmalib.ConnectionTreeView import *
+    import emmalib.dialogs
+else:
+    emmalib_file = __file__
+    import providers
+    from ConnectionWindow import ConnectionWindow
+    from OutputHandler import OutputHandler
+    from Config import Config
+    from ConnectionTreeView import *
+    import dialogs
+
+try:
+    import sqlite3
+    have_sqlite = True
+    from emmalib.providers.sqlite.SQLiteHost import *
+except:
+    have_sqlite = False
 
 version = "0.7"
 new_instance = None
@@ -107,6 +109,8 @@ class Emma:
         self.xml.signal_autoconnect(self)
         
         self.load_icons()
+
+        self.current_query = None
         
         # setup sql_log
         self.sql_log_model = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING)
@@ -129,28 +133,7 @@ class Emma:
         self.blob_tv.set_sensitive(False)
         self.blob_buffer = self.blob_tv.get_buffer()
         self.blob_view_visible = False
-        
-        # setup connections
-        self.connections_model = gtk.TreeStore(gobject.TYPE_PYOBJECT)
-        self.connections_tv = self.xml.get_widget("connections_tv")
-        self.connections_tv.set_model(self.connections_model)
-        col = gtk.TreeViewColumn("Hosts")
-        
-        pixbuf_renderer = gtk.CellRendererPixbuf()
-        col.pack_start(pixbuf_renderer, False)
-        #col.add_attribute(pixbuf_renderer, "pixbuf", 1)
-        col.set_cell_data_func(pixbuf_renderer, self.render_connections_pixbuf)
-        
-        text_renderer = gtk.CellRendererText()
-        col.pack_end(text_renderer)
-        #col.add_attribute(text_renderer, "text", 2)
-        col.set_cell_data_func(text_renderer, self.render_connections_text)
-        
-        self.connections_tv.append_column(col)
-        self.connections_tv.connect("row-expanded", self.on_row_expanded)
-        self.connections_tv.connect("row-collapsed", self.on_row_collapsed)
-        #connections_tv.insert_column_with_data_func(-1, "MySQL-Hosts", col)
-        
+
         # processlist
         self.processlist_tv = self.xml.get_widget("processlist_treeview")
         self.processlist_model = None
@@ -182,42 +165,49 @@ class Emma:
         self.current_processlist_host = None
         self.processlist_timer_running = False
         
-        self.config = Config(self)
-        
-        if not hasattr(self, "state"):
-            self.hosts = {}
-            self.config.load()
-            self.queries = []
-            self.add_query_tab(MySqlQueryTab(self.xml, self.query_notebook))
-        else:
-            self.hosts = self.state["hosts"]
-            self.config.load(True)
-            self.queries = []
-            first = True
-            for q in self.state["queries"]:
-                if first:
-                    xml = self.xml
-                else:
-                    xml = gtk.glade.XML(self.glade_file, "first_query")
-                    
-                new_page = xml.get_widget("first_query")
-                q.__init__(xml, self.query_notebook)
-                self.add_query_tab(q)
-                
-                if first:
-                    first = False
-                    self.query_notebook.set_tab_label_text(new_page, q.name)
-                else:
-                    label = gtk.Label(q.name)
-                    label.show()
-                    self.query_notebook.append_page(new_page, label)
+        self.hosts = {}
+        self.queries = []
 
-        for h in self.hosts:
-            h.__init__(self.add_sql_log, self.add_msg_log)
-            _iter = self.connections_model.append(None, [h])
-            h.set_update_ui(self.redraw_host, _iter)  # call before init!
-            self.redraw_host(h, _iter)
-            self.current_host = h
+        self.config = Config(self)
+        self.config.have_sqlite = have_sqlite
+        self.config.load()
+
+        self.add_query_tab(MySqlQueryTab(self.xml, self.query_notebook))
+
+        # if not hasattr(self, "state"):
+        #     self.hosts = {}
+        #     self.config.load()
+        #     self.queries = []
+        #     self.add_query_tab(MySqlQueryTab(self.xml, self.query_notebook))
+        # else:
+        #     self.hosts = self.state["hosts"]
+        #     self.config.load(True)
+        #     self.queries = []
+        #     first = True
+        #     for q in self.state["queries"]:
+        #         if first:
+        #             xml = self.xml
+        #         else:
+        #             xml = gtk.glade.XML(self.glade_file, "first_query")
+        #
+        #         new_page = xml.get_widget("first_query")
+        #         q.__init__(xml, self.query_notebook)
+        #         self.add_query_tab(q)
+        #
+        #         if first:
+        #             first = False
+        #             self.query_notebook.set_tab_label_text(new_page, q.name)
+        #         else:
+        #             label = gtk.Label(q.name)
+        #             label.show()
+        #             self.query_notebook.append_page(new_page, label)
+
+        connection_tv = self.xml.get_widget("connections_tv")
+        connection_tv_container = self.xml.get_widget("connections_tv_container")
+        connection_tv_container.remove(connection_tv)
+        self.connection_tv = ConnectionsTreeView(self)
+        connection_tv_container.add(self.connection_tv)
+        self.connection_tv.show()
 
         self.first_template = None
         keys = self.config.config.keys()
@@ -230,42 +220,42 @@ class Emma:
                 continue
             toolbar.remove(child)
 
-        template_count = 0
-        for name in keys:
-            value = self.config.config[name]
-            if not self.config.unpickled:
-                prefix = "connection_"
-                if name.startswith(prefix) and value == "::sqlite::":
-                    filename = name[len(prefix):]
-                    self.add_sqlite(filename)
-                    continue
-                if name.startswith(prefix):
-                    v = value.split(",")
-                    port = ""
-                    p = v[0].rsplit(":", 1)
-                    if len(p) == 2:
-                        port = p[1]
-                        v[0] = p[0]
-                    self.add_mysql_host(name[len(prefix):], v[0], port, v[1], v[2], v[3])
-                    pass
-
-            prefix = "template"
-            if name.startswith(prefix):
-                value = value.replace("`$primary_key$`", "$primary_key$")
-                value = value.replace("`$table$`", "$table$")
-                value = value.replace("`$field_conditions$`", "$field_conditions$")
-                self.config.config[name] = value
-                if not self.first_template:
-                    self.first_template = value
-                p = name.split("_", 1)
-                template_count += 1
-
-                button = gtk.ToolButton(gtk.STOCK_EXECUTE)
-                button.set_name("template_%d" % template_count)
-                button.set_tooltip(self.tooltips, "%s\n%s" % (p[1], value))
-                button.connect("clicked", self.on_template, value)
-                toolbar.insert(button, -1)
-                button.show()
+        # template_count = 0
+        # for name in keys:
+        #     value = self.config.config[name]
+        #     if not self.config.unpickled:
+        #         prefix = "connection_"
+        #         if name.startswith(prefix) and value == "::sqlite::":
+        #             filename = name[len(prefix):]
+        #             self.add_sqlite(filename)
+        #             continue
+        #         if name.startswith(prefix):
+        #             v = value.split(",")
+        #             port = ""
+        #             p = v[0].rsplit(":", 1)
+        #             if len(p) == 2:
+        #                 port = p[1]
+        #                 v[0] = p[0]
+        #             self.add_mysql_host(name[len(prefix):], v[0], port, v[1], v[2], v[3])
+        #             pass
+        #
+        #     prefix = "template"
+        #     if name.startswith(prefix):
+        #         value = value.replace("`$primary_key$`", "$primary_key$")
+        #         value = value.replace("`$table$`", "$table$")
+        #         value = value.replace("`$field_conditions$`", "$field_conditions$")
+        #         self.config.config[name] = value
+        #         if not self.first_template:
+        #             self.first_template = value
+        #         p = name.split("_", 1)
+        #         template_count += 1
+        #
+        #         button = gtk.ToolButton(gtk.STOCK_EXECUTE)
+        #         button.set_name("template_%d" % template_count)
+        #         button.set_tooltip(self.tooltips, "%s\n%s" % (p[1], value))
+        #         button.connect("clicked", self.on_template, value)
+        #         toolbar.insert(button, -1)
+        #         button.show()
 
         # menu = self.xml.get_widget("query_encoding_menu")
         # for child in menu.get_children():
@@ -312,13 +302,13 @@ class Emma:
         self.on_closequery_button_clicked(None)
         
     def load_plugins(self):
-        def _load(plugin_name):
-            print "loading plugin %r" % plugin_name
-            if plugin_name in self.plugins:
-                plugin = reload(self.plugins[plugin_name])
+        def _load(_plugin_name):
+            print "loading plugin %r" % _plugin_name
+            if _plugin_name in self.plugins:
+                plugin = reload(self.plugins[_plugin_name])
             else:
-                plugin = __import__(plugin_name)
-            self.plugins[plugin_name] = plugin
+                plugin = __import__(_plugin_name)
+            self.plugins[_plugin_name] = plugin
             ret = self.init_plugin(plugin)
         for path in self.plugin_pathes:
             for plugin_name in os.listdir(path):
@@ -357,18 +347,18 @@ class Emma:
         
     def __getstate__(self):
         hosts = []
-        iter = self.connections_model.get_iter_root()
-        while iter:
-            host = self.connections_model.get_value(iter, 0)
+        _iter = self.connection_tv.connections_model.get_iter_root()
+        while _iter:
+            host = self.connection_tv.connections_model.get_value(_iter, 0)
             hosts.append(host)
-            iter = self.connections_model.iter_next(iter)
+            _iter = self.connection_tv.connections_model.iter_next(_iter)
         
         sql_logs = []
-        iter = self.sql_log_model.get_iter_root()
-        while iter:
-            log = self.sql_log_model.get(iter, 0, 1, 2)
+        _iter = self.sql_log_model.get_iter_root()
+        while _iter:
+            log = self.sql_log_model.get(_iter, 0, 1, 2)
             sql_logs.append(log)
-            iter = self.sql_log_model.iter_next(iter)
+            _iter = self.sql_log_model.iter_next(_iter)
         
         return {"hosts": hosts, "queries": self.queries, "sql_logs": sql_logs}
     
@@ -393,26 +383,26 @@ class Emma:
         del self.queries[i]
 
     def on_connection_ping(self):
-        iter = self.connections_model.get_iter_root()
-        while iter:
-            host = self.connections_model.get_value(iter, 0)
+        _iter = self.connection_tv.connections_model.get_iter_root()
+        while _iter:
+            host = self.connection_tv.connections_model.get_value(_iter, 0)
             if host.connected:
                 if not host.ping():
                     print "...error! reconnect seems to fail!"
-            iter = self.connections_model.iter_next(iter)
+            _iter = self.connection_tv.connections_model.iter_next(_iter)
         return True
         
-    def search_query_end(self, text, start):
+    def search_query_end(self, text, _start):
         try:    r = self.query_end_re
         except: r = self.query_end_re = re.compile(r'("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(;)')
         while 1:
-            result = re.search(r, text[start:])
+            result = re.search(r, text[_start:])
             if not result: 
                 return None
                 
-            start += result.end()
+            _start += result.end()
             if result.group(4):
-                return start
+                return _start
                 
     def is_query_editable(self, query, result = None):
         table, where, field, value, row_iter = self.get_unique_where(query)
@@ -421,26 +411,31 @@ class Emma:
         return True
         
     def is_query_appendable(self, query):
-        if not self.current_host: return False
-        try:    r = self.query_select_re
-        except: r = self.query_select_re = re.compile(r'(?i)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(union)|(select[ \r\n\t]+(.*)[ \r\n\t]+from[ \r\n\t]+(.*))')
-        start = 0
+        if not self.current_host:
+            return False
+        try:
+            r = self.query_select_re
+        except:
+            r = self.query_select_re = re.compile(r'(?i)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(union)|(select[ \r\n\t]+(.*)[ \r\n\t]+from[ \r\n\t]+(.*))')
+        _start = 0
+        result = False
         while 1:
-            result = re.search(r, query[start:])
+            result = re.search(r, query[_start:])
             if not result: 
                 return False
-            start += result.end()
+            _start += result.end()
             if result.group(4):
-                return False # union
+                return False  # union
             if result.group(5) and result.group(6) and result.group(7):
-                break # found select
+                break  # found select
         return result
-    
-        
+
     def get_order_from_query(self, query, return_before_and_after=False):
         current_order = []
-        try:    r = self.query_order_re
-        except: r = self.query_order_re = re.compile(re_src_query_order)
+        try:
+            r = self.query_order_re
+        except:
+            r = self.query_order_re = re.compile(re_src_query_order)
         # get current order by clause
         match = re.search(r, query)
         if not match: 
@@ -449,20 +444,25 @@ class Emma:
             return current_order
         before, order, after = match.groups()
         order.lower()
-        start = 0
+        _start = 0
+        ident = None
         while 1:
             item = []
             while 1:
-                ident, end = self.read_expression(order[start:])
-                if not ident: break
-                if ident == ",": break
+                ident, end = self.read_expression(order[_start:])
+                if not ident:
+                    break
+                if ident == ",":
+                    break
                 if ident[0] == "`":
                     ident = ident[1:-1]
                 item.append(ident)
-                start += end
+                _start += end
             l = len(item)
-            if l == 0: break
-            elif l == 1: item.append(True)
+            if l == 0:
+                break
+            elif l == 1:
+                item.append(True)
             elif l == 2: 
                 if item[1].lower() == "asc": 
                     item[1] = True
@@ -471,9 +471,11 @@ class Emma:
             else:
                 print "unknown order item:", item, "ignoring..."
                 item = None
-            if item: current_order.append(tuple(item))
-            if not ident: break
-            start += 1 # comma
+            if item:
+                current_order.append(tuple(item))
+            if not ident:
+                break
+            _start += 1  # comma
         return current_order
         
     def on_remember_order_clicked(self, button):
@@ -504,22 +506,26 @@ class Emma:
     def get_field_list(self, s):
         # todo USE IT!
         fields = []
-        start = 0
+        _start = 0
+        ident = None
         while 1:
             item = []
             while 1:
-                ident, end = self.read_expression(s[start:])
-                if not ident: break
-                if ident == ",": break
+                ident, end = self.read_expression(s[_start:])
+                if not ident:
+                    break
+                if ident == ",":
+                    break
                 if ident[0] == "`":
                     ident = ident[1:-1]
                 item.append(ident)
-                start += end
+                _start += end
             if len(item) == 1:
                 fields.append(item[0])
             else:
                 fields.append(item)
-            if not ident: break
+            if not ident:
+                break
         print "found fields:", fields
         return fields
         
@@ -527,7 +533,7 @@ class Emma:
         # call is_query_appendable before!
         result = self.is_query_appendable(query)
         if not result:
-            return (None, None, None, None, None)
+            return None, None, None, None, None
 
         field_list = result.group(6)
         table_list = result.group(7)
@@ -540,7 +546,7 @@ class Emma:
         
         if len(tables) > 1:
             print "sorry, i can't edit queries with more than one than one source-table:", tables
-            return (None, None, None, None, None)
+            return None, None, None, None, None
     
         # get table_name
         table = tables[0].strip(" \r\n\t").strip("`'\"")
@@ -576,7 +582,7 @@ class Emma:
                 tries += 1
                 if tries > 1:
                     print "query not editable, because table %r is not found in db %r" % (table, self.current_host.current_db)
-                    return (None, None, None, None, None)
+                    return None, None, None, None, None
                 new_tables = self.current_host.current_db.refresh()
                 continue
         # does this field really exist in this table?
@@ -667,20 +673,22 @@ class Emma:
             return table, where, field, value, row_iter, fields
         return table, where, field, value, row_iter
         
-    def on_row_expanded(self, tv, iter, path):
-        o = tv.get_model().get_value(iter, 0)
+    def on_row_expanded(self, tv, _iter, path):
+        o = tv.get_model().get_value(_iter, 0)
         if len(path) > 3: return
         o.expanded = True
         
-    def on_row_collapsed(self, tv, iter, path):
-        o = tv.get_model().get_value(iter, 0)
+    def on_row_collapsed(self, tv, _iter, path):
+        o = tv.get_model().get_value(_iter, 0)
         if len(path) > 3: return
         o.expanded = False
         
     def on_remove_order_clicked(self, button):
         query = self.current_query.last_source
-        try:    r = self.query_order_re
-        except: r = self.query_order_re = re.compile(re_src_query_order)
+        try:
+            r = self.query_order_re
+        except:
+            r = self.query_order_re = re.compile(re_src_query_order)
         match = re.search(r, query)
         if not match: 
             return
@@ -857,7 +865,7 @@ class Emma:
         else:
             table, where, field, value, row_iter = self.get_unique_where(q.last_source, path)
             if not table or not where:
-                show_message("delete record", "could not delete this record!?")
+                dialogs.show_message("delete record", "could not delete this record!?")
                 return
             if self.current_host.__class__.__name__ == "sqlite_host":
                 limit = ""
@@ -883,13 +891,13 @@ class Emma:
             
         path, column = q.treeview.get_cursor()
         if path:
-            iter = q.model.insert_after(q.model.get_iter(path))
+            _iter = q.model.insert_after(q.model.get_iter(path))
         else:
-            iter = q.model.append()
+            _iter = q.model.append()
         q.treeview.grab_focus()
-        q.treeview.set_cursor(q.model.get_path(iter))
+        q.treeview.set_cursor(q.model.get_path(_iter))
         q.filled_fields = dict()
-        q.append_iter = iter
+        q.append_iter = _iter
         q.apply_record.set_sensitive(True)
         
     def on_reload_self_activate(self, item):
@@ -984,10 +992,10 @@ class Emma:
             return
         
         if self.blob_view_visible and column:
-            iter = q.model.get_iter(path)
+            _iter = q.model.get_iter(path)
             col = q.treeview.get_columns().index(column)
             self.blob_encoding = q.encoding
-            value = q.model.get_value(iter, col)
+            value = q.model.get_value(_iter, col)
             if value is None:
                 # todo signal null value
                 self.blob_buffer.set_text("")
@@ -1033,7 +1041,7 @@ class Emma:
     def get_widget(self, name):
         return self.assign_once("widget_%s" % name, self.xml.get_widget, name)
 
-    def read_query(self, query, start=0):
+    def read_query(self, query, _start=0):
         try:    
             r = self.find_query_re
             rw = self.white_find_query_re
@@ -1052,28 +1060,28 @@ class Emma:
             """, re.VERBOSE)
             rw = self.white_find_query_re = re.compile("[ \r\n\t]+")
     
-        m = rw.match(query, start)
+        m = rw.match(query, _start)
         if m:
-            start = m.end(0)
+            _start = m.end(0)
 
-        match = r.match(query, start)
+        match = r.match(query, _start)
         if not match:
             return None, len(query)
         return (match.start(0), match.end(0))
         
-    def read_one_query(self, fp, start=None, count_lines=0, update_function=None, only_use_queries=False, start_line=1):
+    def read_one_query(self, fp, _start=None, count_lines=0, update_function=None, only_use_queries=False, start_line=1):
         current_query = []
         self.read_one_query_started = True
         while self.read_one_query_started:
             gc.collect()
-            if start is None:
+            if _start is None:
                 while 1:
                     line = fp.readline()
                     #print "line:", [line]
                     if line == "":
                         if len(current_query) > 0:
-                            return (' '.join(current_query), start, count_lines)
-                        return (None, start, count_lines)
+                            return (' '.join(current_query), _start, count_lines)
+                        return (None, _start, count_lines)
                     if count_lines is not None:
                         count_lines += 1
                         
@@ -1091,19 +1099,19 @@ class Emma:
                         break
                     #print "skipping line", [line]
                 self.last_query_line = line
-                start = 0
+                _start = 0
             else:
                 lb = fp.tell() - len(self.last_query_line)
                 line = self.last_query_line
-            start, end = self.read_query(line, start)
-            next = line[end:end+1]
+            _start, end = self.read_query(line, _start)
+            _next = line[end:end+1]
             #print "next: '%s'" % next
-            if start is not None:
+            if _start is not None:
                 #print "append query", [line[start:end]]
-                current_query.append(line[start:end])
-            if next == ";":
+                current_query.append(line[_start:end])
+            if _next == ";":
                 return (''.join(current_query), end + 1, count_lines)
-            start = None
+            _start = None
         return (None, None, None)
         
     def on_start_execute_from_disk_clicked(self, button):
@@ -1175,7 +1183,7 @@ class Emma:
         
         
         last = 0
-        start = time.time()
+        _start = time.time()
         
         def update_ui(force=False, offset=0):
             global last_update
@@ -1185,7 +1193,7 @@ class Emma:
             last_update = now
             pos = offset
             f = float(pos) / float(size)
-            expired = now - start
+            expired = now - _start
             if not self.using_compression and expired > 10:
                 sr = float(expired) / float(pos) * float(size - pos)
                 remaining = " (%.0fs remaining)" % sr
@@ -1203,10 +1211,10 @@ class Emma:
             self.process_events()
         
         new_line = 1
-        current_line = start
+        current_line = _start
         query = ""
         p.show()
-        while time.time() - start < 0.10:
+        while time.time() - _start < 0.10:
             update_ui(True)
         self.query_from_disk = True
         line_offset = 0
@@ -1257,7 +1265,9 @@ class Emma:
         self.query_from_disk = False
         
     def on_execute_query_clicked(self, button=None, query=None):
-        if not self.current_query: return
+        if not self.current_query:
+            self.add_msg_log('no current_query')
+            return
         q = self.current_query
         if not query:
             b = q.textview.get_buffer()
@@ -1313,16 +1323,16 @@ the author knows no way to deselect this database. do you want to continue?""" %
             q.treeview.remove_column(col)
         if q.model: q.model.clear()
         
-        start = 0
-        while start < len(text):
-            query_start = start
+        _start = 0
+        while _start < len(text):
+            query_start = _start
             # search query end
-            query_start, end = self.read_query(text, start)
+            query_start, end = self.read_query(text, _start)
             if query_start is None:
                 break
             thisquery = text[query_start:end]
             print "about to execute query %r" % thisquery
-            start = end + 1
+            _start = end + 1
                 
             thisquery.strip(" \r\n\t;")
             if not thisquery: 
@@ -1403,7 +1413,8 @@ the author knows no way to deselect this database. do you want to continue?""" %
             sortable = True # todo
             current_order = self.get_order_from_query(thisquery)
             sens = False
-            if len(current_order) > 0: sens = True
+            if len(current_order) > 0:
+                sens = True
             q.remove_order.set_sensitive(sens and sortable)
             
             sort_fields = dict()
@@ -1415,7 +1426,8 @@ the author knows no way to deselect this database. do you want to continue?""" %
             start_download = time.time()
             result = host.handle.store_result()
             download_time = time.time() - start_download
-            if download_time < 0: download_time = 0
+            if download_time < 0:
+                download_time = 0
     
             q.label.set_text("displaying resultset...")
             q.label.window.process_updates(False)
@@ -1471,20 +1483,22 @@ the author knows no way to deselect this database. do you want to continue?""" %
             start_display = time.time()
             last_display = start_display
             for row in result.fetch_row(0):
-                def toString(f):
+                def to_string(f):
                     if type(f) == str:
                         f = f.decode(q.encoding, "replace")
-                    elif f == None:
+                    elif f is None:
                         pass
                     else:
                         f = str(f)
                     return f
-                q.model.append(map(toString, row))
+                q.model.append(map(to_string, row))
                 cnt += 1
-                if not cnt % 100 == 0: continue
+                if not cnt % 100 == 0:
+                    continue
                     
                 now = time.time()
-                if (now - last_display) < 0.2: continue
+                if (now - last_display) < 0.2:
+                    continue
                     
                 q.label.set_text("displayed %d rows..." % cnt)
                 q.label.window.process_updates(False)
@@ -1538,7 +1552,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
             if not dialogs.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
                 return
         q = self.current_query
-        iter = q.model.get_iter_first()
+        _iter = q.model.get_iter_first()
         indices = range(q.model.get_n_columns())
         field_delim = self.config.get("save_result_as_csv_delim")
         line_delim = self.config.get("save_result_as_csv_line_delim")
@@ -1547,15 +1561,15 @@ the author knows no way to deselect this database. do you want to continue?""" %
             for search, replace in {"\\n": "\n", "\\r": "\r", "\\t": "\t", "\\0": "\0"}.iteritems():
                 field_delim = field_delim.replace(search, replace)
                 line_delim = line_delim.replace(search, replace)
-            while iter:
-                row = q.model.get(iter, *indices)
+            while _iter:
+                row = q.model.get(_iter, *indices)
                 for field in row:
                     value = field
                     if value is None: value = ""
                     fp.write(value.replace(field_delim, "\\" + field_delim))
                     fp.write(field_delim)
                 fp.write(line_delim)
-                iter = q.model.iter_next(iter)
+                _iter = q.model.iter_next(_iter)
             fp.close()
         except:
             dialogs.show_message("save results", "error writing query to file %s: %s" % (filename, sys.exc_value))
@@ -1581,7 +1595,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
             if not dialogs.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
                 return
         q = self.current_query
-        iter = q.model.get_iter_first()
+        _iter = q.model.get_iter_first()
         indices = range(q.model.get_n_columns())
         
         # try to guess target table name from query
@@ -1607,8 +1621,8 @@ the author knows no way to deselect this database. do you want to continue?""" %
             fp = file(filename, "wb")
             fp.write("insert into %s values" % table_name)
             row_delim = "\n\t"
-            while iter:
-                row = q.model.get(iter, *indices)
+            while _iter:
+                row = q.model.get(_iter, *indices)
                 if not output_row:
                     output_row = range(len(row))
                 for i, field in enumerate(row):
@@ -1619,7 +1633,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
                     output_row[i] = field
                 fp.write("%s(%s)" % (row_delim, ",".join(output_row)))
                 row_delim = ",\n\t"
-                iter = q.model.iter_next(iter)
+                _iter = q.model.iter_next(_iter)
             fp.write("\n;\n")
             fp.close()
         except:
@@ -1685,8 +1699,8 @@ the author knows no way to deselect this database. do you want to continue?""" %
             return
         
         size = sbuf.st_size
-        max = int(self.config.get("ask_execute_query_from_disk_min_size"))
-        if size > max:
+        _max = int(self.config.get("ask_execute_query_from_disk_min_size"))
+        if size > _max:
             if dialogs.confirm("load query", """
 <b>%s</b> is very big (<b>%.2fMB</b>)!
 opening it in the normal query-view may need a very long time!
@@ -1758,7 +1772,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def __setstate__(self, state):
         self.state = state
         
-    def on_local_search_button_clicked(self, button, again = False):
+    def on_local_search_button_clicked(self, button, again=False):
         if not self.current_query.local_search.get_property("sensitive"):
             return
             
@@ -1774,25 +1788,25 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             regex = "(?i)" + regex
         tm = self.current_query.model
         fields = tm.get_n_columns()
-        start = tm.get_iter_root()
+        _start = tm.get_iter_root()
         start_column_index = -1
         start_path = None
         if not self.local_search_start_at_first_row.get_active():
             start_path, start_column = query_view.get_cursor()
             if start_path:
-                start = tm.get_iter(start_path)
+                _start = tm.get_iter(start_path)
                 for k in range(fields):
                     if query_view.get_column(k) == start_column:
                         start_column_index = k
                         break
             else:
                 start_path = None
-        while start:
+        while _start:
             for k in range(fields):
-                v = tm.get_value(start, k)
+                v = tm.get_value(_start, k)
                 if v is None: continue
                 if re.search(regex, v):
-                    path = tm.get_path(start)
+                    path = tm.get_path(_start)
                     if start_path and start_path == path and k <= start_column_index:
                         continue # skip!
                     column = query_view.get_column(k)
@@ -1800,7 +1814,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                     query_view.scroll_to_cell(path, column)
                     query_view.grab_focus()
                     return
-            start = tm.iter_next(start)
+            _start = tm.iter_next(_start)
         dialogs.show_message("local regex search", "sorry, no match found!\ntry to search from the beginning or execute a less restrictive query...")
         
     def on_query_font_clicked(self, button):
@@ -1855,7 +1869,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                     f, traceback.format_exc())
     
     def on_closequery_button_clicked(self, button):
-        if len(self.queries) == 1: return
+        if len(self.queries) == 1:
+            return
         self.current_query.destroy()
         self.del_query_tab(self.current_query)
         self.query_notebook.remove_page(self.query_notebook.get_current_page())
@@ -1864,9 +1879,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def on_rename_query_tab_clicked(self, button):
         label = self.current_query.get_label()
         new_name = dialogs.input_dialog("Rename tab", "Please enter the new name of this tab:",
-            label.get_text(),
-            self.mainwindow
-        )
+                                        label.get_text(),
+                                        self.mainwindow)
         if new_name is None:
             return
         if new_name == "":
@@ -1891,7 +1905,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             else:
                 self.fc_combobox[i].set_active(-1)
                 self.fc_op_combobox[i].set_active(-1)
-            if i: self.fc_logic_combobox[i - 1].set_active(0)
+            if i:
+                self.fc_logic_combobox[i - 1].set_active(0)
     
     def on_quit_activate(self, item):
         gtk.main_quit()
@@ -1918,9 +1933,10 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
     def on_kill_process(self, button):
         path, column = self.processlist_tv.get_cursor()
-        if not path or not self.current_host: return
-        iter = self.processlist_model.get_iter(path)
-        process_id = self.processlist_model.get_value(iter, 0)
+        if not path or not self.current_host:
+            return
+        _iter = self.processlist_model.get_iter(path)
+        process_id = self.processlist_model.get_value(_iter, 0)
         if not self.current_host.query("kill %s" % process_id):
             dialogs.show_message("sorry", "there was an error while trying to kill process_id %s!" % process_id)
     
@@ -1938,8 +1954,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             elif menuitem.name == "set_as_query_text":
                 self.current_query.textview.get_buffer().set_text(row[2])
             if menuitem.name == "delete_sql_log":
-                iter = self.sql_log_model.get_iter(path)
-                self.sql_log_model.remove(iter)
+                _iter = self.sql_log_model.get_iter(path)
+                self.sql_log_model.remove(_iter)
             return True
         tv, path, tvc = args
         query = tv.get_model()[path][2]
@@ -1947,67 +1963,68 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         return True
         
     def on_sql_log_button_press(self, tv, event):
-        if not event.button == 3: return False
-        res = tv.get_path_at_pos(int(event.x), int(event.y))
-        if not res: return False
-        self.xml.get_widget("sqllog_popup").popup(None, None, None, event.button, event.time)
-        return True
-        
-    def on_connections_button_release(self, tv, event):
         if not event.button == 3:
             return False
         res = tv.get_path_at_pos(int(event.x), int(event.y))
-        menu = None
-        if not res or len(res[0]) == 1: 
-            self.xml.get_widget("modify_connection").set_sensitive(not not res)
-            self.xml.get_widget("delete_connection").set_sensitive(not not res)
-            connected_host = False
-            if res:
-                model = self.connections_model
-                _iter = model.get_iter(res[0])
-                host = model.get_value(_iter, 0)
-                connected_host = host.connected
-            self.xml.get_widget("new_database").set_sensitive(connected_host)
-            self.xml.get_widget("refresh_host").set_sensitive(connected_host)
-            menu = self.xml.get_widget("connection_menu")
-            sqllite = self.xml.get_widget("new_sqlite_connection")
-            if have_sqlite:
-                sqllite.show()
-            else:
-                sqllite.hide()
-        elif len(res[0]) == 2:
-            menu = self.xml.get_widget("database_popup")
-        elif len(res[0]) == 3:
-            menu = self.xml.get_widget("table_popup")
-
-        if menu:
-            menu.popup(None, None, None, event.button, event.time)
+        if not res:
+            return False
+        self.xml.get_widget("sqllog_popup").popup(None, None, None, event.button, event.time)
         return True
         
-    def on_connections_tv_cursor_changed(self, tv):
-        path, column = tv.get_cursor()
-        nb = self.xml.get_widget("main_notebook")
-        if path is None:
-            print "get_cursor() returned none. don't know which datebase is selected."
-            return
+    # def on_connections_button_release(self, tv, event):
+    #     if not event.button == 3:
+    #         return False
+    #     res = tv.get_path_at_pos(int(event.x), int(event.y))
+    #     menu = None
+    #     if not res or len(res[0]) == 1:
+    #         self.xml.get_widget("modify_connection").set_sensitive(not not res)
+    #         self.xml.get_widget("delete_connection").set_sensitive(not not res)
+    #         connected_host = False
+    #         if res:
+    #             model = self.connection_tv.connections_model
+    #             _iter = model.get_iter(res[0])
+    #             host = model.get_value(_iter, 0)
+    #             connected_host = host.connected
+    #         self.xml.get_widget("new_database").set_sensitive(connected_host)
+    #         self.xml.get_widget("refresh_host").set_sensitive(connected_host)
+    #         menu = self.xml.get_widget("connection_menu")
+    #         sqllite = self.xml.get_widget("new_sqlite_connection")
+    #         if have_sqlite:
+    #             sqllite.show()
+    #         else:
+    #             sqllite.hide()
+    #     elif len(res[0]) == 2:
+    #         menu = self.xml.get_widget("database_popup")
+    #     elif len(res[0]) == 3:
+    #         menu = self.xml.get_widget("table_popup")
+    #
+    #     if menu:
+    #         menu.popup(None, None, None, event.button, event.time)
+    #     return True
+        
+    # def on_connections_tv_cursor_changed(self, tv):
+    #     path, column = tv.get_cursor()
+    #     nb = self.xml.get_widget("main_notebook")
+    #     if path is None:
+    #         print "get_cursor() returned none. don't know which datebase is selected."
+    #         return
+    #
+    #     if len(path) == 3 and nb.get_current_page() == 3:
+    #         print "update table view..."
+    #         self.update_table_view(path)
+    #     q = self.current_query
+    #     if not q:
+    #         return
+    #     q.last_path = path
+    #     if len(path) == 1: # host
+    #         i = self.connection_tv.connections_model.get_iter(path)
+    #         o = self.connection_tv.connections_model[i][0]
+    #         q.set_current_host(o)
+    #     elif len(path) >= 2: # database or below
+    #         i = self.connection_tv.connections_model.get_iter(path[0:2])
+    #         o = self.connection_tv.connections_model[i][0]
+    #         q.set_current_db(o)
 
-        if len(path) == 3 and nb.get_current_page() == 3:
-            print "update table view..."
-            self.update_table_view(path)
-        q = self.current_query
-        if not q:
-            return
-        q.last_path = path
-        if len(path) == 1: # host
-            i = self.connections_model.get_iter(path)
-            o = self.connections_model[i][0]
-            q.set_current_host(o)
-        elif len(path) >= 2: # database or below
-            i = self.connections_model.get_iter(path[0:2])
-            o = self.connections_model[i][0]
-            q.set_current_db(o)
-            
-    
     def on_nb_change_page(self, np, pointer, page):
         if page == 2:
             self.redraw_tables()
@@ -2017,12 +2034,13 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if len(path) == 3 and page == 3:
             self.update_table_view(path)
     
-    def update_table_view(self, path = None):
+    def update_table_view(self, path=None):
         if not path:
             path, column = self.connections_tv.get_cursor()
-            if len(path) != 3: return
-        iter = self.connections_model.get_iter(path)
-        th = self.connections_model.get_value(iter, 0)
+            if len(path) != 3:
+                return
+        _iter = self.connection_tv.connections_model.get_iter(path)
+        th = self.connection_tv.connections_model.get_value(_iter, 0)
         
         table = self.xml.get_widget("table_properties")
         prop_count = len(th.props)
@@ -2040,10 +2058,11 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 l.set_alignment(0, 0.5)
                 e = gtk.Entry()
                 e.set_editable(False)
-                if p is None: p = ""
+                if p is None:
+                    p = ""
                 e.set_text(p)
                 table.attach(l, 0, 1, r, r + 1, gtk.FILL, 0)
-                table.attach(e, 1, 2, r, r + 1, gtk.EXPAND|gtk.FILL|gtk.SHRINK, 0)
+                table.attach(e, 1, 2, r, r + 1, gtk.EXPAND | gtk.FILL | gtk.SHRINK, 0)
                 l.show()
                 e.show()
                 self.table_property_labels.append(l)
@@ -2055,7 +2074,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 l = self.table_property_labels[r]
                 e = self.table_property_entries[r]
                 l.set_label(h)
-                if p is None: p = ""
+                if p is None:
+                    p = ""
                 e.set_text(p)
                 r += 1
                 
@@ -2088,61 +2108,61 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         self.tables_count = 0
         self.redraw_tables()
         
-    def on_connections_row_activated(self, tv, path, col):
-        depth = len(path)
-        iter = self.connections_model.get_iter(path)
-        o = self.connections_model.get_value(iter, 0)
+    # def on_connections_row_activated(self, tv, path, col):
+    #     depth = len(path)
+    #     iter = self.connection_tv.connections_model.get_iter(path)
+    #     o = self.connection_tv.connections_model.get_value(iter, 0)
+    #
+    #     nb = self.xml.get_widget("main_notebook")
+    #     if depth == 1: # host
+    #         self.current_host = host = o
+    #         if host.connected:
+    #             self.current_host = None
+    #             host.close()
+    #         else:
+    #             host.connect()
+    #             if not host.connected: return
+    #             self.refresh_processlist()
+    #             nb.set_current_page(1)
+    #         self.redraw_host(host, iter, True)
+    #         if self.current_query:
+    #             self.current_query.set_current_host(self.current_host)
+    #
+    #     elif depth == 2: # database
+    #         self.current_host = o.host
+    #         new_tables = o.refresh()
+    #         self.redraw_db(o, iter, new_tables, True)
+    #         self.redraw_tables()
+    #         o.host.select_database(o)
+    #         if self.current_query:
+    #             self.current_query.set_current_db(o)
+    #         # self.connections_tv.expand_row(path, False)
+    #         # todo update_query_db()
+    #
+    #     elif depth == 3: # table
+    #         self.current_host = host = o.db.host
+    #         host.select_database(o.db)
+    #         table = o
+    #         if self.current_query:
+    #             self.current_query.set_current_db(table.db)
+    #         if not table.fields or (time.time() - table.last_field_read) > self.config.get("autorefresh_interval_table"):
+    #             table.refresh()
+    #             self.redraw_table(o, iter)
+    #
+    #         if self.first_template:
+    #             nb.set_current_page(4)
+    #             self.on_template(None, self.first_template)
+    #         elif nb.get_current_page() < 3:
+    #             nb.set_current_page(3)
+    #
+    #         #self.connections_tv.expand_row(path, False)
+    #         # todo update_query_db()
+    #         # todo if(!doubleclick) update_table(e, i)
+    #     else:
+    #         print "No Handler for tree-depth", depth
+    #     return
         
-        nb = self.xml.get_widget("main_notebook")
-        if depth == 1: # host
-            self.current_host = host = o
-            if host.connected:
-                self.current_host = None
-                host.close()
-            else:
-                host.connect()
-                if not host.connected: return
-                self.refresh_processlist()
-                nb.set_current_page(1)
-            self.redraw_host(host, iter, True)
-            if self.current_query:
-                self.current_query.set_current_host(self.current_host)
-            
-        elif depth == 2: # database
-            self.current_host = o.host
-            new_tables = o.refresh()
-            self.redraw_db(o, iter, new_tables, True)
-            self.redraw_tables()
-            o.host.select_database(o)
-            if self.current_query:
-                self.current_query.set_current_db(o)
-            # self.connections_tv.expand_row(path, False)
-            # todo update_query_db()
-            
-        elif depth == 3: # table
-            self.current_host = host = o.db.host
-            host.select_database(o.db)
-            table = o
-            if self.current_query:
-                self.current_query.set_current_db(table.db)
-            if not table.fields or (time.time() - table.last_field_read) > self.config.get("autorefresh_interval_table"):
-                table.refresh()
-                self.redraw_table(o, iter)
-                
-            if self.first_template:
-                nb.set_current_page(4)
-                self.on_template(None, self.first_template)
-            elif nb.get_current_page() < 3:
-                nb.set_current_page(3)              
-            
-            #self.connections_tv.expand_row(path, False)
-            # todo update_query_db()
-            # todo if(!doubleclick) update_table(e, i)
-        else:
-            print "No Handler for tree-depth", depth
-        return
-        
-    def on_mainwindow_key_release_event(self, window, event):
+    def on_mainwindow_key_release_event(self, _window, event):
         if event.keyval == keysyms.F3:
             self.on_local_search_button_clicked(None, True)
             return True
@@ -2154,8 +2174,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             q.treeview.set_cursor(path, column, True)
             return True
         
-        iter = q.model.get_iter(path)
-        if event.keyval == keysyms.Down and not q.model.iter_next(iter):
+        _iter = q.model.get_iter(path)
+        if event.keyval == keysyms.Down and not q.model.iter_next(_iter):
             if q.append_iter and not self.on_apply_record_tool_clicked(None):
                 return True
             self.on_add_record_tool_clicked(None)
@@ -2185,134 +2205,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
 
     def get_current_table(self):
         path, column = self.connections_tv.get_cursor()
-        iter = self.connections_model.get_iter(path)
-        return path, column, iter, self.connections_model.get_value(iter, 0)
+        _iter = self.connection_tv.connections_model.get_iter(path)
+        return path, column, _iter, self.connection_tv.connections_model.get_value(_iter, 0)
     
-    def on_table_popup(self, item):
-        path, column, iter, table = self.get_current_table()
-        what = item.name
-        
-        if what == "refresh_table":
-            table.refresh()
-            self.redraw_table(table, iter)
-            self.update_table_view()
-        elif what == "truncate_table":
-            if not dialogs.confirm("truncate table", "do you really want to truncate the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name), self.mainwindow):
-                return
-            if table.db.query("truncate `%s`" % (table.name)):
-                table.refresh()
-                self.redraw_table(table, iter)
-                self.update_table_view()
-        elif what == "drop_table":
-            if not dialogs.confirm("drop table", "do you really want to DROP the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name), self.mainwindow):
-                return
-            db = table.db
-            if db.query("drop table `%s`" % (table.name)):
-                new_tables = db.refresh()
-                self.redraw_db(db, self.get_db_iter(db), new_tables)
-                self.redraw_tables()
-        elif what == "check_table":
-            self.current_host = table.db.host
-            self.current_host.select_database(table.db)
-            self.xml.get_widget("main_notebook").set_current_page(4)
-            self.on_execute_query_clicked(None, "check table `%s`" % table.name)
-        elif what == "repair_table":
-            self.current_host = table.db.host
-            self.current_host.select_database(table.db)
-            self.xml.get_widget("main_notebook").set_current_page(4)
-            self.on_execute_query_clicked(None, "repair table `%s`" % table.name)
-                
-    def on_db_popup(self, item):
-        path, column = self.connections_tv.get_cursor()
-        iter = self.connections_model.get_iter(path)
-        what = item.name
-        db = self.connections_model.get_value(iter, 0)
-        
-        if what == "refresh_database":
-            new_tables = db.refresh()
-            self.redraw_db(db, iter, new_tables)
-            self.redraw_tables()
-        elif what == "drop_database":
-            if not dialogs.confirm("drop database", "do you really want to drop the <b>%s</b> database on <b>%s</b>?" % (db.name, db.host.name), self.mainwindow):
-                return
-            host = db.host
-            if host.query("drop database`%s`" % (db.name)):
-                host.refresh()
-                self.redraw_host(host, self.get_host_iter(host))
-        elif what == "new_table":
-            name = dialogs.input_dialog("New table", "Please enter the name of the new table:", window=self.mainwindow)
-            if not name:
-                return
-            if db.query("create table `%s` (`%s_id` int primary key auto_increment)" % (name, name)):
-                new_tables = db.refresh()
-                self.redraw_db(db, self.get_db_iter(db), new_tables)
-                self.redraw_tables()
-        elif what == "check_tables":
-            self.current_host = db.host
-            self.current_host.select_database(db)
-            self.xml.get_widget("main_notebook").set_current_page(4)
-            self.on_execute_query_clicked(
-                None, 
-                "check table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
-        elif what == "repair_tables":
-            self.current_host = db.host
-            self.current_host.select_database(db)
-            self.xml.get_widget("main_notebook").set_current_page(4)
-            self.on_execute_query_clicked(
-                None, 
-                "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
-    
-    def on_host_popup(self, item):
-        path, column = self.connections_tv.get_cursor()
-        if path:
-            iter = self.connections_model.get_iter(path)
-            host = self.connections_model.get_value(iter, 0)
-        else:
-            iter = None
-            host = None
-        what = item.name
-        
-        if "connection_window" not in self.__dict__:
-            self.connection_window = ConnectionWindow(self)
-            # self.connection_window = self.xml.get_widget("connection_window")
-            # self.xml.get_widget("cw_apply_button").connect("clicked", self.on_cw_apply)
-            # self.xml.get_widget("cw_test_button").connect("clicked", self.on_cw_test)
-            # self.xml.get_widget("cw_abort_button").connect("clicked", lambda *a: self.connection_window.hide())
-            # self.cw_props = ["name", "host", "port", "user", "password", "database"]
-        
-        if what == "refresh_host":
-            host.refresh()
-            self.redraw_host(host, iter)
-        elif what == "new_database":
-            name = dialogs.input_dialog("New database", "Please enter the name of the new database:", window=self.mainwindow)
-            if not name:
-                return
-            if host.query("Create database `%s`" % name):
-                host.refresh()
-                self.redraw_host(host, iter)
-        elif what == "modify_connection":
-            self.connection_window.host = host
-            self.connection_window.show("edit")
-        elif what == "delete_connection":
-            if not dialogs.confirm("Delete host", "Do you really want to drop the host <b>%s</b>?" % (host.name), self.mainwindow):
-                return
-            host.close()
-            self.connections_model.remove(iter)
-            if self.current_host == host:
-                self.current_host = None
-            del self.config.config["connection_%s" % host.name]
-            host = None
-            self.config.save()
-        elif what == "new_connection":
-            self.connection_window.show("new")
-        elif what == "new_sqlite_connection":
-            resp = self.sqlite_connection_dialog.run()
-            self.sqlite_connection_dialog.hide()
-            print "resp:", resp
-            if resp:
-                self.add_sqlite(self.sqlite_connection_dialog.get_filename())
-                self.config.save()
-
     def get_db_iter(self, db):
         return self.get_connections_object_at_depth(db, 1)
         
@@ -2321,22 +2216,22 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
     def get_connections_object_at_depth(self, obj, depth):
         d = 0
-        model = self.connections_model
-        iter = model.get_iter_first()
-        while iter:
-            if d == depth and model.get_value(iter, 0) == obj:
-                return iter
-            if d < depth and model.iter_has_child(iter):
-                iter = model.iter_children(iter)
+        model = self.connection_tv.connections_model
+        _iter = model.get_iter_first()
+        while _iter:
+            if d == depth and model.get_value(_iter, 0) == obj:
+                return _iter
+            if d < depth and model.iter_has_child(_iter):
+                _iter = model.iter_children(_iter)
                 d += 1
                 continue
-            new_iter = model.iter_next(iter)
+            new_iter = model.iter_next(_iter)
             if not new_iter:
-                iter = model.iter_parent(iter)
+                _iter = model.iter_parent(_iter)
                 d -= 1
-                iter = model.iter_next(iter)
+                _iter = model.iter_next(_iter)
             else:
-                iter = new_iter
+                _iter = new_iter
         return None
 
     def on_execution_timeout(self, button):
@@ -2344,7 +2239,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if value < 0.1:
             self.execution_timer_running = False
             return False
-        if self.on_execute_query_clicked() != True:
+        if not self.on_execute_query_clicked():
             # stop on error
             button.set_value(0)
             value = 0
@@ -2364,7 +2259,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def on_blob_update_clicked(self, button):
         q = self.current_query
         path, column = q.treeview.get_cursor()
-        iter = q.model.get_iter(path)
+        _iter = q.model.get_iter(path)
         
         b = self.blob_tv.get_buffer()
         new_value = b.get_text(b.get_start_iter(), b.get_end_iter())
@@ -2392,7 +2287,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def on_query_popup(self, item):
         q = self.current_query
         path, column = q.treeview.get_cursor()
-        iter = q.model.get_iter(path)
+        _iter = q.model.get_iter(path)
         
         if item.name == "copy_field_value":
             col_max = q.model.get_n_columns()
@@ -2402,7 +2297,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             else:
                 print "column not found!"
                 return
-            value = q.model.get_value(iter, col_num)
+            value = q.model.get_value(_iter, col_num)
             self.clipboard.set_text(value)
             self.pri_clipboard.set_text(value)
         elif item.name == "copy_record_as_csv":
@@ -2410,7 +2305,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             value = ""
             for col_num in range(col_max):
                 if value: value += self.config.get("copy_record_as_csv_delim")
-                v = q.model.get_value(iter, col_num)
+                v = q.model.get_value(_iter, col_num)
                 if not v is None: value += v
             self.clipboard.set_text(value)
             self.pri_clipboard.set_text(value)
@@ -2419,7 +2314,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             value = ""
             for col_num in range(col_max):
                 if value: value += self.config.get("copy_record_as_csv_delim")
-                v = q.model.get_value(iter, col_num)
+                v = q.model.get_value(_iter, col_num)
                 if not v is None: 
                     v = v.replace("\"", "\\\"")
                     value += '"%s"' % v
@@ -2434,12 +2329,12 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 print "column not found!"
                 return
             value = ""
-            iter = q.model.get_iter_first()
-            while iter:
+            _iter = q.model.get_iter_first()
+            while _iter:
                 if value: value += self.config.get("copy_record_as_csv_delim")
-                v = q.model.get_value(iter, col_num)
+                v = q.model.get_value(_iter, col_num)
                 if not v is None: value += v
-                iter = q.model.iter_next(iter)
+                _iter = q.model.iter_next(_iter)
             self.clipboard.set_text(value)
             self.pri_clipboard.set_text(value)
         elif item.name == "copy_column_as_quoted_csv":
@@ -2451,14 +2346,14 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 print "column not found!"
                 return
             value = ""
-            iter = q.model.get_iter_first()
-            while iter:
+            _iter = q.model.get_iter_first()
+            while _iter:
                 if value: value += self.config.get("copy_record_as_csv_delim")
-                v = q.model.get_value(iter, col_num)
+                v = q.model.get_value(_iter, col_num)
                 if not v is None: 
                     v = v.replace("\"", "\\\"")
                     value += '"%s"' % v
-                iter = q.model.iter_next(iter)
+                _iter = q.model.iter_next(_iter)
             self.clipboard.set_text(value)
             self.pri_clipboard.set_text(value)
         elif item.name == "copy_column_names":
@@ -2559,17 +2454,17 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
         if t.find("$table$") != -1:
             if not current_table:
-                show_message("info", "no table selected!\nyou can't execute a template with $table$ in it, if you have no table selected!")
+                dialog.show_message("info", "no table selected!\nyou can't execute a template with $table$ in it, if you have no table selected!")
                 return
             t = t.replace("$table$", self.current_host.escape_table(current_table.name))
             
         pos = t.find("$primary_key$")
         if pos != -1:
             if not current_table:
-                show_message("info", "no table selected!\nyou can't execute a template with $primary_key$ in it, if you have no table selected!")
+                dialog.show_message("info", "no table selected!\nyou can't execute a template with $primary_key$ in it, if you have no table selected!")
                 return
             if not current_table.fields:
-                show_message("info", "sorry, can't execute this template, because table '%s' has no fields!" % current_table.name)
+                dialog.show_message("info", "sorry, can't execute this template, because table '%s' has no fields!" % current_table.name)
                 return
             # is the next token desc or asc?
             result = re.search("(?i)[ \t\r\n]*(de|a)sc", t[pos:])
@@ -2643,7 +2538,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                     self.fc_op_combobox[i].show()
                     self.fc_entry[i].show()
             if not current_table:
-                show_message("info", "no table selected!\nyou can't execute a template with $field_conditions$ in it, if you have no table selected!")
+                dialog.show_message("info", "no table selected!\nyou can't execute a template with $field_conditions$ in it, if you have no table selected!")
                 return
                 
             last_field = []
@@ -2750,9 +2645,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if not res: return False
         self.xml.get_widget("processlist_popup").popup(None, None, None, event.button, event.time)
         
-    def render_connections_pixbuf(self, column, cell, model, iter):
-        d = model.iter_depth(iter)
-        o = model.get_value(iter, 0)
+    def render_connections_pixbuf(self, column, cell, model, _iter):
+        d = model.iter_depth(_iter)
+        o = model.get_value(_iter, 0)
         if d == 0:
             if o.connected:
                 cell.set_property("pixbuf", self.icons["host"])
@@ -2767,9 +2662,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         else:
             print "unknown depth %r for render_connections_pixbuf with object %r" % (d, o)
         
-    def render_connections_text(self, column, cell, model, iter):
-        d = model.iter_depth(iter)
-        o = model.get_value(iter, 0)
+    def render_connections_text(self, column, cell, model, _iter):
+        d = model.iter_depth(_iter)
+        o = model.get_value(_iter, 0)
         if d == 0:
             if o.connected:
                 cell.set_property("text", o.name)
@@ -2781,8 +2676,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             cell.set_property("text", o.name)
             #print "unknown depth", d," for render_connections_pixbuf with object", o
             
-    def render_mysql_string(self, column, cell, model, iter, id):
-        o = model.get_value(iter, id)
+    def render_mysql_string(self, column, cell, model, _iter, _id):
+        o = model.get_value(_iter, _id)
         if not o is None: 
             cell.set_property("background", None)
             if len(o) < 256:
@@ -2808,41 +2703,41 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         db = q.current_db
         if q.last_path is not None:
             try:
-                self.connections_model.get_iter(q.last_path)
+                self.connection_tv.connections_model.get_iter(q.last_path)
                 self.connections_tv.set_cursor(q.last_path)
                 return
             except:
                 # path was not valid
                 pass
 
-        i = self.connections_model.get_iter_root()
-        while i and self.connections_model.iter_is_valid(i):
-            if self.connections_model[i][0] == host:
+        i = self.connection_tv.connections_model.get_iter_root()
+        while i and self.connection_tv.connections_model.iter_is_valid(i):
+            if self.connection_tv.connections_model[i][0] == host:
                 break
-            i = self.connections_model.iter_next(i)
+            i = self.connection_tv.connections_model.iter_next(i)
         else:
             print "host not found in connections list!"
             q.current_host = q.current_db = None
             q.update_db_label()
             return
             
-        host_path = self.connections_model.get_path(i)
+        host_path = self.connection_tv.connections_model.get_path(i)
         self.connections_tv.scroll_to_cell(host_path, column=None, use_align=True, row_align=0.0, col_align=0.0)
         if db is None:
             self.connections_tv.set_cursor(host_path)
             return
-        k = self.connections_model.iter_children(i)
-        while k and self.connections_model.iter_is_valid(k):
-            if self.connections_model[k][0] == db:
+        k = self.connection_tv.connections_model.iter_children(i)
+        while k and self.connection_tv.connections_model.iter_is_valid(k):
+            if self.connection_tv.connections_model[k][0] == db:
                 break
-            k = self.connections_model.iter_next(k)
+            k = self.connection_tv.connections_model.iter_next(k)
         else:
             print "database not found in connections list!"
             q.current_db = None
             q.update_db_label()
             self.connections_tv.set_cursor(host_path)
             return
-        path = self.connections_model.get_path(k)
+        path = self.connection_tv.connections_model.get_path(k)
         #self.connections_tv.scroll_to_cell(path, column=None, use_align=True, row_align=0.125, col_align=0.0)
         self.connections_tv.set_cursor(path)
         return
@@ -2850,17 +2745,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def on_query_encoding_changed(self, menuitem, data):
         self.current_query.set_query_encoding(data[0])
         
-    def add_mysql_host(self, name, hostname, port, user, password, database):
-        host = MySqlHost(self.add_sql_log, self.add_msg_log, name, hostname, port, user, password, database,
-                         self.config.get("connect_timeout"))
-        _iter = self.connections_model.append(None, [host])
-        host.set_update_ui(self.redraw_host, _iter)
-    
-    def add_sqlite(self, filename):
-        host = SQLiteHost(self.add_sql_log, self.add_msg_log, filename)
-        _iter = self.connections_model.append(None, [host])
-        host.set_update_ui(self.redraw_host, _iter)
-    
     def add_sql_log(self, log):
         olog = log
         max_len = int(self.config.get("query_log_max_entry_length"))
@@ -2906,9 +2790,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def get_selected_table(self):
         path, column = self.connections_tv.get_cursor()
         depth = len(path)
-        _iter = self.connections_model.get_iter(path)
+        _iter = self.connection_tv.connections_model.get_iter(path)
         if depth == 3:
-            return self.connections_model.get_value(_iter, 0)
+            return self.connection_tv.connections_model.get_value(_iter, 0)
         return None
 
     def load_icons(self):
@@ -2922,14 +2806,17 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         self.mainwindow.set_icon(self.icons["emma"])
         
     def refresh_processlist(self, *args):
-        if not self.current_host: return
+        if not self.current_host:
+            return
         self.current_host.refresh_processlist()
         self.redraw_processlist(self.current_host)
         
     def redraw_processlist(self, host):
-        if not host.processlist: return
+        if not host.processlist:
+            return
         fields, rows = host.processlist
-        if self.processlist_model: self.processlist_model.clear()
+        if self.processlist_model:
+            self.processlist_model.clear()
             
         if self.current_processlist_host != self.current_host:
             self.current_processlist_host = self.current_host
@@ -2943,12 +2830,12 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.processlist_model = gtk.ListStore(*columns)
             self.processlist_tv.set_model(self.processlist_model)
             self.processlist_tv.set_headers_clickable(True)
-            id = 0
+            _id = 0
             for field in fields:
                 title = field[0].replace("_", "__")
                 self.processlist_tv.insert_column_with_data_func(-1, title, gtk.CellRendererText(),
-                                                                 self.render_mysql_string, id)
-                id += 1
+                                                                 self.render_mysql_string, _id)
+                _id += 1
             
         for proc in rows:
             self.processlist_model.append(proc)
@@ -2956,6 +2843,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         return
     
     def redraw_tables(self):
+        self.add_msg_log('redraw_tables')
         if not self.current_host:
             return
         db = self.current_host.current_db
@@ -2979,12 +2867,12 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 return
             self.tables_model = gtk.ListStore(*columns)
             self.tables_tv.set_model(self.tables_model)
-            id = 0
+            _id = 0
             for field in fields:
                 title = field.replace("_", "__")
                 self.tables_tv.insert_column_with_data_func(-1, title, gtk.CellRendererText(),
-                                                            self.render_mysql_string, id)
-                id += 1
+                                                            self.render_mysql_string, _id)
+                _id += 1
             self.tables_count = 0
         
         keys = db.tables.keys()
@@ -2997,66 +2885,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             table = db.tables[name]
             self.tables_model.append(table.props)
     
-    def redraw_host(self, host, _iter, expand=False):
-        #print "redraw host", host.name
-        if host.expanded:
-            expand = True
-            
-        # first remove exiting children of that node
-        i = self.connections_model.iter_children(_iter)
-        while i and self.connections_model.iter_is_valid(i):
-            self.connections_model.remove(i)
-        
-        # now add every database
-        keys = host.databases.keys()
-        keys.sort()
-        for name in keys:
-            db = host.databases[name]
-            i = self.connections_model.append(_iter, (db,))
-            if expand:
-                self.connections_tv.expand_row(self.connections_model.get_path(_iter), False)
-                expand = False
-            self.redraw_db(db, i)
-            
-    def redraw_db(self, db, _iter, new_tables=None, force_expand=False):
-        #print "redraw db", db.name
-        if not _iter:
-            print "Error: invalid db-iterator:", _iter
-            return
-        path = self.connections_model.get_path(_iter)
-        if db.expanded: 
-            force_expand = True
-        i = self.connections_model.iter_children(_iter)
-        while i and self.connections_model.iter_is_valid(i): 
-            self.connections_model.remove(i)
-        keys = db.tables.keys()
-        keys.sort()
-        iterators = {}
-        for name in keys:
-            table = db.tables[name]
-            i = self.connections_model.append(_iter, (table,))
-            if force_expand: 
-                self.connections_tv.expand_row(path, False)
-                force_expand = False
-            self.redraw_table(table, i)
-            iterators[name] = i
-        if not new_tables: return
-        for name in new_tables:
-            table = db.tables[name]
-            table.refresh(False)
-            self.redraw_table(table, iterators[name])
-            self.process_events()
-            
-    def redraw_table(self, table, _iter):
-        #print "redraw table", table.name
-        if table.expanded: self.connections_tv.expand_row(self.connections_model.get_path(_iter), False)
-        i = self.connections_model.iter_children(_iter)
-        while i and self.connections_model.iter_is_valid(i): 
-            self.connections_model.remove(i)
-        for field in table.field_order:
-            i = self.connections_model.append(_iter, (table.fields[field],))
-
-    def read_expression(self, query, start=0, concat=True, update_function=None, update_offset=0, icount=0):
+    def read_expression(self, query, _start=0, concat=True, update_function=None, update_offset=0, icount=0):
         ## TODO!
         # r'(?is)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|([^ \r\n\t]*[ \r\n\t]*\()|(\))|([0-9]+(?:\\.[0-9]*)?)|([^ \r\n\t,()"\'`]+)|(,)')
         try:
@@ -3065,7 +2894,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             r = self.query_expr_re = query_regular_expression
         
         # print "read expr in", query
-        match = r.search(query, start)
+        match = r.search(query, _start)
         #if match: print match.groups()
         if not match:
             return None, None
