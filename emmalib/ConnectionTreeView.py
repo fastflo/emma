@@ -4,6 +4,7 @@ import gtk.glade
 import time
 import gobject
 import dialogs
+import widgets
 from Config import Config
 from ConnectionWindow import ConnectionWindow
 
@@ -38,6 +39,11 @@ class ConnectionsTreeView(gtk.TreeView):
         self.connect("row-activated", self.on_connections_row_activated)
         self.connect("button-release-event", self.on_connections_button_release)
         self.connect("cursor-changed", self.on_connections_tv_cursor_changed)
+
+        self.pop_up_host = widgets.PopUpHost()
+        self.pop_up_host.connect('item-selected', self.on_host_popup)
+
+        self.connection_window = ConnectionWindow(self)
 
         self.load_from_config()
 
@@ -176,12 +182,8 @@ class ConnectionsTreeView(gtk.TreeView):
                 connected_host = host.connected
             self.emma.xml.get_widget("new_database").set_sensitive(connected_host)
             self.emma.xml.get_widget("refresh_host").set_sensitive(connected_host)
-            menu = self.emma.xml.get_widget("connection_menu")
-            sqllite = self.emma.xml.get_widget("new_sqlite_connection")
-            if self.emma.config.have_sqlite:
-                sqllite.show()
-            else:
-                sqllite.hide()
+            #menu = self.emma.xml.get_widget("connection_menu")
+            self.pop_up_host.popup(None, None, None, event.button, event.time)
         elif len(res[0]) == 2:
             menu = self.emma.xml.get_widget("database_popup")
         elif len(res[0]) == 3:
@@ -189,8 +191,7 @@ class ConnectionsTreeView(gtk.TreeView):
 
         if menu:
             menu.popup(None, None, None, event.button, event.time)
-        else:
-            print 'no menu found'
+
         return True
 
     def redraw_host(self, host, _iter, expand=False):
@@ -312,6 +313,40 @@ class ConnectionsTreeView(gtk.TreeView):
         _iter = self.connections_model.append(None, [host])
         host.set_update_ui(self.redraw_host, _iter)
 
+    def on_table_popup(self, item):
+        path, column, _iter, table = self.get_current_table()
+        what = item.name
+
+        if what == "refresh_table":
+            table.refresh()
+            self.redraw_table(table, _iter)
+            self.update_table_view()
+        elif what == "truncate_table":
+            if not dialogs.confirm("truncate table", "do you really want to truncate the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name), self.mainwindow):
+                return
+            if table.db.query("truncate `%s`" % (table.name)):
+                table.refresh()
+                self.redraw_table(table, _iter)
+                self.update_table_view()
+        elif what == "drop_table":
+            if not dialogs.confirm("drop table", "do you really want to DROP the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name), self.mainwindow):
+                return
+            db = table.db
+            if db.query("drop table `%s`" % (table.name)):
+                new_tables = db.refresh()
+                self.redraw_db(db, self.get_db_iter(db), new_tables)
+                self.redraw_tables()
+        elif what == "check_table":
+            self.current_host = table.db.host
+            self.current_host.select_database(table.db)
+            self.xml.get_widget("main_notebook").set_current_page(4)
+            self.on_execute_query_clicked(None, "check table `%s`" % table.name)
+        elif what == "repair_table":
+            self.current_host = table.db.host
+            self.current_host.select_database(table.db)
+            self.xml.get_widget("main_notebook").set_current_page(4)
+            self.on_execute_query_clicked(None, "repair table `%s`" % table.name)
+
     def on_db_popup(self, item):
         self.emma.add_msg_log('on_db_popup')
         path, column = self.connections_tv.get_cursor()
@@ -353,28 +388,20 @@ class ConnectionsTreeView(gtk.TreeView):
                 None,
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
 
-    def on_host_popup(self, item):
+    def on_host_popup(self, pop_up_host_object , item):
         self.emma.add_msg_log('on_db_popup')
-        path, column = self.connections_tv.get_cursor()
+        path, column = self.get_cursor()
         if path:
-            iter = self.connections_model.get_iter(path)
-            host = self.connections_model.get_value(iter, 0)
+            _iter = self.connections_model.get_iter(path)
+            host = self.connections_model.get_value(_iter, 0)
         else:
-            iter = None
+            _iter = None
             host = None
         what = item.name
 
-        if "connection_window" not in self.__dict__:
-            self.connection_window = ConnectionWindow(self)
-            # self.connection_window = self.xml.get_widget("connection_window")
-            # self.xml.get_widget("cw_apply_button").connect("clicked", self.on_cw_apply)
-            # self.xml.get_widget("cw_test_button").connect("clicked", self.on_cw_test)
-            # self.xml.get_widget("cw_abort_button").connect("clicked", lambda *a: self.connection_window.hide())
-            # self.cw_props = ["name", "host", "port", "user", "password", "database"]
-
         if what == "refresh_host":
             host.refresh()
-            self.redraw_host(host, iter)
+            self.redraw_host(host, _iter)
         elif what == "new_database":
             name = dialogs.input_dialog("New database", "Please enter the name of the new database:",
                                         window=self.emma.mainwindow)
@@ -382,7 +409,7 @@ class ConnectionsTreeView(gtk.TreeView):
                 return
             if host.query("Create database `%s`" % name):
                 host.refresh()
-                self.redraw_host(host, iter)
+                self.redraw_host(host, _iter)
         elif what == "modify_connection":
             self.connection_window.host = host
             self.connection_window.show("edit")
@@ -391,7 +418,7 @@ class ConnectionsTreeView(gtk.TreeView):
                                    self.emma.mainwindow):
                 return
             host.close()
-            self.connections_model.remove(iter)
+            self.connections_model.remove(_iter)
             if self.current_host == host:
                 self.current_host = None
             del self.emma.config.config["connection_%s" % host.name]
