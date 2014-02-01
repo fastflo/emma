@@ -406,26 +406,31 @@ class Emma:
         return True
         
     def is_query_appendable(self, query):
-        if not self.current_host: return False
-        try:    r = self.query_select_re
-        except: r = self.query_select_re = re.compile(r'(?i)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(union)|(select[ \r\n\t]+(.*)[ \r\n\t]+from[ \r\n\t]+(.*))')
-        start = 0
+        if not self.current_host:
+            return False
+        try:
+            r = self.query_select_re
+        except:
+            r = self.query_select_re = re.compile(r'(?i)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(union)|(select[ \r\n\t]+(.*)[ \r\n\t]+from[ \r\n\t]+(.*))')
+        _start = 0
+        result = False
         while 1:
-            result = re.search(r, query[start:])
+            result = re.search(r, query[_start:])
             if not result: 
                 return False
-            start += result.end()
+            _start += result.end()
             if result.group(4):
-                return False # union
+                return False  # union
             if result.group(5) and result.group(6) and result.group(7):
-                break # found select
+                break  # found select
         return result
-    
-        
+
     def get_order_from_query(self, query, return_before_and_after=False):
         current_order = []
-        try:    r = self.query_order_re
-        except: r = self.query_order_re = re.compile(re_src_query_order)
+        try:
+            r = self.query_order_re
+        except:
+            r = self.query_order_re = re.compile(re_src_query_order)
         # get current order by clause
         match = re.search(r, query)
         if not match: 
@@ -456,9 +461,11 @@ class Emma:
             else:
                 print "unknown order item:", item, "ignoring..."
                 item = None
-            if item: current_order.append(tuple(item))
-            if not ident: break
-            start += 1 # comma
+            if item:
+                current_order.append(tuple(item))
+            if not ident:
+                break
+            start += 1  # comma
         return current_order
         
     def on_remember_order_clicked(self, button):
@@ -504,7 +511,8 @@ class Emma:
                 fields.append(item[0])
             else:
                 fields.append(item)
-            if not ident: break
+            if not ident:
+                break
         print "found fields:", fields
         return fields
         
@@ -842,7 +850,7 @@ class Emma:
         else:
             table, where, field, value, row_iter = self.get_unique_where(q.last_source, path)
             if not table or not where:
-                show_message("delete record", "could not delete this record!?")
+                dialogs.show_message("delete record", "could not delete this record!?")
                 return
             if self.current_host.__class__.__name__ == "sqlite_host":
                 limit = ""
@@ -1456,20 +1464,22 @@ the author knows no way to deselect this database. do you want to continue?""" %
             start_display = time.time()
             last_display = start_display
             for row in result.fetch_row(0):
-                def toString(f):
+                def to_string(f):
                     if type(f) == str:
                         f = f.decode(q.encoding, "replace")
-                    elif f == None:
+                    elif f is None:
                         pass
                     else:
                         f = str(f)
                     return f
-                q.model.append(map(toString, row))
+                q.model.append(map(to_string, row))
                 cnt += 1
-                if not cnt % 100 == 0: continue
+                if not cnt % 100 == 0:
+                    continue
                     
                 now = time.time()
-                if (now - last_display) < 0.2: continue
+                if (now - last_display) < 0.2:
+                    continue
                     
                 q.label.set_text("displayed %d rows..." % cnt)
                 q.label.window.process_updates(False)
@@ -2240,7 +2250,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if value < 0.1:
             self.execution_timer_running = False
             return False
-        if self.on_execute_query_clicked() != True:
+        if not self.on_execute_query_clicked():
             # stop on error
             button.set_value(0)
             value = 0
@@ -2455,17 +2465,17 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
         if t.find("$table$") != -1:
             if not current_table:
-                show_message("info", "no table selected!\nyou can't execute a template with $table$ in it, if you have no table selected!")
+                dialog.show_message("info", "no table selected!\nyou can't execute a template with $table$ in it, if you have no table selected!")
                 return
             t = t.replace("$table$", self.current_host.escape_table(current_table.name))
             
         pos = t.find("$primary_key$")
         if pos != -1:
             if not current_table:
-                show_message("info", "no table selected!\nyou can't execute a template with $primary_key$ in it, if you have no table selected!")
+                dialog.show_message("info", "no table selected!\nyou can't execute a template with $primary_key$ in it, if you have no table selected!")
                 return
             if not current_table.fields:
-                show_message("info", "sorry, can't execute this template, because table '%s' has no fields!" % current_table.name)
+                dialog.show_message("info", "sorry, can't execute this template, because table '%s' has no fields!" % current_table.name)
                 return
             # is the next token desc or asc?
             result = re.search("(?i)[ \t\r\n]*(de|a)sc", t[pos:])
@@ -2539,7 +2549,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                     self.fc_op_combobox[i].show()
                     self.fc_entry[i].show()
             if not current_table:
-                show_message("info", "no table selected!\nyou can't execute a template with $field_conditions$ in it, if you have no table selected!")
+                dialog.show_message("info", "no table selected!\nyou can't execute a template with $field_conditions$ in it, if you have no table selected!")
                 return
                 
             last_field = []
@@ -2844,6 +2854,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         return
     
     def redraw_tables(self):
+        self.add_msg_log('redraw_tables')
         if not self.current_host:
             return
         db = self.current_host.current_db
