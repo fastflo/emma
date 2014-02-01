@@ -3,9 +3,9 @@ import gtk
 import gtk.glade
 import time
 import gobject
-#
-# import dialogs
+import dialogs
 from Config import Config
+from ConnectionWindow import ConnectionWindow
 
 
 class ConnectionsTreeView(gtk.TreeView):
@@ -65,6 +65,7 @@ class ConnectionsTreeView(gtk.TreeView):
 
     def on_connections_row_activated(self, tv, path, col):
         depth = len(path)
+        self.emma.add_msg_log('on_connections_row_activated level %s' % depth)
         _iter = self.connections_model.get_iter(path)
         o = self.connections_model.get_value(_iter, 0)
 
@@ -312,24 +313,25 @@ class ConnectionsTreeView(gtk.TreeView):
         host.set_update_ui(self.redraw_host, _iter)
 
     def on_db_popup(self, item):
+        self.emma.add_msg_log('on_db_popup')
         path, column = self.connections_tv.get_cursor()
-        iter = self.connections_model.get_iter(path)
+        _iter = self.connections_model.get_iter(path)
         what = item.name
-        db = self.connections_model.get_value(iter, 0)
+        db = self.connections_model.get_value(_iter, 0)
 
         if what == "refresh_database":
             new_tables = db.refresh()
-            self.redraw_db(db, iter, new_tables)
+            self.redraw_db(db, _iter, new_tables)
             self.redraw_tables()
         elif what == "drop_database":
-            if not dialogs.confirm("drop database", "do you really want to drop the <b>%s</b> database on <b>%s</b>?" % (db.name, db.host.name), self.mainwindow):
+            if not dialogs.confirm("drop database", "do you really want to drop the <b>%s</b> database on <b>%s</b>?" % (db.name, db.host.name), self.emma.mainwindow):
                 return
             host = db.host
             if host.query("drop database`%s`" % (db.name)):
                 host.refresh()
                 self.redraw_host(host, self.get_host_iter(host))
         elif what == "new_table":
-            name = dialogs.input_dialog("New table", "Please enter the name of the new table:", window=self.mainwindow)
+            name = dialogs.input_dialog("New table", "Please enter the name of the new table:", window=self.emma.mainwindow)
             if not name:
                 return
             if db.query("create table `%s` (`%s_id` int primary key auto_increment)" % (name, name)):
@@ -352,6 +354,7 @@ class ConnectionsTreeView(gtk.TreeView):
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
 
     def on_host_popup(self, item):
+        self.emma.add_msg_log('on_db_popup')
         path, column = self.connections_tv.get_cursor()
         if path:
             iter = self.connections_model.get_iter(path)
@@ -373,7 +376,8 @@ class ConnectionsTreeView(gtk.TreeView):
             host.refresh()
             self.redraw_host(host, iter)
         elif what == "new_database":
-            name = dialogs.input_dialog("New database", "Please enter the name of the new database:", window=self.mainwindow)
+            name = dialogs.input_dialog("New database", "Please enter the name of the new database:",
+                                        window=self.emma.mainwindow)
             if not name:
                 return
             if host.query("Create database `%s`" % name):
@@ -383,24 +387,25 @@ class ConnectionsTreeView(gtk.TreeView):
             self.connection_window.host = host
             self.connection_window.show("edit")
         elif what == "delete_connection":
-            if not dialogs.confirm("Delete host", "Do you really want to drop the host <b>%s</b>?" % (host.name), self.mainwindow):
+            if not dialogs.confirm("Delete host", "Do you really want to drop the host <b>%s</b>?" % host.name,
+                                   self.emma.mainwindow):
                 return
             host.close()
             self.connections_model.remove(iter)
             if self.current_host == host:
                 self.current_host = None
-            del self.config.config["connection_%s" % host.name]
+            del self.emma.config.config["connection_%s" % host.name]
             host = None
-            self.config.save()
+            self.emma.config.save()
         elif what == "new_connection":
             self.connection_window.show("new")
-        elif what == "new_sqlite_connection":
-            resp = self.sqlite_connection_dialog.run()
-            self.sqlite_connection_dialog.hide()
-            print "resp:", resp
-            if resp:
-                self.add_sqlite(self.sqlite_connection_dialog.get_filename())
-                self.config.save()
+        # elif what == "new_sqlite_connection":
+        #     resp = self.sqlite_connection_dialog.run()
+        #     self.sqlite_connection_dialog.hide()
+        #     print "resp:", resp
+        #     if resp:
+        #         self.add_sqlite(self.sqlite_connection_dialog.get_filename())
+        #         self.config.save()
 
 
 if __name__ == '__main__':
