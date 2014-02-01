@@ -8,6 +8,7 @@ class Config:
     def __init__(self, emma=None):
         self.emma = emma
         self.unpickled = False
+        self.have_sqlite = False
         filename = False
         for i in ["HOME", "USERPROFILE"]:
             filename = os.getenv(i)
@@ -16,7 +17,7 @@ class Config:
         if not filename:
             filename = "."
         filename += "/.emma"
-        print filename
+        #print filename
         if os.path.isfile(filename):
             print "detected emma config file %r. converting to directory" % filename
             temp_dir = filename + "_temp"
@@ -189,12 +190,12 @@ class Config:
             fp.write("%s=%s\n" % (name, value))
 
         if self.emma:
-            itr = self.emma.connections_model.get_iter_root()
+            itr = self.emma.connection_tv.connections_model.get_iter_root()
             while itr:
-                host = self.emma.connections_model.get_value(itr, 0)
+                host = self.emma.connection_tv.connections_model.get_value(itr, 0)
                 _str_to_write = "connection_%s=%s\n" % (host.name, host.get_connection_string())
                 fp.write(_str_to_write)
-                itr = self.emma.connections_model.iter_next(itr)
+                itr = self.emma.connection_tv.connections_model.iter_next(itr)
             fp.close()
 
 # if __name__ != 'main':
