@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <glade-interface>
-  <!-- interface-requires gtk+ 2.10 -->
+  <!-- interface-requires gtk+ 2.24 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkAboutDialog" id="aboutdialog">
     <property name="can_focus">False</property>
     <property name="type_hint">normal</property>
+    <property name="program_name">Emma</property>
+    <property name="version">v0.7</property>
     <property name="copyright" translatable="yes">by Florian Schmidt 2006</property>
-    <property name="comments" translatable="yes">Extendable Mysql Managing Assistant
+    <property name="comments" translatable="yes">Extendable Database Managing Assistant
 
 successor of yamysqlfront</property>
+    <property name="website">http://emma-assistant.org</property>
     <property name="authors">Florian Schmidt &lt;schmidt_florian at gmx.de&gt;</property>
     <property name="translator_credits" translatable="yes" comments="TRANSLATORS: Replace this string with your names, one name per line.">translator-credits</property>
     <child internal-child="vbox">
@@ -45,119 +48,6 @@ successor of yamysqlfront</property>
             <property name="can_focus">True</property>
             <property name="editable">False</property>
             <property name="cursor_visible">False</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-  </widget>
-  <widget class="GtkMenu" id="connection_menu">
-    <property name="can_focus">False</property>
-    <child>
-      <widget class="GtkImageMenuItem" id="refresh_host">
-        <property name="label" translatable="yes">Refresh</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_host_popup"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image306">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-refresh</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="modify_connection">
-        <property name="label" translatable="yes">Modify connection</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_host_popup"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image307">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-edit</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="delete_connection">
-        <property name="label" translatable="yes">Delete connection</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_host_popup"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image308">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-delete</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="new_connection">
-        <property name="label" translatable="yes">New connection</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_host_popup"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image309">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-new</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="new_sqlite_connection">
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="label" translatable="yes">new sqlite connection</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="on_host_popup"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkSeparatorMenuItem" id="separator1">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="new_database">
-        <property name="label" translatable="yes">New database</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_host_popup"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image310">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-new</property>
-            <property name="icon-size">1</property>
           </widget>
         </child>
       </widget>
@@ -435,94 +325,6 @@ successor of yamysqlfront</property>
             <property name="position">1</property>
           </packing>
         </child>
-      </widget>
-    </child>
-  </widget>
-  <widget class="GtkMenu" id="database_popup">
-    <property name="can_focus">False</property>
-    <child>
-      <widget class="GtkImageMenuItem" id="refresh_database">
-        <property name="label" translatable="yes">refresh</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_db_popup"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image299">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-refresh</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="drop_database">
-        <property name="label" translatable="yes">drop database</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_db_popup"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image300">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-delete</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkSeparatorMenuItem" id="separator2">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="new_table">
-        <property name="label" translatable="yes">new table</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_db_popup"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image301">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-new</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="check_tables">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="use_action_appearance">False</property>
-        <property name="label" translatable="yes">check tables</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="on_db_popup"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="repair_tables">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="use_action_appearance">False</property>
-        <property name="label" translatable="yes">repair tables</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="on_db_popup"/>
       </widget>
     </child>
   </widget>
@@ -3353,88 +3155,6 @@ successor of yamysqlfront</property>
         <property name="label" translatable="yes">clear all entries</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_sql_log_activate"/>
-      </widget>
-    </child>
-  </widget>
-  <widget class="GtkMenu" id="table_popup">
-    <property name="can_focus">False</property>
-    <child>
-      <widget class="GtkImageMenuItem" id="refresh_table">
-        <property name="label" translatable="yes">refresh</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_table_popup"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image294">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-refresh</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="truncate_table">
-        <property name="label" translatable="yes">truncate table</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_table_popup"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image295">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-cut</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="drop_table">
-        <property name="label" translatable="yes">drop table</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_table_popup"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image296">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-delete</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="check_table">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="use_action_appearance">False</property>
-        <property name="label" translatable="yes">check table</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="on_table_popup"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="repair_table">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="use_action_appearance">False</property>
-        <property name="label" translatable="yes">repair table</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="on_table_popup"/>
       </widget>
     </child>
   </widget>
