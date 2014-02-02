@@ -345,22 +345,22 @@ class Emma:
             self.plugin_pathes.append(path)
         self.load_plugins()
         
-    def __getstate__(self):
-        hosts = []
-        _iter = self.connection_tv.connections_model.get_iter_root()
-        while _iter:
-            host = self.connection_tv.connections_model.get_value(_iter, 0)
-            hosts.append(host)
-            _iter = self.connection_tv.connections_model.iter_next(_iter)
-        
-        sql_logs = []
-        _iter = self.sql_log_model.get_iter_root()
-        while _iter:
-            log = self.sql_log_model.get(_iter, 0, 1, 2)
-            sql_logs.append(log)
-            _iter = self.sql_log_model.iter_next(_iter)
-        
-        return {"hosts": hosts, "queries": self.queries, "sql_logs": sql_logs}
+    # def __getstate__(self):
+    #     hosts = []
+    #     _iter = self.connection_tv.connections_model.get_iter_root()
+    #     while _iter:
+    #         host = self.connection_tv.connections_model.get_value(_iter, 0)
+    #         hosts.append(host)
+    #         _iter = self.connection_tv.connections_model.iter_next(_iter)
+    #
+    #     sql_logs = []
+    #     _iter = self.sql_log_model.get_iter_root()
+    #     while _iter:
+    #         log = self.sql_log_model.get(_iter, 0, 1, 2)
+    #         sql_logs.append(log)
+    #         _iter = self.sql_log_model.iter_next(_iter)
+    #
+    #     return {"hosts": hosts, "queries": self.queries, "sql_logs": sql_logs}
     
     def add_query_tab(self, qt):
         self.query_count += 1
@@ -1769,8 +1769,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             dialogs.show_message("restore workspace", "error restoring workspace from file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
         self.mainwindow.destroy()
 
-    def __setstate__(self, state):
-        self.state = state
+    # def __setstate__(self, state):
+    #     self.state = state
         
     def on_local_search_button_clicked(self, button, again=False):
         if not self.current_query.local_search.get_property("sensitive"):

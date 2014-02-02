@@ -5,7 +5,6 @@ import time
 import gobject
 import dialogs
 import widgets
-from Config import Config
 from ConnectionWindow import ConnectionWindow
 
 
@@ -242,14 +241,13 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.process_events()
 
     def redraw_table(self, table, _iter):
-        #print "redraw table", table.name
         if table.expanded:
             self.expand_row(self.connections_model.get_path(_iter), False)
         i = self.connections_model.iter_children(_iter)
         while i and self.connections_model.iter_is_valid(i):
             self.connections_model.remove(i)
         for field in table.field_order:
-            i = self.connections_model.append(_iter, (table.fields[field],))
+            self.connections_model.append(_iter, (table.fields[field],))
 
     def render_connections_pixbuf(self, column, cell, model, itr):
         d = model.iter_depth(itr)
@@ -267,8 +265,6 @@ class ConnectionsTreeView(gtk.TreeView):
             cell.set_property("pixbuf", self.icons["table"])
         elif d == 3:
             cell.set_property("pixbuf", self.icons["field"])
-        else:
-            print "unknown depth %r for render_connections_pixbuf with object %r" % (d, o)
 
     def render_connections_text(self, column, cell, model, itr):
         d = model.iter_depth(itr)
@@ -281,11 +277,10 @@ class ConnectionsTreeView(gtk.TreeView):
                 cell.set_property("text", o.name)
             else:
                 cell.set_property("text", "(%s)" % o.name)
-        elif d == 3:  # fields are only strings
+        elif d == 3:
             cell.set_property("text", "%s %s" % (o[0], o[1]))
-        else:  # everything else has a name
+        else:
             cell.set_property("text", o.name)
-            #print "unknown depth", d," for render_connections_pixbuf with object", o
 
     def load_icons(self):
         from emmalib import icons_path
@@ -310,38 +305,42 @@ class ConnectionsTreeView(gtk.TreeView):
         host.set_update_ui(self.redraw_host, _iter)
 
     def on_table_popup(self, item):
-        path, column, _iter, table = self.get_current_table()
+        path, column, _iter, table = self.emma.get_current_table()
         what = item.name
 
         if what == "refresh_table":
             table.refresh()
             self.redraw_table(table, _iter)
-            self.update_table_view()
+            self.emma.update_table_view()
         elif what == "truncate_table":
-            if not dialogs.confirm("truncate table", "do you really want to truncate the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name), self.mainwindow):
+            if not dialogs.confirm("truncate table",
+                                   "do you really want to truncate the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name),
+                                   self.emma.mainwindow):
                 return
-            if table.db.query("truncate `%s`" % (table.name)):
+            if table.db.query("truncate `%s`" % table.name):
                 table.refresh()
                 self.redraw_table(table, _iter)
-                self.update_table_view()
+                self.emma.update_table_view()
         elif what == "drop_table":
-            if not dialogs.confirm("drop table", "do you really want to DROP the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name), self.mainwindow):
+            if not dialogs.confirm("drop table",
+                                   "do you really want to DROP the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name),
+                                   self.emma.mainwindow):
                 return
             db = table.db
-            if db.query("drop table `%s`" % (table.name)):
+            if db.query("drop table `%s`" % table.name):
                 new_tables = db.refresh()
-                self.redraw_db(db, self.get_db_iter(db), new_tables)
-                self.redraw_tables()
+                self.redraw_db(db, self.emma.get_db_iter(db), new_tables)
+                self.emma.redraw_tables()
         elif what == "check_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
-            self.xml.get_widget("main_notebook").set_current_page(4)
-            self.on_execute_query_clicked(None, "check table `%s`" % table.name)
+            self.emma.xml.get_widget("main_notebook").set_current_page(4)
+            self.emma.on_execute_query_clicked(None, "check table `%s`" % table.name)
         elif what == "repair_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
-            self.xml.get_widget("main_notebook").set_current_page(4)
-            self.on_execute_query_clicked(None, "repair table `%s`" % table.name)
+            self.emma.xml.get_widget("main_notebook").set_current_page(4)
+            self.emma.on_execute_query_clicked(None, "repair table `%s`" % table.name)
 
     def on_db_popup(self, popup, item):
         self.emma.add_msg_log('on_db_popup')
@@ -358,7 +357,7 @@ class ConnectionsTreeView(gtk.TreeView):
             if not dialogs.confirm("drop database", "do you really want to drop the <b>%s</b> database on <b>%s</b>?" % (db.name, db.host.name), self.emma.mainwindow):
                 return
             host = db.host
-            if host.query("drop database`%s`" % (db.name)):
+            if host.query("drop database`%s`" % db.name):
                 host.refresh()
                 self.redraw_host(host, self.emma.get_host_iter(host))
         elif what == "new_table":
@@ -418,7 +417,7 @@ class ConnectionsTreeView(gtk.TreeView):
             if self.current_host == host:
                 self.current_host = None
             del self.emma.config.config["connection_%s" % host.name]
-            host = None
+            del host
             self.emma.config.save()
         elif what == "new_connection":
             self.connection_window.show("new")
@@ -431,44 +430,12 @@ class ConnectionsTreeView(gtk.TreeView):
         #         self.config.save()
 
 
-if __name__ == '__main__':
-
-    print __name__
-
-    # class EmmaStub():
-    #     def __init__(self):
-    #         self.config = Config()
-    #         self.config.load()
-    #         self.current_query = False
-    #         self.xml = gtk.glade.XML("/home/nick/Projects/emma/emmalib/emma.glade")
-    #
-    #     def add_msg_log(self, log):
-    #         print log
-    #
-    #     def add_sql_log(self, log):
-    #         print log
-    #
-    #     def refresh_processlist(self):
-    #         pass
-    #
-    #     def process_events(self):
-    #         pass
-    #
-    #     def redraw_tables(self):
-    #         pass
-    #
-    # emmastub = EmmaStub()
-    #
-    # con = ConnectionsTreeView(emmastub)
-
-    from emmalib import Emma
-
-    con = ConnectionsTreeView(Emma())
-
-    window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-    window.connect("delete_event", lambda *x: gtk.main_quit())
-    window.set_size_request(640, 480)
-    window.set_position(gtk.WIN_POS_CENTER)
-    window.add(con)
-    window.show_all()
-    gtk.main()
+# if __name__ == '__main__':
+#     con = ConnectionsTreeView()
+#     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+#     window.connect("delete_event", lambda *x: gtk.main_quit())
+#     window.set_size_request(640, 480)
+#     window.set_position(gtk.WIN_POS_CENTER)
+#     window.add(con)
+#     window.show_all()
+#     gtk.main()
