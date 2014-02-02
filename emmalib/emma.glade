@@ -1761,7 +1761,7 @@ successor of yamysqlfront</property>
                       <widget class="GtkLabel" id="infopage">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">info</property>
+                        <property name="label" translatable="yes">Info</property>
                       </widget>
                       <packing>
                         <property name="tab_fill">False</property>
@@ -1912,7 +1912,7 @@ successor of yamysqlfront</property>
                       <widget class="GtkLabel" id="label3">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">process list</property>
+                        <property name="label" translatable="yes">Process list</property>
                       </widget>
                       <packing>
                         <property name="position">1</property>
@@ -1941,7 +1941,7 @@ successor of yamysqlfront</property>
                       <widget class="GtkLabel" id="label4">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">tables</property>
+                        <property name="label" translatable="yes">Tables</property>
                       </widget>
                       <packing>
                         <property name="position">2</property>
@@ -2079,7 +2079,7 @@ successor of yamysqlfront</property>
                       <widget class="GtkLabel" id="label5">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">table</property>
+                        <property name="label" translatable="yes">Table</property>
                       </widget>
                       <packing>
                         <property name="position">3</property>
@@ -2105,8 +2105,8 @@ successor of yamysqlfront</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-execute</property>
                                 <signal name="clicked" handler="on_execute_query_clicked"/>
-                                <accelerator key="Return" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                                 <accelerator key="F9" signal="clicked"/>
+                                <accelerator key="Return" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                               <packing>
                                 <property name="expand">False</property>
@@ -2120,10 +2120,9 @@ successor of yamysqlfront</property>
                                 <property name="use_action_appearance">False</property>
                                 <child>
                                   <widget class="GtkSpinButton" id="reexecution_spin">
-                                    <property name="width_request">41</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip" translatable="yes">automatic reexecution</property>
+                                    <property name="tooltip" translatable="yes">Automatic Reexecution</property>
                                     <property name="primary_icon_activatable">False</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="primary_icon_sensitive">True</property>
@@ -2318,6 +2317,7 @@ successor of yamysqlfront</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="orientation">vertical</property>
+                                        <property name="toolbar_style">icons</property>
                                         <property name="tooltips">False</property>
                                         <property name="icon_size">0</property>
                                         <child>
@@ -2525,7 +2525,6 @@ successor of yamysqlfront</property>
                                                     <property name="xalign">0</property>
                                                     <property name="xpad">5</property>
                                                     <property name="ypad">1</property>
-                                                    <property name="label" translatable="yes">label</property>
                                                     <property name="single_line_mode">True</property>
                                                   </widget>
                                                 </child>
@@ -2589,7 +2588,7 @@ successor of yamysqlfront</property>
                                   <widget class="GtkLabel" id="query_tab_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">query1</property>
+                                    <property name="label" translatable="yes">Query1</property>
                                   </widget>
                                   <packing>
                                     <property name="expand">False</property>
@@ -2639,7 +2638,7 @@ successor of yamysqlfront</property>
                       <widget class="GtkLabel" id="label30">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">query</property>
+                        <property name="label" translatable="yes">Query</property>
                       </widget>
                       <packing>
                         <property name="position">4</property>
@@ -2692,7 +2691,7 @@ successor of yamysqlfront</property>
               <widget class="GtkLabel" id="label1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">sql log</property>
+                <property name="label" translatable="yes">SQL Log</property>
               </widget>
               <packing>
                 <property name="tab_fill">False</property>
@@ -2720,7 +2719,7 @@ successor of yamysqlfront</property>
               <widget class="GtkLabel" id="label2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">messages</property>
+                <property name="label" translatable="yes">Messages</property>
               </widget>
               <packing>
                 <property name="position">1</property>
@@ -2871,7 +2870,7 @@ successor of yamysqlfront</property>
               <widget class="GtkLabel" id="label48">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">blobview</property>
+                <property name="label" translatable="yes">BLOB view</property>
               </widget>
               <packing>
                 <property name="position">2</property>

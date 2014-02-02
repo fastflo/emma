@@ -1,4 +1,4 @@
-from emmalib import MySqlDb
+from emmalib.providers.mysql.MySqlDb import MySqlDb
 from emmalib.providers.sqlite.SQLiteTable import SQLiteTable
 
 

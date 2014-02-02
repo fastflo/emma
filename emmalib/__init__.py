@@ -17,6 +17,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
+if __name__ != 'emmalib':
+    print "Don't run __init__.py - run ../emma instead"
+    exit()
+
+try:
+    import gtk
+    import gobject
+    import gtk.gdk
+    import gtk.glade
+    from gtk import keysyms
+except:
+    print "no gtk. you will not be able to start emma.", sys.exc_value
+
 from stat import *
 import os
 import gc
@@ -24,35 +37,24 @@ import pickle
 import datetime
 import bz2
 import sql
-import traceback
+
 from query_regular_expression import *
 
-try:
-    import gtk
-    from gtk import keysyms
-    import gobject
-    import gtk.gdk
-    import gtk.glade
-except:
-    print "no gtk. you will not be able to start emma.", sys.exc_value
+import providers
 
-if __name__ != "__main__":
-    from emmalib import __file__ as emmalib_file
-    from emmalib.providers.mysql.MySqlHost import *
-    from emmalib.providers.mysql.MySqlQueryTab import *
-    from emmalib.ConnectionWindow import ConnectionWindow
-    from emmalib.OutputHandler import OutputHandler
-    from emmalib.Config import Config
-    from emmalib.ConnectionTreeView import *
-    import emmalib.dialogs
-else:
-    emmalib_file = __file__
-    import providers
-    from ConnectionWindow import ConnectionWindow
-    from OutputHandler import OutputHandler
-    from Config import Config
-    from ConnectionTreeView import *
-    import dialogs
+from emmalib.ConnectionTreeView import ConnectionsTreeView
+from emmalib.ConnectionWindow import ConnectionWindow
+from emmalib.OutputHandler import OutputHandler
+from emmalib.Config import Config
+import dialogs
+
+# emmalib_file = __file__
+# import providers
+# from ConnectionWindow import ConnectionWindow
+# from OutputHandler import OutputHandler
+# from Config import Config
+# from ConnectionTreeView import *
+# import dialogs
 
 try:
     import sqlite3
@@ -69,7 +71,7 @@ re_src_after_order_end = "(?:limit.*|procedure.*|for update.*|lock in share mode
 re_src_after_order = "(?:[ \r\n\t]" + re_src_after_order_end + ")"
 re_src_query_order = "(?is)(.*order[ \r\n\t]+by[ \r\n\t]+)(.*?)([ \r\n\t]*" + re_src_after_order_end + ")"
 
-emmalib_file = os.path.abspath(emmalib_file)
+emmalib_file = os.path.abspath(__file__)
     
 #print "sys prefix:", sys.prefix
 
@@ -116,19 +118,17 @@ class Emma:
         self.sql_log_model = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING)
         self.sql_log_tv = self.xml.get_widget("sql_log_tv")
         self.sql_log_tv.set_model(self.sql_log_model)
-        self.sql_log_tv.append_column(gtk.TreeViewColumn("time", gtk.CellRendererText(), text=0))
-        self.sql_log_tv.append_column(gtk.TreeViewColumn("query", gtk.CellRendererText(), markup=1))
-        if hasattr(self, "state"):
-            for log in self.state["sql_logs"]:
-                self.sql_log_model.append(log)
-        
+        self.sql_log_tv.append_column(gtk.TreeViewColumn("Time", gtk.CellRendererText(), text=0))
+        self.sql_log_tv.append_column(gtk.TreeViewColumn("Query", gtk.CellRendererText(), markup=1))
+
         # setup msg
         self.msg_model = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING)
         self.msg_tv = self.xml.get_widget("msg_tv")
         self.msg_tv.set_model(self.msg_model)
-        self.msg_tv.append_column(gtk.TreeViewColumn("time", gtk.CellRendererText(), text=0))
-        self.msg_tv.append_column(gtk.TreeViewColumn("message", gtk.CellRendererText(), text=1))
-        
+        self.msg_tv.append_column(gtk.TreeViewColumn("Time", gtk.CellRendererText(), text=0))
+        self.msg_tv.append_column(gtk.TreeViewColumn("Message", gtk.CellRendererText(), text=1))
+
+        # BLOB view
         self.blob_tv = self.xml.get_widget("blob_tv")
         self.blob_tv.set_sensitive(False)
         self.blob_buffer = self.blob_tv.get_buffer()
@@ -138,6 +138,7 @@ class Emma:
         self.processlist_tv = self.xml.get_widget("processlist_treeview")
         self.processlist_model = None
 
+        # Local Search Window
         self.local_search_window = self.xml.get_widget("localsearch_window")
         self.local_search_entry = self.xml.get_widget("local_search_entry")
         self.local_search_entry.connect("activate", lambda *a: self.local_search_window.response(gtk.RESPONSE_OK))
@@ -172,35 +173,7 @@ class Emma:
         self.config.have_sqlite = have_sqlite
         self.config.load()
 
-        self.add_query_tab(MySqlQueryTab(self.xml, self.query_notebook))
-
-        # if not hasattr(self, "state"):
-        #     self.hosts = {}
-        #     self.config.load()
-        #     self.queries = []
-        #     self.add_query_tab(MySqlQueryTab(self.xml, self.query_notebook))
-        # else:
-        #     self.hosts = self.state["hosts"]
-        #     self.config.load(True)
-        #     self.queries = []
-        #     first = True
-        #     for q in self.state["queries"]:
-        #         if first:
-        #             xml = self.xml
-        #         else:
-        #             xml = gtk.glade.XML(self.glade_file, "first_query")
-        #
-        #         new_page = xml.get_widget("first_query")
-        #         q.__init__(xml, self.query_notebook)
-        #         self.add_query_tab(q)
-        #
-        #         if first:
-        #             first = False
-        #             self.query_notebook.set_tab_label_text(new_page, q.name)
-        #         else:
-        #             label = gtk.Label(q.name)
-        #             label.show()
-        #             self.query_notebook.append_page(new_page, label)
+        self.add_query_tab(providers.mysql.MySqlQueryTab(self.xml, self.query_notebook))
 
         connection_tv = self.xml.get_widget("connections_tv")
         connection_tv_container = self.xml.get_widget("connections_tv_container")
@@ -318,9 +291,7 @@ class Emma:
                 try:
                     _load(plugin_name)
                 except:
-                    print "could not load plugin %r:\n%s" % (
-                        plugin_name,
-                        traceback.format_exc())
+                    print "could not load plugin %r" % plugin_name
 
     def unload_plugins(self):
         """ not really an unload - i just asks the module to cleanup """
@@ -1865,8 +1836,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             try:
                 f(q)
             except:
-                print "query_change_listener %r had exception:\n%s" % (
-                    f, traceback.format_exc())
+                print "query_change_listener %r had exception" % f
     
     def on_closequery_button_clicked(self, button):
         if len(self.queries) == 1:

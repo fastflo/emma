@@ -1,2 +1,2 @@
-from mysql import *
-from sqlite import *
+import mysql
+import sqlite
