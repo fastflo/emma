@@ -164,7 +164,6 @@ class Config:
         return False
 
     def save(self):
-        self.emma.add_msg_log('config.save')
         if not os.path.exists(self.config_path):
             print "try to create config path %r" % self.config_path
             try:
@@ -190,12 +189,12 @@ class Config:
             fp.write("%s=%s\n" % (name, value))
 
         if self.emma:
-            itr = self.emma.connection_tv.connections_model.get_iter_root()
+            itr = self.emma.connections_tv.connections_model.get_iter_root()
             while itr:
-                host = self.emma.connection_tv.connections_model.get_value(itr, 0)
+                host = self.emma.connections_tv.connections_model.get_value(itr, 0)
                 _str_to_write = "connection_%s=%s\n" % (host.name, host.get_connection_string())
                 fp.write(_str_to_write)
-                itr = self.emma.connection_tv.connections_model.iter_next(itr)
+                itr = self.emma.connections_tv.connections_model.iter_next(itr)
             fp.close()
 
 # if __name__ != 'main':

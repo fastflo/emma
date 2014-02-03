@@ -1721,16 +1721,6 @@ successor of yamysqlfront</property>
                     <property name="can_focus">True</property>
                     <property name="hscrollbar_policy">automatic</property>
                     <property name="vscrollbar_policy">automatic</property>
-                    <child>
-                      <widget class="GtkTreeView" id="connections_tv">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="has_focus">True</property>
-                        <signal name="cursor_changed" handler="on_connections_tv_cursor_changed"/>
-                        <signal name="button_release_event" handler="on_connections_button_release"/>
-                        <signal name="row_activated" handler="on_connections_row_activated"/>
-                      </widget>
-                    </child>
                   </widget>
                   <packing>
                     <property name="resize">False</property>
@@ -1743,31 +1733,6 @@ successor of yamysqlfront</property>
                     <property name="can_focus">True</property>
                     <property name="show_border">False</property>
                     <signal name="switch_page" handler="on_nb_change_page"/>
-                    <child>
-                      <widget class="GtkScrolledWindow" id="scrolledwindow13">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">automatic</property>
-                        <property name="vscrollbar_policy">automatic</property>
-                        <child>
-                          <widget class="GtkTextView" id="textview1">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                          </widget>
-                        </child>
-                      </widget>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="infopage">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Info</property>
-                      </widget>
-                      <packing>
-                        <property name="tab_fill">False</property>
-                        <property name="type">tab</property>
-                      </packing>
-                    </child>
                     <child>
                       <widget class="GtkVBox" id="vbox8">
                         <property name="visible">True</property>

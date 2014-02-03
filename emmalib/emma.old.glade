@@ -63,6 +63,14 @@
       </widget>
     </child>
   </widget>
+  <widget class="GtkTreeView" id="connections_tv">
+    <property name="visible">True</property>
+    <property name="can_focus">True</property>
+    <property name="has_focus">True</property>
+    <signal name="cursor_changed" handler="on_connections_tv_cursor_changed" swapped="no"/>
+    <signal name="button_release_event" handler="on_connections_button_release" swapped="no"/>
+    <signal name="row_activated" handler="on_connections_row_activated" swapped="no"/>
+  </widget>
   <widget class="GtkMenu" id="database_popup">
     <property name="can_focus">False</property>
     <child>
@@ -114,6 +122,23 @@
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="use_action_appearance">False</property>
         <signal name="activate" handler="on_db_popup" swapped="no"/>
+      </widget>
+    </child>
+  </widget>
+  <widget class="GtkLabel" id="infopage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="label" translatable="yes">Info</property>
+  </widget>
+  <widget class="GtkScrolledWindow" id="scrolledwindow13">
+    <property name="visible">True</property>
+    <property name="can_focus">True</property>
+    <property name="hscrollbar_policy">automatic</property>
+    <property name="vscrollbar_policy">automatic</property>
+    <child>
+      <widget class="GtkTextView" id="textview1">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
       </widget>
     </child>
   </widget>

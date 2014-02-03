@@ -74,7 +74,6 @@ class ConnectionsTreeView(gtk.TreeView):
 
     def on_connections_row_activated(self, tv, path, col):
         depth = len(path)
-        self.emma.add_msg_log('on_connections_row_activated level %s' % depth)
         _iter = self.connections_model.get_iter(path)
         o = self.connections_model.get_value(_iter, 0)
 
@@ -343,7 +342,6 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.on_execute_query_clicked(None, "repair table `%s`" % table.name)
 
     def on_db_popup(self, popup, item):
-        self.emma.add_msg_log('on_db_popup')
         path, column = self.get_cursor()
         _iter = self.connections_model.get_iter(path)
         what = item.name
@@ -384,7 +382,6 @@ class ConnectionsTreeView(gtk.TreeView):
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
 
     def on_host_popup(self, popup, item):
-        self.emma.add_msg_log('on_db_popup')
         path, column = self.get_cursor()
         if path:
             _iter = self.connections_model.get_iter(path)
