@@ -19,7 +19,7 @@ class TabSqlLog(gtk.ScrolledWindow):
         self.add(self.tv)
         self.show_all()
 
-    def addLog(self, log):
+    def log(self, log):
         olog = log
         max_len = int(self.emma.config.get("query_log_max_entry_length"))
         if len(log) > max_len:
@@ -37,9 +37,7 @@ class TabSqlLog(gtk.ScrolledWindow):
         log = log.replace(">", "&gt;")
         _iter = self.model.append((timestamp, log, olog))
         self.tv.scroll_to_cell(self.model.get_path(_iter))
-        #self.xml.get_widget("message_notebook").set_current_page(0)
-        pagenum = self.emma.message_notebook.page_num(self)
-        self.emma.message_notebook.set_current_page(pagenum)
+        self.emma.message_notebook.set_current_page(self.emma.message_notebook.page_num(self))
         self.emma.process_events()
 
     def on_sql_log_activate(self, *args):

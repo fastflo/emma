@@ -212,4 +212,16 @@
             </widget>
         </child>
     </widget>
+    <widget class="GtkScrolledWindow" id="scrolledwindow2">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="shadow_type">in</property>
+        <child>
+            <widget class="GtkTreeView" id="msg_tv">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <signal name="button_press_event" handler="on_msg_tv_button_press_event"/>
+            </widget>
+        </child>
+    </widget>
 </glade-interface>

@@ -117,12 +117,8 @@ class Emma:
         self.sql_log = widgets.TabSqlLog(self)
         self.message_notebook.append_page(self.sql_log, gtk.Label('SQL Log'))
 
-        # setup msg
-        self.msg_model = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING)
-        self.msg_tv = self.xml.get_widget("msg_tv")
-        self.msg_tv.set_model(self.msg_model)
-        self.msg_tv.append_column(gtk.TreeViewColumn("Time", gtk.CellRendererText(), text=0))
-        self.msg_tv.append_column(gtk.TreeViewColumn("Message", gtk.CellRendererText(), text=1))
+        self.msg_log = widgets.TabMsgLog(self)
+        self.message_notebook.append_page(self.msg_log, gtk.Label('Message Log'))
 
         # BLOB view
         self.blob_tv = self.xml.get_widget("blob_tv")
@@ -2080,16 +2076,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         crs = column.get_cell_renderers()
         return self.on_query_change_data(crs[0], path, new_value, col_num, force_update=self.blob_encoding != q.encoding)
         
-    def on_messages_popup(self, item):
-        if item.name == "clear_messages":
-            self.msg_model.clear()
-        
-    def on_msg_tv_button_press_event(self, tv, event):
-        if not event.button == 3: return False
-        res = tv.get_path_at_pos(int(event.x), int(event.y))
-        self.xml.get_widget("messages_popup").popup(None, None, None, event.button, event.time)
-        return True
-        
     def on_query_popup(self, item):
         q = self.current_query
         path, column = q.treeview.get_cursor()
@@ -2523,23 +2509,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def process_events(self):
         while gtk.events_pending():
             gtk.main_iteration(False)
-
-    def add_msg_log(self, log):
-        if not log:
-            return
-        
-        log.replace(
-            "You have an error in your SQL syntax.  Check the manual that corresponds to your MySQL server version for the right syntax to use near",
-            "syntax error at "
-        )
-        now = time.time()
-        now = int((now - int(now)) * 100)
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        if now:
-            timestamp = "%s.%02d" % (timestamp, now)
-        _iter = self.msg_model.append((timestamp, log))
-        self.msg_tv.scroll_to_cell(self.msg_model.get_path(_iter))
-        self.xml.get_widget("message_notebook").set_current_page(1)
 
     def get_selected_table(self):
         path, column = self.connections_tv.get_cursor()
