@@ -1,6 +1,7 @@
 import gtk
 import time
 import gobject
+from PopUpTabSqlLog import PopUpTabSqlLog
 
 
 class TabSqlLog(gtk.ScrolledWindow):
@@ -15,6 +16,9 @@ class TabSqlLog(gtk.ScrolledWindow):
 
         self.tv.connect('row-activated', self.on_sql_log_activate)
         self.tv.connect('button-press-event', self.on_sql_log_button_press)
+
+        self.menu = PopUpTabSqlLog()
+        self.menu.connect('item-selected', self.menu_item_selected)
 
         self.add(self.tv)
         self.show_all()
@@ -41,22 +45,6 @@ class TabSqlLog(gtk.ScrolledWindow):
         self.emma.process_events()
 
     def on_sql_log_activate(self, *args):
-        if len(args) == 1:
-            menuitem = args[0]
-            if menuitem.name == "clear_all_entries":
-                self.model.clear()
-
-            path, column = self.tv.get_cursor()
-            row = self.model[path]
-            if menuitem.name == "copy_sql_log":
-                self.emma.clipboard.set_text(row[2])
-                self.emma.pri_clipboard.set_text(row[2])
-            elif menuitem.name == "set_as_query_text":
-                self.emma.current_query.textview.get_buffer().set_text(row[2])
-            if menuitem.name == "delete_sql_log":
-                _iter = self.model.get_iter(path)
-                self.model.remove(_iter)
-            return True
         tv, path, tvc = args
         query = tv.get_model()[path][2]
         self.emma.current_query.textview.get_buffer().set_text(query)
@@ -68,5 +56,26 @@ class TabSqlLog(gtk.ScrolledWindow):
         res = tv.get_path_at_pos(int(event.x), int(event.y))
         if not res:
             return False
-        self.emma.xml.get_widget("sqllog_popup").popup(None, None, None, event.button, event.time)
+        tv.set_cursor_on_cell(res[0])
+        self.menu.popup(None, None, None, event.button, event.time)
+        return True
+
+    def menu_item_selected(self, menu, item):
+        if item.name == "clear_all_entries":
+            self.model.clear()
+            return True
+
+        path, column = self.tv.get_cursor()
+
+        if not path:
+            return False
+        row = self.model[path]
+        if item.name == "copy_sql_log":
+            self.emma.clipboard.set_text(row[2])
+            self.emma.pri_clipboard.set_text(row[2])
+        elif item.name == "set_as_query_text":
+            self.emma.current_query.textview.get_buffer().set_text(row[2])
+        if item.name == "delete_sql_log":
+            _iter = self.model.get_iter(path)
+            self.model.remove(_iter)
         return True

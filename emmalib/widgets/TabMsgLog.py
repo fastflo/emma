@@ -1,6 +1,7 @@
 import gtk
 import time
 import gobject
+from PopUpTabMsgLog import PopUpTabMsgLog
 
 
 class TabMsgLog(gtk.ScrolledWindow):
@@ -14,6 +15,9 @@ class TabMsgLog(gtk.ScrolledWindow):
         self.tv.append_column(gtk.TreeViewColumn("Message", gtk.CellRendererText(), text=1))
 
         self.tv.connect('button-press-event', self.on_msg_tv_button_press_event)
+
+        self.menu = PopUpTabMsgLog()
+        self.menu.connect('item-selected', self.menu_item_selected)
 
         self.add(self.tv)
         self.show_all()
@@ -38,10 +42,12 @@ class TabMsgLog(gtk.ScrolledWindow):
         if not event.button == 3:
             return False
         res = tv.get_path_at_pos(int(event.x), int(event.y))
-        self.emma.xml.get_widget("messages_popup").popup(None, None, None, event.button, event.time)
+        if not res:
+            return False
+        tv.set_cursor_on_cell(res[0])
+        self.menu.popup(None, None, None, event.button, event.time)
         return True
 
-    def on_messages_popup(self, item):
+    def menu_item_selected(self, menu, item):
         if item.name == "clear_messages":
             self.model.clear()
-

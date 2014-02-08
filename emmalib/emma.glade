@@ -2796,19 +2796,6 @@ successor of yamysqlfront</property>
       </widget>
     </child>
   </widget>
-  <widget class="GtkMenu" id="messages_popup">
-    <property name="can_focus">False</property>
-    <child>
-      <widget class="GtkMenuItem" id="clear_messages">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="label" translatable="yes">clear messages</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="on_messages_popup"/>
-      </widget>
-    </child>
-  </widget>
   <widget class="GtkMenu" id="processlist_popup">
     <property name="can_focus">False</property>
     <child>
@@ -2993,76 +2980,6 @@ successor of yamysqlfront</property>
             <property name="icon-size">1</property>
           </widget>
         </child>
-      </widget>
-    </child>
-  </widget>
-  <widget class="GtkMenu" id="sqllog_popup">
-    <property name="can_focus">False</property>
-    <child>
-      <widget class="GtkImageMenuItem" id="copy_sql_log">
-        <property name="label" translatable="yes">copy</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_sql_log_activate"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image347">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-copy</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="set_as_query_text">
-        <property name="label" translatable="yes">set as query text</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_sql_log_activate"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image348">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-justify-fill</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="delete_sql_log">
-        <property name="label" translatable="yes">delete</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_underline">True</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_sql_log_activate"/>
-        <child internal-child="image">
-          <widget class="GtkImage" id="image349">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="stock">gtk-delete</property>
-            <property name="icon-size">1</property>
-          </widget>
-        </child>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="clear_all_entries">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="label" translatable="yes">clear all entries</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="on_sql_log_activate"/>
       </widget>
     </child>
   </widget>
