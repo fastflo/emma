@@ -48,6 +48,7 @@ from ConnectionWindow import ConnectionWindow
 from OutputHandler import OutputHandler
 from Config import Config
 import dialogs
+import widgets
 
 try:
     import sqlite3
@@ -110,13 +111,11 @@ class Emma:
             print "Icon not loaded"
 
         self.current_query = None
-        
-        # setup sql_log
-        self.sql_log_model = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING)
-        self.sql_log_tv = self.xml.get_widget("sql_log_tv")
-        self.sql_log_tv.set_model(self.sql_log_model)
-        self.sql_log_tv.append_column(gtk.TreeViewColumn("Time", gtk.CellRendererText(), text=0))
-        self.sql_log_tv.append_column(gtk.TreeViewColumn("Query", gtk.CellRendererText(), markup=1))
+
+        self.message_notebook = self.xml.get_widget("message_notebook")
+
+        self.sql_log = widgets.TabSqlLog(self)
+        self.message_notebook.append_page(self.sql_log, gtk.Label('SQL Log'))
 
         # setup msg
         self.msg_model = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING)
@@ -1884,37 +1883,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if not self.current_host.query("kill %s" % process_id):
             dialogs.show_message("sorry", "there was an error while trying to kill process_id %s!" % process_id)
     
-    def on_sql_log_activate(self, *args):
-        if len(args) == 1:
-            menuitem = args[0]
-            if menuitem.name == "clear_all_entries":
-                self.sql_log_model.clear()
-                
-            path, column = self.sql_log_tv.get_cursor()
-            row = self.sql_log_model[path]
-            if menuitem.name == "copy_sql_log":
-                self.clipboard.set_text(row[2])
-                self.pri_clipboard.set_text(row[2])
-            elif menuitem.name == "set_as_query_text":
-                self.current_query.textview.get_buffer().set_text(row[2])
-            if menuitem.name == "delete_sql_log":
-                _iter = self.sql_log_model.get_iter(path)
-                self.sql_log_model.remove(_iter)
-            return True
-        tv, path, tvc = args
-        query = tv.get_model()[path][2]
-        self.current_query.textview.get_buffer().set_text(query)
-        return True
-        
-    def on_sql_log_button_press(self, tv, event):
-        if not event.button == 3:
-            return False
-        res = tv.get_path_at_pos(int(event.x), int(event.y))
-        if not res:
-            return False
-        self.xml.get_widget("sqllog_popup").popup(None, None, None, event.button, event.time)
-        return True
-        
     def on_nb_change_page(self, np, pointer, page):
         if page == 2:
             self.redraw_tables()
@@ -2095,6 +2063,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def on_blob_update_clicked(self, button):
         q = self.current_query
         path, column = q.treeview.get_cursor()
+        if not q.model:
+            return
         _iter = q.model.get_iter(path)
         
         b = self.blob_tv.get_buffer()
@@ -2549,27 +2519,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
 
     def on_query_encoding_changed(self, menuitem, data):
         self.current_query.set_query_encoding(data[0])
-        
-    def add_sql_log(self, log):
-        olog = log
-        max_len = int(self.config.get("query_log_max_entry_length"))
-        if len(log) > max_len:
-            log = log[0:max_len] + "\n/* query with length of %d bytes truncated. */" % len(log)
-        
-        if not log:
-            return
-            
-        now = time.time()
-        now = int((now - int(now)) * 100)
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        if now:
-            timestamp = "%s.%02d" % (timestamp, now)
-        log = log.replace("<", "&lt;")
-        log = log.replace(">", "&gt;")
-        _iter = self.sql_log_model.append((timestamp, log, olog))
-        self.sql_log_tv.scroll_to_cell(self.sql_log_model.get_path(_iter))
-        #self.xml.get_widget("message_notebook").set_current_page(0)
-        self.process_events()
         
     def process_events(self):
         while gtk.events_pending():

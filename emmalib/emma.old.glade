@@ -1,193 +1,215 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <glade-interface>
-  <!-- interface-requires gtk+ 2.24 -->
-  <!-- interface-naming-policy project-wide -->
-  <widget class="GtkMenu" id="connection_menu">
-    <property name="can_focus">False</property>
-    <child>
-      <widget class="GtkImageMenuItem" id="refresh_host">
-        <property name="visible">True</property>
+    <!-- interface-requires gtk+ 2.24 -->
+    <!-- interface-naming-policy project-wide -->
+    <widget class="GtkMenu" id="connection_menu">
         <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_host_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="modify_connection">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_host_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="delete_connection">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_host_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="new_connection">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_host_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="new_sqlite_connection">
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <signal name="activate" handler="on_host_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkSeparatorMenuItem" id="separator1">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="new_database">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_host_popup" swapped="no"/>
-      </widget>
-    </child>
-  </widget>
-  <widget class="GtkTreeView" id="connections_tv">
-    <property name="visible">True</property>
-    <property name="can_focus">True</property>
-    <property name="has_focus">True</property>
-    <signal name="cursor_changed" handler="on_connections_tv_cursor_changed" swapped="no"/>
-    <signal name="button_release_event" handler="on_connections_button_release" swapped="no"/>
-    <signal name="row_activated" handler="on_connections_row_activated" swapped="no"/>
-  </widget>
-  <widget class="GtkMenu" id="database_popup">
-    <property name="can_focus">False</property>
-    <child>
-      <widget class="GtkImageMenuItem" id="refresh_database">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_db_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="drop_database">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_db_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkSeparatorMenuItem" id="separator2">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="new_table">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_db_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="check_tables">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="use_action_appearance">False</property>
-        <signal name="activate" handler="on_db_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="repair_tables">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="use_action_appearance">False</property>
-        <signal name="activate" handler="on_db_popup" swapped="no"/>
-      </widget>
-    </child>
-  </widget>
-  <widget class="GtkLabel" id="infopage">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="label" translatable="yes">Info</property>
-  </widget>
-  <widget class="GtkScrolledWindow" id="scrolledwindow13">
-    <property name="visible">True</property>
-    <property name="can_focus">True</property>
-    <property name="hscrollbar_policy">automatic</property>
-    <property name="vscrollbar_policy">automatic</property>
-    <child>
-      <widget class="GtkTextView" id="textview1">
+        <child>
+            <widget class="GtkImageMenuItem" id="refresh_host">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_host_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkImageMenuItem" id="modify_connection">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_host_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkImageMenuItem" id="delete_connection">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_host_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkImageMenuItem" id="new_connection">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_host_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkMenuItem" id="new_sqlite_connection">
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="activate" handler="on_host_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkSeparatorMenuItem" id="separator1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkImageMenuItem" id="new_database">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_host_popup" swapped="no"/>
+            </widget>
+        </child>
+    </widget>
+    <widget class="GtkTreeView" id="connections_tv">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
-      </widget>
-    </child>
-  </widget>
-  <widget class="GtkMenu" id="table_popup">
-    <property name="can_focus">False</property>
-    <child>
-      <widget class="GtkImageMenuItem" id="refresh_table">
+        <property name="has_focus">True</property>
+        <signal name="cursor_changed" handler="on_connections_tv_cursor_changed" swapped="no"/>
+        <signal name="button_release_event" handler="on_connections_button_release" swapped="no"/>
+        <signal name="row_activated" handler="on_connections_row_activated" swapped="no"/>
+    </widget>
+    <widget class="GtkMenu" id="database_popup">
+        <property name="can_focus">False</property>
+        <child>
+            <widget class="GtkImageMenuItem" id="refresh_database">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_db_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkImageMenuItem" id="drop_database">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_db_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkSeparatorMenuItem" id="separator2">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkImageMenuItem" id="new_table">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_db_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkMenuItem" id="check_tables">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK |
+                    GDK_BUTTON_RELEASE_MASK
+                </property>
+                <property name="use_action_appearance">False</property>
+                <signal name="activate" handler="on_db_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkMenuItem" id="repair_tables">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK |
+                    GDK_BUTTON_RELEASE_MASK
+                </property>
+                <property name="use_action_appearance">False</property>
+                <signal name="activate" handler="on_db_popup" swapped="no"/>
+            </widget>
+        </child>
+    </widget>
+    <widget class="GtkLabel" id="infopage">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_table_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="truncate_table">
+        <property name="label" translatable="yes">Info</property>
+    </widget>
+    <widget class="GtkScrolledWindow" id="scrolledwindow13">
         <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="hscrollbar_policy">automatic</property>
+        <property name="vscrollbar_policy">automatic</property>
+        <child>
+            <widget class="GtkTextView" id="textview1">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+            </widget>
+        </child>
+    </widget>
+    <widget class="GtkMenu" id="table_popup">
         <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_table_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkImageMenuItem" id="drop_table">
+        <child>
+            <widget class="GtkImageMenuItem" id="refresh_table">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_table_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkImageMenuItem" id="truncate_table">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_table_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkImageMenuItem" id="drop_table">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_table_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkMenuItem" id="check_table">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK |
+                    GDK_BUTTON_RELEASE_MASK
+                </property>
+                <property name="use_action_appearance">False</property>
+                <signal name="activate" handler="on_table_popup" swapped="no"/>
+            </widget>
+        </child>
+        <child>
+            <widget class="GtkMenuItem" id="repair_table">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK |
+                    GDK_BUTTON_RELEASE_MASK
+                </property>
+                <property name="use_action_appearance">False</property>
+                <signal name="activate" handler="on_table_popup" swapped="no"/>
+            </widget>
+        </child>
+    </widget>
+    <widget class="GtkScrolledWindow" id="scrolledwindow1">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="use_stock">False</property>
-        <signal name="activate" handler="on_table_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="check_table">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="use_action_appearance">False</property>
-        <signal name="activate" handler="on_table_popup" swapped="no"/>
-      </widget>
-    </child>
-    <child>
-      <widget class="GtkMenuItem" id="repair_table">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="use_action_appearance">False</property>
-        <signal name="activate" handler="on_table_popup" swapped="no"/>
-      </widget>
-    </child>
-  </widget>
+        <property name="can_focus">True</property>
+        <property name="hscrollbar_policy">automatic</property>
+        <property name="vscrollbar_policy">automatic</property>
+        <child>
+            <widget class="GtkTreeView" id="sql_log_tv">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <signal name="button_press_event" handler="on_sql_log_button_press"/>
+                <signal name="row_activated" handler="on_sql_log_activate"/>
+            </widget>
+        </child>
+    </widget>
 </glade-interface>

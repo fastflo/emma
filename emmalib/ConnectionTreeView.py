@@ -292,14 +292,14 @@ class ConnectionsTreeView(gtk.TreeView):
 
     def add_mysql_host(self, name, hostname, port, user, password, database):
         from providers.mysql.MySqlHost import MySqlHost
-        host = MySqlHost(self.emma.add_sql_log, self.emma.add_msg_log, name, hostname, port, user, password, database,
+        host = MySqlHost(self.emma.sql_log.addLog, self.emma.add_msg_log, name, hostname, port, user, password, database,
                          self.emma.config.get("connect_timeout"))
         _iter = self.connections_model.append(None, [host])
         host.set_update_ui(self.redraw_host, _iter)
 
     def add_sqlite(self, filename):
         from providers.sqlite.SQLiteHost import SQLiteHost
-        host = SQLiteHost(self.emma.add_sql_log, self.emma.add_msg_log, filename)
+        host = SQLiteHost(self.emma.sql_log.addLog, self.emma.add_msg_log, filename)
         _iter = self.connections_model.append(None, [host])
         host.set_update_ui(self.redraw_host, _iter)
 

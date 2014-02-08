@@ -2637,33 +2637,6 @@ successor of yamysqlfront</property>
             <property name="show_border">False</property>
             <signal name="switch_page" handler="on_message_notebook_switch_page"/>
             <child>
-              <widget class="GtkScrolledWindow" id="scrolledwindow1">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hscrollbar_policy">automatic</property>
-                <property name="vscrollbar_policy">automatic</property>
-                <child>
-                  <widget class="GtkTreeView" id="sql_log_tv">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <signal name="button_press_event" handler="on_sql_log_button_press"/>
-                    <signal name="row_activated" handler="on_sql_log_activate"/>
-                  </widget>
-                </child>
-              </widget>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="label1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">SQL Log</property>
-              </widget>
-              <packing>
-                <property name="tab_fill">False</property>
-                <property name="type">tab</property>
-              </packing>
-            </child>
-            <child>
               <widget class="GtkScrolledWindow" id="scrolledwindow2">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
