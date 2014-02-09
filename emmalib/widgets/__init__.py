@@ -5,6 +5,8 @@ from PopUpTable import PopUpTable
 from PopUpTabSqlLog import PopUpTabSqlLog
 from PopUpTabMsgLog import PopUpTabMsgLog
 
+from PopUpProcessList import PopUpProcessList
+
 from TabSqlLog import TabSqlLog
 from TabMsgLog import TabMsgLog
 

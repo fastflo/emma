@@ -1,6 +1,8 @@
 import gtk
 import gobject
+from PopUpProcessList import PopUpProcessList
 from emmalib import dialogs
+
 
 class TabProcessList(gtk.VBox):
     def __init__(self, emma):
@@ -11,6 +13,7 @@ class TabProcessList(gtk.VBox):
         self.toolbar = gtk.Toolbar()
         self.treeviewcontainer = gtk.ScrolledWindow()
         self.treeview = gtk.TreeView()
+        self.treeview.connect('button-release-event', self.on_processlist_button_release)
         self.treeviewcontainer.add(self.treeview)
         self.button_refresh = gtk.ToolButton(gtk.STOCK_REFRESH)
         self.button_refresh.connect('clicked', self.refresh)
@@ -25,6 +28,9 @@ class TabProcessList(gtk.VBox):
         self.current_processlist_host = None
         self.processlist_timer_running = False
         self.processlist_timer_interval = 0
+
+        self.popup = PopUpProcessList()
+        self.popup.connect('item-selected', self.on_kill_process)
 
         self.show_all()
         pass
@@ -67,7 +73,7 @@ class TabProcessList(gtk.VBox):
 
         return
 
-    def on_kill_process(self, button):
+    def on_kill_process(self, *args):
         path, column = self.treeview.get_cursor()
         if not path or not self.emma.current_host:
             return
@@ -82,7 +88,7 @@ class TabProcessList(gtk.VBox):
         res = tv.get_path_at_pos(int(event.x), int(event.y))
         if not res:
             return False
-        # self.xml.get_widget("processlist_popup").popup(None, None, None, event.button, event.time)
+        self.popup.popup(None, None, None, event.button, event.time)
 
     def on_processlist_refresh_value_change(self, button):
         value = button.get_value()

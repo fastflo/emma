@@ -729,4 +729,26 @@
             </widget>
         </child>
     </widget>
+    <widget class="GtkMenu" id="processlist_popup">
+        <property name="can_focus">False</property>
+        <child>
+            <widget class="GtkImageMenuItem" id="kill_process">
+                <property name="label" translatable="yes">kill process</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_underline">True</property>
+                <property name="use_stock">False</property>
+                <signal name="activate" handler="on_kill_process"/>
+                <child internal-child="image">
+                    <widget class="GtkImage" id="image180">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="stock">gtk-stop</property>
+                        <property name="icon-size">1</property>
+                    </widget>
+                </child>
+            </widget>
+        </child>
+    </widget>
 </glade-interface>
