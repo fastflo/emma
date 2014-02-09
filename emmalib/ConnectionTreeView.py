@@ -170,16 +170,16 @@ class ConnectionsTreeView(gtk.TreeView):
             return False
         res = tv.get_path_at_pos(int(event.x), int(event.y))
         if not res or len(res[0]) == 1:
-            self.emma.xml.get_widget("modify_connection").set_sensitive(not not res)
-            self.emma.xml.get_widget("delete_connection").set_sensitive(not not res)
+            self.pop_up_host.menu_modify_connection.set_sensitive(not not res)
+            self.pop_up_host.menu_delete_connection.set_sensitive(not not res)
             connected_host = False
             if res:
                 model = self.connections_model
                 _iter = model.get_iter(res[0])
                 host = model.get_value(_iter, 0)
                 connected_host = host.connected
-            self.emma.xml.get_widget("new_database").set_sensitive(connected_host)
-            self.emma.xml.get_widget("refresh_host").set_sensitive(connected_host)
+            self.pop_up_host.menu_new_database.set_sensitive(connected_host)
+            self.pop_up_host.menu_refresh_host.set_sensitive(connected_host)
             self.pop_up_host.popup(None, None, None, event.button, event.time)
         elif len(res[0]) == 2:
             self.pop_up_database.popup(None, None, None, event.button, event.time)
