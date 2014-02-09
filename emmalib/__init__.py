@@ -112,11 +112,16 @@ class Emma:
 
         self.current_query = None
 
+        # init all notebooks
         self.message_notebook = self.xml.get_widget("message_notebook")
+        self.main_notebook = self.xml.get_widget("main_notebook")
+        self.query_notebook = self.xml.get_widget("query_notebook")
 
+        # init SQL log
         self.sql_log = widgets.TabSqlLog(self)
         self.message_notebook.append_page(self.sql_log, gtk.Label('SQL Log'))
 
+        # init Message log
         self.msg_log = widgets.TabMsgLog(self)
         self.message_notebook.append_page(self.msg_log, gtk.Label('Message Log'))
 
@@ -149,7 +154,7 @@ class Emma:
         self.table_description = self.xml.get_widget("table_description")
         
         self.query_notebook = self.xml.get_widget("query_notebook")
-        
+
         self.tooltips = gtk.Tooltips()
         self.sort_timer_running = False
         self.execution_timer_running = False
@@ -350,7 +355,7 @@ class Emma:
             if result.group(4):
                 return _start
                 
-    def is_query_editable(self, query, result = None):
+    def is_query_editable(self, query, result=None):
         table, where, field, value, row_iter = self.get_unique_where(query)
         if not table or not where:
             return False
@@ -429,10 +434,11 @@ class Emma:
         current_order = self.get_order_from_query(query)
         result = self.is_query_appendable(query)
         if not result:
-            return (None, None, None, None, None)
+            return None, None, None, None, None
         table_list = result.group(7)
         table_list = table_list.replace(" join ", ",")
-        table_list = re.sub("(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)", "", table_list)
+        table_list = re.sub("(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)",
+                            "", table_list)
         table_list = table_list.replace("`", "")
         tables = map(lambda s: s.strip(), table_list.split(","))
         
@@ -486,7 +492,8 @@ class Emma:
         
         # check tables
         table_list = table_list.replace(" join ", ",")
-        table_list = re.sub("(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)", "", table_list)
+        table_list = re.sub("(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)",
+                            "", table_list)
         table_list = table_list.replace("`", "")
         tables = table_list.split(",")
         
@@ -527,7 +534,8 @@ class Emma:
             except:
                 tries += 1
                 if tries > 1:
-                    print "query not editable, because table %r is not found in db %r" % (table, self.current_host.current_db)
+                    print "query not editable, because table %r is not found in db %r" % (table,
+                                                                                          self.current_host.current_db)
                     return None, None, None, None, None
                 new_tables = self.current_host.current_db.refresh()
                 continue
@@ -552,9 +560,11 @@ class Emma:
         self.last_th = th
         for field, field_pos in zip(th.field_order, range(len(th.field_order))):
             props = th.fields[field]
-            if ((pri_okay >= 0 and props[3] == "PRI") or (
-                th.host.__class__.__name__ == "sqlite_host" and field.endswith("_id"))):
-                if possible_primary: possible_primary += ", "
+            if (
+                (pri_okay >= 0 and props[3] == "PRI") or (
+                    th.host.__class__.__name__ == "sqlite_host" and field.endswith("_id"))):
+                if possible_primary:
+                    possible_primary += ", "
                 possible_primary += field
                 if wildcard:
                     c = field_pos
@@ -568,7 +578,8 @@ class Emma:
                     pri_okay = 1
                     if path:
                         value = self.current_query.model.get_value(row_iter, c)
-                        if primary: primary += " and "
+                        if primary:
+                            primary += " and "
                         primary += "`%s`='%s'" % (field, value)
                         self._kv_list.append((field, value))
             if uni_okay >= 0 and props[3] == "UNI":
@@ -587,7 +598,8 @@ class Emma:
                     uni_okay = 1
                     if path:
                         value = self.current_query.model.get_value(row_iter, c)
-                        if unique: unique += " and "
+                        if unique:
+                            unique += " and "
                         unique += "`%s`='%s'" % (field, value)
                         self._kv_list.append((field, value))
                         
@@ -598,14 +610,16 @@ class Emma:
             elif possible_unique:
                 possible_key = "e.g.'%s' would be useful!" % possible_unique
             print "no edit-key found. try to name a key-field in your select-clause. (%r)" % possible_key
-            return (table, None, None, None, None)
+            return table, None, None, None, None
         
         value = ""
         field = None
         if path:
             where = primary
-            if not where: where = unique
-            if not where: where = None
+            if not where:
+                where = unique
+            if not where:
+                where = None
             if not col_num is None:
                 value = self.current_query.model.get_value(row_iter, col_num)
                 if wildcard:
@@ -681,7 +695,7 @@ class Emma:
         self.current_query.set(new_query)
     
         if self.config.get("result_view_column_sort_timeout") <= 0:
-            on_execute_query_clicked()
+            self.on_execute_query_clicked()
             
         new_order = dict(new_order)
         
@@ -723,7 +737,7 @@ class Emma:
             return
         
         table, where, field, value, row_iter = self.get_unique_where(q.last_source, path, col_num)
-        if force_update == False and new_value == value:
+        if force_update is False and new_value == value:
             return
         if self.current_host.__class__.__name__ == "sqlite_host":
             limit = ""
@@ -749,14 +763,19 @@ class Emma:
             self.blob_tv.set_wrap_mode(gtk.WRAP_NONE)
         
     def on_blob_load_clicked(self, button):
-        d = self.assign_once("load dialog", 
-            gtk.FileChooserDialog, "load blob contents", self.mainwindow, gtk.FILE_CHOOSER_ACTION_OPEN, 
-                (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
+        d = self.assign_once(
+            "load dialog",
+            gtk.FileChooserDialog,
+            "load blob contents",
+            self.mainwindow,
+            gtk.FILE_CHOOSER_ACTION_OPEN,
+            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
         
         d.set_default_response(gtk.RESPONSE_ACCEPT)
         answer = d.run()
         d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT: return
+        if not answer == gtk.RESPONSE_ACCEPT:
+            return
             
         filename = d.get_filename()
         try:
@@ -764,19 +783,25 @@ class Emma:
             query_text = fp.read().decode(self.current_query.encoding, "ignore")
             fp.close()
         except:
-            dialogs.show_message("load blob contents", "loading blob contents from file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message("load blob contents", "loading blob contents from file %s: %s" % (filename,
+                                                                                                   sys.exc_value))
             return
         self.blob_tv.get_buffer().set_text(query_text)
         
     def on_blob_save_clicked(self, button):
-        d = self.assign_once("save dialog", 
-            gtk.FileChooserDialog, "save blob contents", self.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE, 
-                (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
+        d = self.assign_once(
+            "save dialog",
+            gtk.FileChooserDialog,
+            "save blob contents",
+            self.mainwindow,
+            gtk.FILE_CHOOSER_ACTION_SAVE,
+            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
         
         d.set_default_response(gtk.RESPONSE_ACCEPT)
         answer = d.run()
         d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT: return
+        if not answer == gtk.RESPONSE_ACCEPT:
+            return
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
@@ -798,7 +823,8 @@ class Emma:
     def on_delete_record_tool_clicked(self, button):
         q = self.current_query
         path, column = q.treeview.get_cursor()
-        if not path: return
+        if not path:
+            return
         row_iter = q.model.get_iter(path)
         if q.append_iter and q.model.iter_is_valid(q.append_iter) and q.model.get_path(q.append_iter) == q.model.get_path(row_iter):
             q.append_iter = None
@@ -850,7 +876,8 @@ class Emma:
             return
         query = ""
         for field, value in q.filled_fields.iteritems():
-            if query: query += ", "
+            if query:
+                query += ", "
             if not value.isdigit():
                 value = "'%s'" % self.current_host.escape(value)
             query += "%s=%s" % (self.current_host.escape_field(field), value)
@@ -1008,7 +1035,7 @@ class Emma:
         match = r.match(query, _start)
         if not match:
             return None, len(query)
-        return (match.start(0), match.end(0))
+        return match.start(0), match.end(0)
         
     def read_one_query(self, fp, _start=None, count_lines=0, update_function=None, only_use_queries=False, start_line=1):
         current_query = []
@@ -1021,8 +1048,8 @@ class Emma:
                     #print "line:", [line]
                     if line == "":
                         if len(current_query) > 0:
-                            return (' '.join(current_query), _start, count_lines)
-                        return (None, _start, count_lines)
+                            return ' '.join(current_query), _start, count_lines
+                        return None, _start, count_lines
                     if count_lines is not None:
                         count_lines += 1
                         
@@ -1051,9 +1078,9 @@ class Emma:
                 #print "append query", [line[start:end]]
                 current_query.append(line[_start:end])
             if _next == ";":
-                return (''.join(current_query), end + 1, count_lines)
+                return ''.join(current_query), end + 1, count_lines
             _start = None
-        return (None, None, None)
+        return None, None, None
         
     def on_start_execute_from_disk_clicked(self, button):
         host = self.current_host
@@ -1067,7 +1094,8 @@ class Emma:
             try:
                 exclude_regex = re.compile(exclude_regex, re.DOTALL)
             except:
-                dialogs.show_message("execute query from disk", "error compiling your regular expression: %s" % (sys.exc_value))
+                dialogs.show_message(
+                    "execute query from disk", "error compiling your regular expression: %s" % sys.exc_value)
                 return
         
         filename = fc.get_filename()
@@ -1122,7 +1150,6 @@ class Emma:
             limit_re = re.compile("(?is)^use[ \r\n\t]+`?" + re.escape(limit_dbname) + "`?|^create database[^`]+`?" + re.escape(limit_dbname) + "`?")
             limit_end_re = re.compile("(?is)^use[ \r\n\t]+`?.*`?|^create database")
         
-        
         last = 0
         _start = time.time()
         
@@ -1162,7 +1189,8 @@ class Emma:
         found_db = False
         while self.query_from_disk:
             current_line = new_line
-            query, line_offset, new_line = self.read_one_query(fp, line_offset, current_line, update_ui, limit_db and not found_db, start_line)
+            query, line_offset, new_line = self.read_one_query(
+                fp, line_offset, current_line, update_ui, limit_db and not found_db, start_line)
             if current_line < start_line:
                 current_line = start_line
                 
@@ -1183,7 +1211,9 @@ class Emma:
                 if exclude and exclude_regex.match(query):
                     print "skipping query %r" % query[0:80]
                 elif not host.query(query, True, append_to_log) and stop_on_error:
-                    dialogs.show_message("execute query from disk", "an error occoured. maybe remind the line number and press cancel to close this dialog!")
+                    dialogs.show_message(
+                        "execute query from disk",
+                        "an error occoured. maybe remind the line number and press cancel to close this dialog!")
                     self.query_from_disk = False
                     break
                 #print "exec", [query]
@@ -1191,7 +1221,8 @@ class Emma:
         update_ui(True, fp.tell())
         fp.close()
         if not self.query_from_disk:
-            dialogs.show_message("execute query from disk", "aborted by user whish - click cancel again to close window")
+            dialogs.show_message("execute query from disk",
+                                 "aborted by user whish - click cancel again to close window")
             return
         else:
             dialogs.show_message("execute query from disk", "done!")
@@ -1227,9 +1258,12 @@ class Emma:
         if q.current_db:
             host.select_database(q.current_db)
         elif host.current_db:
-            if not dialogs.confirm("query without selected db",
-"""warning: this query tab has no database selected but the host-connection already has the database '%s' selected.
-the author knows no way to deselect this database. do you want to continue?""" % host.current_db.name, self.mainwindow):
+            if not dialogs.confirm(
+                    "query without selected db",
+                    """warning: this query tab has no database selected
+                    but the host-connection already has the database '%s' selected.
+                    the author knows no way to deselect this database.
+                    do you want to continue?""" % host.current_db.name, self.mainwindow):
                 return
             
         update = False
@@ -1261,7 +1295,8 @@ the author knows no way to deselect this database. do you want to continue?""" %
         # cleanup last query model and treeview
         for col in q.treeview.get_columns():
             q.treeview.remove_column(col)
-        if q.model: q.model.clear()
+        if q.model:
+            q.model.clear()
         
         _start = 0
         while _start < len(text):
@@ -1276,7 +1311,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
                 
             thisquery.strip(" \r\n\t;")
             if not thisquery: 
-                continue # empty query
+                continue  # empty query
             query_count += 1
             query_hint = re.sub("[\n\r\t ]+", " ", thisquery[:40])
             q.label.set_text("executing query %d %s..." % (query_count, query_hint))
@@ -1350,7 +1385,7 @@ the author knows no way to deselect this database. do you want to continue?""" %
             select = True
             q.last_source = thisquery
             # get sort order!
-            sortable = True # todo
+            sortable = True  # todo
             current_order = self.get_order_from_query(thisquery)
             sens = False
             if len(current_order) > 0:
@@ -1445,7 +1480,8 @@ the author knows no way to deselect this database. do you want to continue?""" %
                 last_display = now
             
             display_time = time.time() - start_display
-            if display_time < 0: display_time = 0
+            if display_time < 0:
+                display_time = 0
         
         result = []
         if select:
@@ -1476,20 +1512,24 @@ the author knows no way to deselect this database. do you want to continue?""" %
         if not self.current_query:
             return
         
-        d = self.assign_once("save results dialog", 
+        d = self.assign_once(
+            "save results dialog",
             gtk.FileChooserDialog, "save results", self.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE, 
-                (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
+            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
         
         d.set_default_response(gtk.RESPONSE_ACCEPT)
         answer = d.run()
         d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT: return
+        if not answer == gtk.RESPONSE_ACCEPT:
+            return
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
                 dialogs.show_message("save results", "%s already exists and is not a file!" % filename)
                 return
-            if not dialogs.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
+            if not dialogs.confirm(
+                    "overwrite file?",
+                    "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
                 return
         q = self.current_query
         _iter = q.model.get_iter_first()
@@ -1505,7 +1545,8 @@ the author knows no way to deselect this database. do you want to continue?""" %
                 row = q.model.get(_iter, *indices)
                 for field in row:
                     value = field
-                    if value is None: value = ""
+                    if value is None:
+                        value = ""
                     fp.write(value.replace(field_delim, "\\" + field_delim))
                     fp.write(field_delim)
                 fp.write(line_delim)
@@ -1514,25 +1555,28 @@ the author knows no way to deselect this database. do you want to continue?""" %
         except:
             dialogs.show_message("save results", "error writing query to file %s: %s" % (filename, sys.exc_value))
         
-
     def on_save_result_sql_clicked(self, button):
         if not self.current_query:
             return
         title = "save results as sql insert script"
-        d = self.assign_once("save results dialog", 
+        d = self.assign_once(
+            "save results dialog",
             gtk.FileChooserDialog, title, self.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE, 
-                (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
+            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
         
         d.set_default_response(gtk.RESPONSE_ACCEPT)
         answer = d.run()
         d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT: return
+        if not answer == gtk.RESPONSE_ACCEPT:
+            return
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
                 dialogs.show_message(title, "%s already exists and is not a file!" % filename)
                 return
-            if not dialogs.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
+            if not dialogs.confirm(
+                    "overwrite file?",
+                    "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
                 return
         q = self.current_query
         _iter = q.model.get_iter_first()
@@ -1591,20 +1635,24 @@ the author knows no way to deselect this database. do you want to continue?""" %
         if not self.current_query:
             return
         
-        d = self.assign_once("save dialog", 
+        d = self.assign_once(
+            "save dialog",
             gtk.FileChooserDialog, "save query", self.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE, 
-                (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
+            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
         
         d.set_default_response(gtk.RESPONSE_ACCEPT)
         answer = d.run()
         d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT: return
+        if not answer == gtk.RESPONSE_ACCEPT:
+            return
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
                 dialogs.show_message("save query", "%s already exists and is not a file!" % filename)
                 return
-            if not dialogs.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
+            if not dialogs.confirm(
+                    "overwrite file?",
+                    "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
                 return
         b = self.current_query.textview.get_buffer()
         query_text = b.get_text(b.get_start_iter(), b.get_end_iter())
@@ -1619,14 +1667,16 @@ the author knows no way to deselect this database. do you want to continue?""" %
         if not self.current_query:
             return
         
-        d = self.assign_once("load dialog", 
+        d = self.assign_once(
+            "load dialog",
             gtk.FileChooserDialog, "load query", self.mainwindow, gtk.FILE_CHOOSER_ACTION_OPEN, 
-                (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
+            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
         
         d.set_default_response(gtk.RESPONSE_ACCEPT)
         answer = d.run()
         d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT: return
+        if not answer == gtk.RESPONSE_ACCEPT:
+            return
             
         filename = d.get_filename()
         try:
@@ -1659,38 +1709,46 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         self.current_query.textview.get_buffer().set_text(query_text)
         
     def on_save_workspace_activate(self, button):
-        d = self.assign_once("save workspace dialog", 
+        d = self.assign_once(
+            "save workspace dialog",
             gtk.FileChooserDialog, "save workspace", self.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE, 
-                (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
+            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
         
         d.set_default_response(gtk.RESPONSE_ACCEPT)
         answer = d.run()
         d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT: return
+        if not answer == gtk.RESPONSE_ACCEPT:
+            return
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
                 dialogs.show_message("save workspace", "%s already exists and is not a file!" % filename)
                 return
-            if not dialogs.confirm("overwrite file?", "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
+            if not dialogs.confirm(
+                    "overwrite file?",
+                    "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
                 return
         try:
             fp = file(filename, "wb")
             pickle.dump(self, fp)
             fp.close()
         except:
-            dialogs.show_message("save workspace", "error writing workspace to file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
+            dialogs.show_message(
+                "save workspace",
+                "error writing workspace to file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
         
     def on_restore_workspace_activate(self, button):
         global new_instance
-        d = self.assign_once("restore workspace dialog", 
+        d = self.assign_once(
+            "restore workspace dialog",
             gtk.FileChooserDialog, "restore workspace", self.mainwindow, gtk.FILE_CHOOSER_ACTION_OPEN, 
-                (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
+            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
         
         d.set_default_response(gtk.RESPONSE_ACCEPT)
         answer = d.run()
         d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT: return
+        if not answer == gtk.RESPONSE_ACCEPT:
+            return
         filename = d.get_filename()
         if not os.path.exists(filename):
             dialogs.show_message("restore workspace", "%s does not exists!" % filename)
@@ -1706,7 +1764,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             print "got new instance:", new_instance
             fp.close()
         except:
-            dialogs.show_message("restore workspace", "error restoring workspace from file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
+            dialogs.show_message(
+                "restore workspace",
+                "error restoring workspace from file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
         self.mainwindow.destroy()
 
     # def __setstate__(self, state):
@@ -1722,7 +1782,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.local_search_entry.grab_focus()
             answer = self.local_search_window.run()
             self.local_search_window.hide()
-            if not answer == gtk.RESPONSE_OK: return
+            if not answer == gtk.RESPONSE_OK:
+                return
         regex = self.local_search_entry.get_text()
         if self.local_search_case_sensitive.get_active():
             regex = "(?i)" + regex
@@ -1744,25 +1805,29 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         while _start:
             for k in range(fields):
                 v = tm.get_value(_start, k)
-                if v is None: continue
+                if v is None:
+                    continue
                 if re.search(regex, v):
                     path = tm.get_path(_start)
                     if start_path and start_path == path and k <= start_column_index:
-                        continue # skip!
+                        continue  # skip!
                     column = query_view.get_column(k)
                     query_view.set_cursor(path, column)
                     query_view.scroll_to_cell(path, column)
                     query_view.grab_focus()
                     return
             _start = tm.iter_next(_start)
-        dialogs.show_message("local regex search", "sorry, no match found!\ntry to search from the beginning or execute a less restrictive query...")
+        dialogs.show_message(
+            "local regex search",
+            "sorry, no match found!\ntry to search from the beginning or execute a less restrictive query...")
         
     def on_query_font_clicked(self, button):
         d = self.assign_once("query text font", gtk.FontSelectionDialog, "select query font")
         d.set_font_name(self.config.get("query_text_font"))
         answer = d.run()
         d.hide()
-        if not answer == gtk.RESPONSE_OK: return
+        if not answer == gtk.RESPONSE_OK:
+            return
         font_name = d.get_font_name()
         self.current_query.set_query_font(font_name)
         self.config.config["query_text_font"] = font_name
@@ -1773,7 +1838,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         d.set_font_name(self.config.get("query_result_font"))
         answer = d.run()
         d.hide()
-        if not answer == gtk.RESPONSE_OK: return
+        if not answer == gtk.RESPONSE_OK:
+            return
         font_name = d.get_font_name()
         self.current_query.set_result_font(font_name)
         self.config.config["query_result_font"] = font_name
@@ -1783,7 +1849,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         xml = gtk.glade.XML(self.glade_file, "first_query")
         tab_label_hbox = gtk.glade.XML(self.glade_file, "tab_label_hbox")
         new_page = xml.get_widget("first_query")
-        self.add_query_tab(MySqlQueryTab(xml, self.query_notebook))
+        self.add_query_tab(providers.mysql.MySqlQueryTab(xml, self.query_notebook))
         label = tab_label_hbox.get_widget("tab_label_hbox")
         qtlabel = tab_label_hbox.get_widget("query_tab_label")
         #qtlabel.set_text("query%d" % self.query_count)
@@ -1830,7 +1896,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
     def on_processlist_refresh_value_change(self, button):
         value = button.get_value()
-        if self.processlist_timer_running: return
+        if self.processlist_timer_running:
+            return
         self.processlist_timer_running = True
         self.processlist_timer_interval = value
         gobject.timeout_add(int(value * 1000), self.on_processlist_refresh_timeout, button)
@@ -1884,7 +1951,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.redraw_tables()
             return
         path, column = self.connections_tv.get_cursor()
-        if not path: return
+        if not path:
+            return
         if len(path) == 3 and page == 3:
             self.update_table_view(path)
     
@@ -1951,7 +2019,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             v = th.fields[fn]
             for c in range(len(th.describe_headers)):
                 s = v[c]
-                if s is None: s = ""
+                if s is None:
+                    s = ""
                 l = gtk.Label(s)
                 t.attach(l, c, c + 1, r, r + 1, gtk.FILL, 0)
                 l.set_alignment(0, 0.5)
@@ -1982,7 +2051,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             return True
             
     def on_query_view_button_release_event(self, tv, event):
-        if not event.button == 3: return False
+        if not event.button == 3:
+            return False
         res = tv.get_path_at_pos(int(event.x), int(event.y))
         menu = self.xml.get_widget("result_popup")
         if res:
@@ -2000,7 +2070,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 else:
                     c.set_sensitive(self.current_query.add_record.get_property("sensitive"))
         #menu.popup(None, None, None, event.button, event.time)
-        menu.popup(None, None, None, 0, event.time) # strange!
+        menu.popup(None, None, None, 0, event.time)  # strange!
         return True
 
     def get_current_table(self):
@@ -2051,7 +2121,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
 
     def on_reexecution_spin_changed(self, button):
         value = button.get_value()
-        if self.execution_timer_running: return
+        if self.execution_timer_running:
+            return
         self.execution_timer_running = True
         self.execution_timer_interval = value
         gobject.timeout_add(int(value * 1000), self.on_execution_timeout, button)
@@ -2074,7 +2145,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             print "column not found!"
             return
         crs = column.get_cell_renderers()
-        return self.on_query_change_data(crs[0], path, new_value, col_num, force_update=self.blob_encoding != q.encoding)
+        return self.on_query_change_data(crs[0], path, new_value, col_num,
+                                         force_update=self.blob_encoding != q.encoding)
         
     def on_query_popup(self, item):
         q = self.current_query
@@ -2096,16 +2168,19 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             col_max = q.model.get_n_columns()
             value = ""
             for col_num in range(col_max):
-                if value: value += self.config.get("copy_record_as_csv_delim")
+                if value:
+                    value += self.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(_iter, col_num)
-                if not v is None: value += v
+                if not v is None:
+                    value += v
             self.clipboard.set_text(value)
             self.pri_clipboard.set_text(value)
         elif item.name == "copy_record_as_quoted_csv":
             col_max = q.model.get_n_columns()
             value = ""
             for col_num in range(col_max):
-                if value: value += self.config.get("copy_record_as_csv_delim")
+                if value:
+                    value += self.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(_iter, col_num)
                 if not v is None: 
                     v = v.replace("\"", "\\\"")
@@ -2123,9 +2198,11 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             value = ""
             _iter = q.model.get_iter_first()
             while _iter:
-                if value: value += self.config.get("copy_record_as_csv_delim")
+                if value:
+                    value += self.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(_iter, col_num)
-                if not v is None: value += v
+                if not v is None:
+                    value += v
                 _iter = q.model.iter_next(_iter)
             self.clipboard.set_text(value)
             self.pri_clipboard.set_text(value)
@@ -2140,7 +2217,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             value = ""
             _iter = q.model.get_iter_first()
             while _iter:
-                if value: value += self.config.get("copy_record_as_csv_delim")
+                if value:
+                    value += self.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(_iter, col_num)
                 if not v is None: 
                     v = v.replace("\"", "\\\"")
@@ -2151,7 +2229,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         elif item.name == "copy_column_names":
             value = ""
             for col in q.treeview.get_columns():
-                if value: value += self.config.get("copy_record_as_csv_delim")
+                if value:
+                    value += self.config.get("copy_record_as_csv_delim")
                 value += col.get_title().replace("__", "_")
             self.clipboard.set_text(value)
             self.pri_clipboard.set_text(value)
@@ -2212,7 +2291,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 print "column not found!"
                 return
             table, where, field, value, row_iter = self.get_unique_where(q.last_source, path, col_num)
-            update_query = "update `%s` set `%s`=password('%s') where %s limit 1" % (table, field, self.current_host.escape(value), where)
+            update_query = "update `%s` set `%s`=password('%s') where %s limit 1" % (table, field,
+                                                                                     self.current_host.escape(value),
+                                                                                     where)
             if not self.current_host.query(update_query, encoding=q.encoding):
                 return
             self.current_host.query("select `%s` from `%s` where %s limit 1" % (field, table, where))
@@ -2230,7 +2311,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 print "column not found!"
                 return
             table, where, field, value, row_iter = self.get_unique_where(q.last_source, path, col_num)
-            update_query = "update `%s` set `%s`=sha1('%s') where %s limit 1" % (table, field, self.current_host.escape(value), where)
+            update_query = "update `%s` set `%s`=sha1('%s') where %s limit 1" % (table, field,
+                                                                                 self.current_host.escape(value),
+                                                                                 where)
             if not self.current_host.query(update_query, encoding=q.encoding):
                 return
             self.current_host.query("select `%s` from `%s` where %s limit 1" % (field, table, where))
@@ -2246,17 +2329,23 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
         if t.find("$table$") != -1:
             if not current_table:
-                dialog.show_message("info", "no table selected!\nyou can't execute a template with $table$ in it, if you have no table selected!")
+                dialogs.show_message(
+                    "info",
+                    "no table selected!\nyou can't execute a template with $table$ in it, if you have no table selected!")
                 return
             t = t.replace("$table$", self.current_host.escape_table(current_table.name))
             
         pos = t.find("$primary_key$")
         if pos != -1:
             if not current_table:
-                dialog.show_message("info", "no table selected!\nyou can't execute a template with $primary_key$ in it, if you have no table selected!")
+                dialogs.show_message(
+                    "info",
+                    "no table selected!\nyou can't execute a template with $primary_key$ in it, if you have no table selected!")
                 return
             if not current_table.fields:
-                dialog.show_message("info", "sorry, can't execute this template, because table '%s' has no fields!" % current_table.name)
+                dialogs.show_message(
+                    "info",
+                    "sorry, can't execute this template, because table '%s' has no fields!" % current_table.name)
                 return
             # is the next token desc or asc?
             result = re.search("(?i)[ \t\r\n]*(de|a)sc", t[pos:])
@@ -2273,8 +2362,10 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 primary_key = ""
                 for name in current_table.field_order:
                     props = current_table.fields[name]
-                    if props[3] != "PRI": continue
-                    if primary_key: primary_key += " " + order_dir + ", "
+                    if props[3] != "PRI":
+                        continue
+                    if primary_key:
+                        primary_key += " " + order_dir + ", "
                     primary_key += self.current_host.escape_field(name)
                 if primary_key: 
                     replace = primary_key
@@ -2282,8 +2373,10 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 key = ""
                 for name in current_table.field_order:
                     props = current_table.fields[name]
-                    if props[3] != "UNI": continue
-                    if key: key +=  " " + order_dir + ", "
+                    if props[3] != "UNI":
+                        continue
+                    if key:
+                        key += " " + order_dir + ", "
                     key += self.current_host.escape_field(name)
                 if key: 
                     replace = key
@@ -2330,7 +2423,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                     self.fc_op_combobox[i].show()
                     self.fc_entry[i].show()
             if not current_table:
-                dialog.show_message("info", "no table selected!\nyou can't execute a template with $field_conditions$ in it, if you have no table selected!")
+                dialogs.show_message(
+                    "info",
+                    "no table selected!\nyou can't execute a template with $field_conditions$ in it, if you have no table selected!")
                 return
                 
             last_field = []
@@ -2346,12 +2441,15 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                     if last_field[k] == field_name:
                         self.fc_combobox[k].set_active(fc)
                 fc += 1
-            if not self.fc_op_combobox[0].get_active_text(): self.fc_op_combobox[0].set_active(0)
-            if not self.fc_combobox[0].get_active_text(): self.fc_combobox[0].set_active(0)
+            if not self.fc_op_combobox[0].get_active_text():
+                self.fc_op_combobox[0].set_active(0)
+            if not self.fc_combobox[0].get_active_text():
+                self.fc_combobox[0].set_active(0)
             
             answer = self.fc_window.run()
             self.fc_window.hide()
-            if answer != gtk.RESPONSE_OK: return
+            if answer != gtk.RESPONSE_OK:
+                return
             
             def field_operator_value(field, op, value):
                 if op == "ISNULL":
@@ -2382,14 +2480,15 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                     )
                 )
             t = t.replace("$field_conditions$", conditions)
-            
-            
+
         try:
             new_order = self.stored_orders[self.current_host.current_db.name][current_table.name]
             print "found stored order: %r" % (new_order, )
             query = t
-            try:    r = self.query_order_re
-            except: r = self.query_order_re = re.compile(re_src_query_order)
+            try:
+                r = self.query_order_re
+            except:
+                r = self.query_order_re = re.compile(re_src_query_order)
             match = re.search(r, query)
             if match: 
                 before, order, after = match.groups()
@@ -2406,9 +2505,11 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 addition = "\norder by\n\t"
             order = ""
             for col, o in new_order:
-                if order: order += ",\n\t"
+                if order:
+                    order += ",\n\t"
                 order += self.current_host.escape_field(col)
-                if not o: order += " desc"
+                if not o:
+                    order += " desc"
             if order:
                 new_query = ''.join([before, addition, order, after])
             else:
@@ -2432,9 +2533,11 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         return True
 
     def on_processlist_button_release(self, tv, event):
-        if not event.button == 3: return False
+        if not event.button == 3:
+            return False
         res = tv.get_path_at_pos(int(event.x), int(event.y))
-        if not res: return False
+        if not res:
+            return False
         self.xml.get_widget("processlist_popup").popup(None, None, None, event.button, event.time)
         
     def render_mysql_string(self, column, cell, model, _iter, _id):
@@ -2557,7 +2660,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     
     def redraw_tables(self):
         if not self.current_host:
-            if self.current_query:
+            if self.current_query.current_host:
                 self.current_host = self.current_query.current_host
             else:
                 return
@@ -2591,7 +2694,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.tables_count = 0
         
         keys = db.tables.keys()
-        if self.tables_count == len(keys): return
+        if self.tables_count == len(keys):
+            return
         self.tables_count = len(keys)
         keys.sort()
         if self.tables_model:
@@ -2638,10 +2742,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 return t, e
         print "should not happen!"
         return None, None
-    # def alert(self, text):
-    #     md = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE, text)
-    #     md.run()
-    #     md.destroy()
 
 
 def usage():
@@ -2674,7 +2774,8 @@ def start(args):
         elif arg == "-f" or arg == "--flush":
             log_flush = True
         elif arg == "-l" or arg == "--log":
-            if i + 1 == len(args): usage()
+            if i + 1 == len(args):
+                usage()
             log_file = args[i + 1]
             skip = True
         else:
