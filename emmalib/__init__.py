@@ -131,7 +131,11 @@ class Emma:
         self.blob_buffer = self.blob_tv.get_buffer()
         self.blob_view_visible = False
 
-        # processlist
+        # process list
+        self.tableslist = widgets.TabTablesList(self)
+        self.main_notebook.prepend_page(self.tableslist, gtk.Label('Tables List'))
+
+        # tables list
         self.processlist = widgets.TabProcessList(self)
         self.main_notebook.prepend_page(self.processlist, gtk.Label('Process List'))
 
@@ -153,8 +157,6 @@ class Emma:
         self.table_description_size = (0, 0)
         self.table_description = self.xml.get_widget("table_description")
         
-        self.query_notebook = self.xml.get_widget("query_notebook")
-
         self.tooltips = gtk.Tooltips()
         self.sort_timer_running = False
         self.execution_timer_running = False
@@ -1929,7 +1931,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
     def on_nb_change_page(self, np, pointer, page):
         if page == 2:
-            self.redraw_tables()
+            self.tableslist.redraw()
             return
         path, column = self.connections_tv.get_cursor()
         if not path:
@@ -2009,8 +2011,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 l.show()
             r += 1
         self.xml.get_widget("vbox14").check_resize()
-        self.tables_count = 0
-        self.redraw_tables()
+        self.tableslist.tables_count = 0
+        self.tableslist.redraw()
         
     def on_mainwindow_key_release_event(self, _window, event):
         if event.keyval == keysyms.F3:
@@ -2582,52 +2584,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             return self.connections_tv.connections_model.get_value(_iter, 0)
         return None
 
-    def redraw_tables(self):
-        if not self.current_host:
-            if self.current_query.current_host:
-                self.current_host = self.current_query.current_host
-            else:
-                return
-        db = self.current_host.current_db
-        if not db:
-            return
-        if not "tables_tv" in self.__dict__:
-            self.tables_tv = self.xml.get_widget("tables_treeview")
-            self.tables_model = None
-            self.tables_db = None
-            
-        if not self.tables_db == db:
-            self.tables_db = db
-            if self.tables_model: 
-                self.tables_model.clear()
-                for col in self.tables_tv.get_columns():
-                    self.tables_tv.remove_column(col)
-
-            fields = db.status_headers
-            columns = [gobject.TYPE_STRING] * len(fields)
-            if not columns:
-                return
-            self.tables_model = gtk.ListStore(*columns)
-            self.tables_tv.set_model(self.tables_model)
-            _id = 0
-            for field in fields:
-                title = field.replace("_", "__")
-                self.tables_tv.insert_column_with_data_func(-1, title, gtk.CellRendererText(),
-                                                            self.render_mysql_string, _id)
-                _id += 1
-            self.tables_count = 0
-        
-        keys = db.tables.keys()
-        if self.tables_count == len(keys):
-            return
-        self.tables_count = len(keys)
-        keys.sort()
-        if self.tables_model:
-            self.tables_model.clear()
-        for name in keys:
-            table = db.tables[name]
-            self.tables_model.append(table.props)
-    
     def read_expression(self, query, _start=0, concat=True, update_function=None, update_offset=0, icount=0):
         ## TODO!
         # r'(?is)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|([^ \r\n\t]*[ \r\n\t]*\()|(\))|([0-9]+(?:\\.[0-9]*)?)|([^ \r\n\t,()"\'`]+)|(,)')

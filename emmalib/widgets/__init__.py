@@ -9,3 +9,4 @@ from TabSqlLog import TabSqlLog
 from TabMsgLog import TabMsgLog
 
 from TabProcessList import TabProcessList
+from TabTablesList import TabTablesList
