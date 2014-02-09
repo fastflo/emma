@@ -7,6 +7,7 @@ from PopUpTabSqlLog import PopUpTabSqlLog
 class TabSqlLog(gtk.ScrolledWindow):
     def __init__(self, emma):
         super(TabSqlLog, self).__init__()
+        self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.emma = emma
         self.model = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING)
         self.tv = gtk.TreeView()

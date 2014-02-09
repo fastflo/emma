@@ -90,7 +90,7 @@ class ConnectionsTreeView(gtk.TreeView):
                 host.connect()
                 if not host.connected:
                     return
-                self.emma.refresh_processlist()
+                self.emma.processlist.refresh()
                 if nb:
                     nb.set_current_page(1)
             self.redraw_host(host, _iter, True)

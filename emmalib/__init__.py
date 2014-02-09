@@ -117,13 +117,13 @@ class Emma:
         self.main_notebook = self.xml.get_widget("main_notebook")
         self.query_notebook = self.xml.get_widget("query_notebook")
 
-        # init SQL log
-        self.sql_log = widgets.TabSqlLog(self)
-        self.message_notebook.append_page(self.sql_log, gtk.Label('SQL Log'))
-
         # init Message log
         self.msg_log = widgets.TabMsgLog(self)
-        self.message_notebook.append_page(self.msg_log, gtk.Label('Message Log'))
+        self.message_notebook.prepend_page(self.msg_log, gtk.Label('Message Log'))
+
+        # init SQL log
+        self.sql_log = widgets.TabSqlLog(self)
+        self.message_notebook.prepend_page(self.sql_log, gtk.Label('SQL Log'))
 
         # BLOB view
         self.blob_tv = self.xml.get_widget("blob_tv")
@@ -132,8 +132,8 @@ class Emma:
         self.blob_view_visible = False
 
         # processlist
-        self.processlist_tv = self.xml.get_widget("processlist_treeview")
-        self.processlist_model = None
+        self.processlist = widgets.TabProcessList(self)
+        self.main_notebook.prepend_page(self.processlist, gtk.Label('Process List'))
 
         # Local Search Window
         self.local_search_window = self.xml.get_widget("localsearch_window")
@@ -160,9 +160,7 @@ class Emma:
         self.execution_timer_running = False
         self.field_conditions_initialized = False
         self.current_host = None
-        self.current_processlist_host = None
-        self.processlist_timer_running = False
-        
+
         self.hosts = {}
         self.queries = []
 
@@ -178,15 +176,15 @@ class Emma:
         self.connections_tv.show()
 
         self.first_template = None
-        keys = self.config.config.keys()
-        keys.sort()
-
-        toolbar = self.xml.get_widget("query_toolbar")
-        toolbar.set_style(gtk.TOOLBAR_ICONS)
-        for child in toolbar.get_children():
-            if not child.name.startswith("template_"):
-                continue
-            toolbar.remove(child)
+        # keys = self.config.config.keys()
+        # keys.sort()
+        #
+        # toolbar = self.xml.get_widget("query_toolbar")
+        # toolbar.set_style(gtk.TOOLBAR_ICONS)
+        # for child in toolbar.get_children():
+        #     if not child.name.startswith("template_"):
+        #         continue
+        #     toolbar.remove(child)
 
         # template_count = 0
         # for name in keys:
@@ -1894,14 +1892,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             return
         self.current_query.user_rename(new_name)
         
-    def on_processlist_refresh_value_change(self, button):
-        value = button.get_value()
-        if self.processlist_timer_running:
-            return
-        self.processlist_timer_running = True
-        self.processlist_timer_interval = value
-        gobject.timeout_add(int(value * 1000), self.on_processlist_refresh_timeout, button)
-        
     def on_fc_reset_clicked(self, button):
         for i in range(self.fc_count):
             self.fc_entry[i].set_text("")
@@ -1937,15 +1927,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         window.hide()
         return True
         
-    def on_kill_process(self, button):
-        path, column = self.processlist_tv.get_cursor()
-        if not path or not self.current_host:
-            return
-        _iter = self.processlist_model.get_iter(path)
-        process_id = self.processlist_model.get_value(_iter, 0)
-        if not self.current_host.query("kill %s" % process_id):
-            dialogs.show_message("sorry", "there was an error while trying to kill process_id %s!" % process_id)
-    
     def on_nb_change_page(self, np, pointer, page):
         if page == 2:
             self.redraw_tables()
@@ -2520,26 +2501,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             pass
         self.on_execute_query_clicked(None, t)
         
-    def on_processlist_refresh_timeout(self, button):
-        value = button.get_value()
-        if value < 0.1:
-            self.processlist_timer_running = False
-            return False
-        self.refresh_processlist()
-        if value != self.processlist_timer_interval:
-            self.processlist_timer_running = False
-            self.on_processlist_refresh_value_change(button)
-            return False
-        return True
-
-    def on_processlist_button_release(self, tv, event):
-        if not event.button == 3:
-            return False
-        res = tv.get_path_at_pos(int(event.x), int(event.y))
-        if not res:
-            return False
-        self.xml.get_widget("processlist_popup").popup(None, None, None, event.button, event.time)
-        
     def render_mysql_string(self, column, cell, model, _iter, _id):
         o = model.get_value(_iter, _id)
         if not o is None: 
@@ -2621,43 +2582,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             return self.connections_tv.connections_model.get_value(_iter, 0)
         return None
 
-    def refresh_processlist(self, *args):
-        if not self.current_host:
-            return
-        self.current_host.refresh_processlist()
-        self.redraw_processlist(self.current_host)
-        
-    def redraw_processlist(self, host):
-        if not host.processlist:
-            return
-        fields, rows = host.processlist
-        if self.processlist_model:
-            self.processlist_model.clear()
-            
-        if self.current_processlist_host != self.current_host:
-            self.current_processlist_host = self.current_host
-            self.xml.get_widget("version_label").set_text(
-                "  server version: %s" % self.current_host.handle.get_server_info())
-            
-            for col in self.processlist_tv.get_columns():
-                self.processlist_tv.remove_column(col)
-            
-            columns = [gobject.TYPE_STRING] * len(fields)
-            self.processlist_model = gtk.ListStore(*columns)
-            self.processlist_tv.set_model(self.processlist_model)
-            self.processlist_tv.set_headers_clickable(True)
-            _id = 0
-            for field in fields:
-                title = field[0].replace("_", "__")
-                self.processlist_tv.insert_column_with_data_func(-1, title, gtk.CellRendererText(),
-                                                                 self.render_mysql_string, _id)
-                _id += 1
-            
-        for proc in rows:
-            self.processlist_model.append(proc)
-            
-        return
-    
     def redraw_tables(self):
         if not self.current_host:
             if self.current_query.current_host:
