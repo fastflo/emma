@@ -21,17 +21,33 @@ if __name__ != 'emmalib':
     print "Don't run __init__.py - run ../emma instead"
     exit()
 
+import os
+import sys
+
+# package: python-gobject
+try:
+    import gobject
+except:
+    print "No gobject. Emma cannot start."
+    exit(-1)
+
+# package: python-gtk2
 try:
     import gtk
-    import gobject
     import gtk.gdk
-    import gtk.glade
     from gtk import keysyms
 except:
-    print "no gtk. you will not be able to start emma.", sys.exc_value
+    print "No gtk. Emma cannot start.", sys.exc_value
+    exit(-1)
+
+# package: python-glade2
+try:
+    import gtk.glade
+except:
+    print "No gtk.glade. Emma cannot start.", sys.exc_value
+    exit(-1)
 
 from stat import *
-import os
 import gc
 import pickle
 import datetime
@@ -49,13 +65,6 @@ from OutputHandler import OutputHandler
 from Config import Config
 import dialogs
 import widgets
-
-try:
-    import sqlite3
-    have_sqlite = True
-    from providers.sqlite.SQLiteHost import *
-except:
-    have_sqlite = False
 
 version = "0.7"
 new_instance = None
@@ -167,10 +176,9 @@ class Emma:
         self.queries = []
 
         self.config = Config(self)
-        self.config.have_sqlite = have_sqlite
         self.config.load()
 
-        self.add_query_tab(providers.mysql.MySqlQueryTab(self.xml, self.query_notebook))
+        #self.add_query_tab(providers.mysql.MySqlQueryTab(self.xml, self.query_notebook))
 
         connections_tv_container = self.xml.get_widget("connections_tv_container")
         self.connections_tv = ConnectionsTreeView(self)
