@@ -122,6 +122,7 @@ class Emma:
 
         # init dialogs
         self.about_dialog = dialogs.About()
+        self.changelog_dialog = dialogs.ChangeLog(emma_path)
 
         # init all notebooks
         self.message_notebook = self.xml.get_widget("message_notebook")
@@ -1942,19 +1943,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         # aboutdialog.hide()
 
     def on_changelog_activate(self, item):
-        fp = file(os.path.join(emma_path, "../changelog"))
-        changelog = fp.read()
-        fp.close()
-        w = self.xml.get_widget("changelog_window")
-        tv = self.xml.get_widget("changelog_text")
-        tv.get_buffer().set_text(changelog.decode("latin1", "replace"))
-        w.connect('delete-event', self.on_changelog_delete)
-        w.show()
-        
-    def on_changelog_delete(self, window, event):
-        window.hide()
-        return True
-        
+        self.changelog_dialog.show()
+
     def on_nb_change_page(self, np, pointer, page):
         if page == 2:
             self.tableslist.redraw()
