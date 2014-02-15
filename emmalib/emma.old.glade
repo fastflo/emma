@@ -2,6 +2,38 @@
 <glade-interface>
     <!-- interface-requires gtk+ 2.24 -->
     <!-- interface-naming-policy project-wide -->
+    <widget class="GtkAboutDialog" id="aboutdialog">
+        <property name="can_focus">False</property>
+        <property name="type_hint">normal</property>
+        <property name="program_name">Emma</property>
+        <property name="version">v0.7</property>
+        <property name="copyright" translatable="yes">by Florian Schmidt 2006</property>
+        <property name="comments" translatable="yes">Extendable Database Managing Assistant
+
+            successor of yamysqlfront
+        </property>
+        <property name="website">http://emma-assistant.org</property>
+        <property name="authors">Florian Schmidt &lt;schmidt_florian at gmx.de&gt;</property>
+        <property name="translator_credits" translatable="yes"
+                  comments="TRANSLATORS: Replace this string with your names, one name per line.">translator-credits
+        </property>
+        <child internal-child="vbox">
+            <widget class="GtkVBox" id="dialog-vbox1">
+                <property name="can_focus">False</property>
+                <child internal-child="action_area">
+                    <widget class="GtkHButtonBox" id="dialog-action_area1">
+                        <property name="can_focus">False</property>
+                    </widget>
+                    <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">0</property>
+                    </packing>
+                </child>
+            </widget>
+        </child>
+    </widget>
     <widget class="GtkWindow" id="connection_window">
         <property name="can_focus">False</property>
         <property name="border_width">4</property>

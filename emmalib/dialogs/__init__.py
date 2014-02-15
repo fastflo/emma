@@ -1,4 +1,5 @@
 import gtk
+from About import About
 
 
 def alert(message):

@@ -44,7 +44,6 @@ from query_regular_expression import *
 import providers
 
 from ConnectionTreeView import ConnectionsTreeView
-from ConnectionWindow import ConnectionWindow
 from OutputHandler import OutputHandler
 from Config import Config
 import dialogs
@@ -111,6 +110,9 @@ class Emma:
             print "Icon not loaded"
 
         self.current_query = None
+
+        # init dialogs
+        self.about_dialog = dialogs.About()
 
         # init all notebooks
         self.message_notebook = self.xml.get_widget("message_notebook")
@@ -362,12 +364,13 @@ class Emma:
         return True
         
     def is_query_appendable(self, query):
+        pat = r'(?i)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(union)|(select[ \r\n\t]+(.*)[ \r\n\t]+from[ \r\n\t]+(.*))'
         if not self.current_host:
             return False
         try:
             r = self.query_select_re
         except:
-            r = self.query_select_re = re.compile(r'(?i)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(union)|(select[ \r\n\t]+(.*)[ \r\n\t]+from[ \r\n\t]+(.*))')
+            r = self.query_select_re = re.compile(pat)
         _start = 0
         result = False
         while 1:
@@ -731,7 +734,9 @@ class Emma:
     def on_query_change_data(self, cellrenderer, path, new_value, col_num, force_update=False):
         q = self.current_query
         row_iter = q.model.get_iter(path)
-        if q.append_iter and q.model.iter_is_valid(q.append_iter) and q.model.get_path(q.append_iter) == q.model.get_path(row_iter):
+        if q.append_iter \
+                and q.model.iter_is_valid(q.append_iter) \
+                and q.model.get_path(q.append_iter) == q.model.get_path(row_iter):
             q.filled_fields[q.treeview.get_column(col_num).get_title().replace("__", "_")] = new_value
             q.model.set_value(row_iter, col_num, new_value)
             return
@@ -826,7 +831,9 @@ class Emma:
         if not path:
             return
         row_iter = q.model.get_iter(path)
-        if q.append_iter and q.model.iter_is_valid(q.append_iter) and q.model.get_path(q.append_iter) == q.model.get_path(row_iter):
+        if q.append_iter \
+                and q.model.iter_is_valid(q.append_iter) \
+                and q.model.get_path(q.append_iter) == q.model.get_path(row_iter):
             q.append_iter = None
             q.apply_record.set_sensitive(False)
         else:
@@ -1037,7 +1044,8 @@ class Emma:
             return None, len(query)
         return match.start(0), match.end(0)
         
-    def read_one_query(self, fp, _start=None, count_lines=0, update_function=None, only_use_queries=False, start_line=1):
+    def read_one_query(self, fp, _start=None, count_lines=0, update_function=None,
+                       only_use_queries=False, start_line=1):
         current_query = []
         self.read_one_query_started = True
         while self.read_one_query_started:
@@ -1123,7 +1131,9 @@ class Emma:
                 fp = file(filename, "rb")
                 self.last_query_line = fp.readline()
             except:
-                dialogs.show_message("execute query from disk", "error opening query from file %s: %s" % (filename, sys.exc_value))
+                dialogs.show_message(
+                    "execute query from disk",
+                    "error opening query from file %s: %s" % (filename, sys.exc_value))
                 return
         d.hide()
         
@@ -1147,7 +1157,8 @@ class Emma:
         limit_db = self.get_widget("eqfd_limit_db").get_active() and limit_dbname != ""
 
         if limit_db:
-            limit_re = re.compile("(?is)^use[ \r\n\t]+`?" + re.escape(limit_dbname) + "`?|^create database[^`]+`?" + re.escape(limit_dbname) + "`?")
+            limit_re = re.compile("(?is)^use[ \r\n\t]+`?" + re.escape(limit_dbname) + "`?|^create database[^`]+`?" +
+                                  re.escape(limit_dbname) + "`?")
             limit_end_re = re.compile("(?is)^use[ \r\n\t]+`?.*`?|^create database")
         
         last = 0
@@ -1330,8 +1341,13 @@ class Emma:
             # if stop on error is enabled
             if not ret:
                 print "mysql error: %r" % (host.last_error, )
-                message = "error at: %s" % host.last_error.replace("You have an error in your SQL syntax.  Check the manual that corresponds to your MySQL server version for the right syntax to use near ", "")
-                message = "error at: %s" % message.replace("You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ", "")
+                message = "error at: %s" % host.last_error.replace(
+                    "You have an error in your SQL syntax.  "
+                    "Check the manual that corresponds to your MySQL server version for the right syntax to use near ",
+                    "")
+                message = "error at: %s" % message.replace("You have an error in your SQL syntax; "
+                                                           "check the manual that corresponds to your MySQL server "
+                                                           "version for the right syntax to use near ", "")
                 
                 line_pos = 0
                 pos = message.find("at line ")
@@ -1910,10 +1926,12 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         gtk.main_quit()
         
     def on_about_activate(self, item):
-        aboutdialog = self.xml.get_widget("aboutdialog")
-        aboutdialog.set_version(version)
-        aboutdialog.run()
-        aboutdialog.hide()
+        self.about_dialog.run()
+        self.about_dialog.hide()
+        # aboutdialog = self.xml.get_widget("aboutdialog")
+        # aboutdialog.set_version(version)
+        # aboutdialog.run()
+        # aboutdialog.hide()
 
     def on_changelog_activate(self, item):
         fp = file(os.path.join(emma_path, "../changelog"))
@@ -2314,7 +2332,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             if not current_table:
                 dialogs.show_message(
                     "info",
-                    "no table selected!\nyou can't execute a template with $table$ in it, if you have no table selected!")
+                    "no table selected!\nyou can't execute a template with $table$ in it, "
+                    "if you have no table selected!")
                 return
             t = t.replace("$table$", self.current_host.escape_table(current_table.name))
             
@@ -2323,7 +2342,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             if not current_table:
                 dialogs.show_message(
                     "info",
-                    "no table selected!\nyou can't execute a template with $primary_key$ in it, if you have no table selected!")
+                    "no table selected!\nyou can't execute a template with $primary_key$ in it, "
+                    "if you have no table selected!")
                 return
             if not current_table.fields:
                 dialogs.show_message(
@@ -2408,7 +2428,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             if not current_table:
                 dialogs.show_message(
                     "info",
-                    "no table selected!\nyou can't execute a template with $field_conditions$ in it, if you have no table selected!")
+                    "no table selected!\nyou can't execute a template with "
+                    "$field_conditions$ in it, if you have no table selected!")
                 return
                 
             last_field = []
@@ -2452,7 +2473,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 )
             )
             for i in range(1, self.fc_count):
-                if self.fc_logic_combobox[i - 1].get_active_text() == "disabled" or self.fc_combobox[i].get_active_text() == "" or self.fc_op_combobox[i].get_active_text() == "":
+                if self.fc_logic_combobox[i - 1].get_active_text() == "disabled" \
+                        or self.fc_combobox[i].get_active_text() == "" \
+                        or self.fc_op_combobox[i].get_active_text() == "":
                     continue
                 conditions += " %s %s" % (
                     self.fc_logic_combobox[i - 1].get_active_text(),
@@ -2662,7 +2685,7 @@ def start(args):
             usage()
 
     # this singleton will be accessible as sys.stdout!
-    OutputHandler(debug_output, log_file, log_flush)
+    # OutputHandler(debug_output, log_file, log_flush)
 
     e = Emma()
 
