@@ -1139,18 +1139,18 @@
                           <widget class="GtkToolbar" id="query_toolbar">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="icon_size">0</property>
                             <child>
                               <widget class="GtkToolButton" id="execute_query">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">execute query (F9, Ctrl-Enter)</property>
+                                <property name="tooltip" translatable="yes">Execute Query (F9, Ctrl+Enter)</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="label" translatable="yes">Execute</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-execute</property>
                                 <signal name="clicked" handler="on_execute_query_clicked"/>
-                                <accelerator key="Return" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                                 <accelerator key="F9" signal="clicked"/>
+                                <accelerator key="Return" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                               <packing>
                                 <property name="expand">False</property>
@@ -1186,9 +1186,9 @@
                               <widget class="GtkToolButton" id="save_query">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">save query to file (ctrl-s)</property>
+                                <property name="tooltip" translatable="yes">Save Query To File (Ctrl+S)</property>
                                 <property name="use_action_appearance">False</property>
-                                <property name="label" translatable="yes">save query</property>
+                                <property name="label" translatable="yes">Save</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-save</property>
                                 <signal name="clicked" handler="on_save_query_clicked"/>
@@ -1203,9 +1203,9 @@
                               <widget class="GtkToolButton" id="load_query">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">load query from file (ctrl-o)</property>
+                                <property name="tooltip" translatable="yes">Load Query From File (Ctrl+O)</property>
                                 <property name="use_action_appearance">False</property>
-                                <property name="label" translatable="yes">load query</property>
+                                <property name="label" translatable="yes">Load</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-open</property>
                                 <signal name="clicked" handler="on_load_query_clicked"/>
@@ -1229,7 +1229,9 @@
                               <widget class="GtkToolButton" id="query_font">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip" translatable="yes">Set Query Font</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="label" translatable="yes">Query Font</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-select-font</property>
                                 <signal name="clicked" handler="on_query_font_clicked"/>
@@ -1252,8 +1254,9 @@
                               <widget class="GtkToolButton" id="newquery_button">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">new query tab (ctrl-t)</property>
+                                <property name="tooltip" translatable="yes">New Query Tab (Ctrl+T)</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="label" translatable="yes">New Query</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-new</property>
                                 <signal name="clicked" handler="on_newquery_button_clicked"/>
@@ -1268,8 +1271,9 @@
                               <widget class="GtkToolButton" id="closequery_button">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">close query tab (ctrl-w)</property>
+                                <property name="tooltip" translatable="yes">Close Query Tab (Ctrl+W)</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="label" translatable="yes">Close</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-close</property>
                                 <signal name="clicked" handler="on_closequery_button_clicked"/>
@@ -1284,8 +1288,9 @@
                               <widget class="GtkToolButton" id="rename_query_tab">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">rename query tab</property>
+                                <property name="tooltip" translatable="yes">Rename Query Tab</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="label" translatable="yes">Rename</property>
                                 <property name="stock_id">gtk-bold</property>
                                 <signal name="clicked" handler="on_rename_query_tab_clicked"/>
                               </widget>
@@ -1363,7 +1368,6 @@
                                         <property name="orientation">vertical</property>
                                         <property name="toolbar_style">icons</property>
                                         <property name="tooltips">False</property>
-                                        <property name="icon_size">0</property>
                                         <child>
                                           <widget class="GtkToolButton" id="add_record_tool">
                                             <property name="visible">True</property>
