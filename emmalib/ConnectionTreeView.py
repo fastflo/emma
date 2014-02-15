@@ -57,12 +57,10 @@ class ConnectionsTreeView(gtk.TreeView):
             if not self.emma.config.unpickled:
                 prefix = "connection_"
                 if name.startswith(prefix) and value == "::sqlite::":
-                    print 'sqlite'
                     filename = name[len(prefix):]
                     self.add_sqlite(filename)
                     continue
                 if name.startswith(prefix):
-                    print 'mysql'
                     v = value.split(",")
                     port = ""
                     p = v[0].rsplit(":", 1)

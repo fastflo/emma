@@ -72,6 +72,7 @@ def test(c, t, f):
 
 class table_editor:
     def __init__(self, emma_instance):
+        self.changed_handler = None
         self.emma = emma_instance
         self.popup_items = []
 
@@ -105,7 +106,6 @@ class table_editor:
     def row_changed(self, model, path, iter):
         if self.changed_handler:
             self.model.disconnect(self.changed_handler)
-            self.changed_handler = None
         l = list(model[path][3])
         l.append("reordered")
         model[path][3] = l
@@ -125,16 +125,19 @@ class table_editor:
         self.popup_items = []
 
     def install_popup_item(self, popup_name, item_catpion, callback):
-        popup = self.emma.xml.get_widget(popup_name)
-        for child in popup.get_children():
-            if child.get_child().get_text() == item_catpion:
-                print "%s: warning: there already is a menu item called '%s' in '%s'" % (
-                __name__, item_caption, popup_name)
-        item = gtk.MenuItem(item_catpion)
-        item.connect("activate", callback)
-        item.show()
-        popup.append(item)
-        self.popup_items.append((item, popup))
+        popup = self.emma.connections_tv.pop_up_table
+        if popup:
+            for child in popup.get_children():
+                if child.get_child().get_text() == item_catpion:
+                    print "%s: warning: there already is a menu item called '%s' in '%s'" % (
+                        __name__, item_caption, popup_name)
+            item = gtk.MenuItem(item_catpion)
+            item.connect("activate", callback)
+            item.show()
+            popup.append(item)
+            self.popup_items.append((item, popup))
+        else:
+            print 'Cannot find popup "%s"' % popup_name
 
     def edit_table(self, menuitem):
         path, column, iter, table = self.emma.get_current_table()

@@ -177,7 +177,7 @@ class pretty_format:
         self.install_toolbar_item("query_toolbar", gtk.STOCK_INDENT, "pretty format query", self.on_pretty_format)
         self.install_toolbar_item("query_toolbar", gtk.STOCK_UNINDENT, "compress query", self.on_compress)
         q = self.emma.current_query
-        if sys.stdout.debug and 0:
+        if False:
             # check if we are running with debug output - enable example text
             print "\n\n\n"
             self.set_query_text(q, """# this is the pretty format test query. click the "pretty format" or "compress query" button in the query-toolbar.

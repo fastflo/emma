@@ -23,6 +23,7 @@ if __name__ != 'emmalib':
 
 import os
 import sys
+import time
 
 # package: python-gobject
 try:
@@ -181,7 +182,7 @@ class Emma:
         self.config = Config(self)
         self.config.load()
 
-        #self.add_query_tab(providers.mysql.MySqlQueryTab(self.xml, self.query_notebook))
+        self.add_query_tab(providers.mysql.MySqlQueryTab(self.xml, self.query_notebook))
 
         connections_tv_container = self.xml.get_widget("connections_tv_container")
         self.connections_tv = ConnectionsTreeView(self)
@@ -288,16 +289,16 @@ class Emma:
             else:
                 plugin = __import__(_plugin_name)
             self.plugins[_plugin_name] = plugin
-            ret = self.init_plugin(plugin)
+            self.init_plugin(plugin)
         for path in self.plugin_pathes:
             for plugin_name in os.listdir(path):
                 plugin_dir = os.path.join(path, plugin_name)
                 if not os.path.isdir(plugin_dir) or plugin_name[0] == ".":
                     continue
-                try:
-                    _load(plugin_name)
-                except:
-                    print "could not load plugin %r" % plugin_name
+                #try:
+                _load(plugin_name)
+                #except Exception as e:
+                #    print "!!!could not load plugin %r" % plugin_name, e.message
 
     def unload_plugins(self):
         """ not really an unload - i just asks the module to cleanup """
@@ -308,7 +309,7 @@ class Emma:
         
     def init_plugins(self):
         plugins_pathes = [
-            os.path.join(self.config.config_path, "plugins"),
+            # os.path.join(self.config.config_path, "plugins"),
             os.path.join(emma_path, "plugins")
         ]
         self.plugin_pathes = []
