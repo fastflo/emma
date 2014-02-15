@@ -17,11 +17,12 @@ class TabTablesList(gtk.ScrolledWindow):
         self.show_all()
 
     def redraw(self):
-        if not self.emma.current_host:
-            if self.emma.current_query.current_host:
-                self.emma.current_host = self.emma.current_query.current_host
-            else:
-                return
+        if not self.emma.current_query:
+            return
+        elif self.emma.current_query.current_host:
+            self.emma.current_host = self.emma.current_query.current_host
+        else:
+            return
         db = self.emma.current_host.current_db
         if not db:
             return
