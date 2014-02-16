@@ -1,12 +1,10 @@
-
 emma_registered_providers = []
-
-# print "before import", emma_registered_providers
 
 import mysql
 import sqlite
 
-# print 'after import', emma_registered_providers
+from Connection import Connection
+from Connections import Connections
 
 
 def check_provider(provider_name):
