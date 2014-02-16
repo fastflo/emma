@@ -144,6 +144,10 @@ class Emma:
         self.blob_buffer = self.blob_tv.get_buffer()
         self.blob_view_visible = False
 
+        # table view
+        self.table_view = widgets.TabTable(self)
+        self.main_notebook.prepend_page(self.table_view, gtk.Label('Table'))
+
         # process list
         self.tableslist = widgets.TabTablesList(self)
         self.main_notebook.prepend_page(self.tableslist, gtk.Label('Tables List'))
@@ -165,11 +169,6 @@ class Emma:
         self.field_edit = self.xml.get_widget("field_edit")
         self.field_edit_content = self.xml.get_widget("edit_field_content")
 
-        self.table_property_labels = []
-        self.table_property_entries = []
-        self.table_description_size = (0, 0)
-        self.table_description = self.xml.get_widget("table_description")
-        
         self.tooltips = gtk.Tooltips()
         self.sort_timer_running = False
         self.execution_timer_running = False
@@ -1954,83 +1953,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if not path:
             return
         if len(path) == 3 and page == 3:
-            self.update_table_view(path)
+            self.table_view.update(path)
     
-    def update_table_view(self, path=None):
-        if not path:
-            path, column = self.connections_tv.get_cursor()
-            if len(path) != 3:
-                return
-        _iter = self.connections_tv.connections_model.get_iter(path)
-        th = self.connections_tv.connections_model.get_value(_iter, 0)
-        
-        table = self.xml.get_widget("table_properties")
-        prop_count = len(th.props)
-        if len(self.table_property_labels) != prop_count:
-            for c in self.table_property_labels:
-                table.remove(c)
-            for c in self.table_property_entries:
-                table.remove(c)
-            self.table_property_labels = []
-            self.table_property_entries = []
-            table.resize(prop_count, 2)
-            r = 0
-            for h, p in zip(th.db.status_headers, th.props):
-                l = gtk.Label(h)
-                l.set_alignment(0, 0.5)
-                e = gtk.Entry()
-                e.set_editable(False)
-                if p is None:
-                    p = ""
-                e.set_text(p)
-                table.attach(l, 0, 1, r, r + 1, gtk.FILL, 0)
-                table.attach(e, 1, 2, r, r + 1, gtk.EXPAND | gtk.FILL | gtk.SHRINK, 0)
-                l.show()
-                e.show()
-                self.table_property_labels.append(l)
-                self.table_property_entries.append(e)
-                r += 1
-        else:
-            r = 0
-            for h, p in zip(th.db.status_headers, th.props):
-                l = self.table_property_labels[r]
-                e = self.table_property_entries[r]
-                l.set_label(h)
-                if p is None:
-                    p = ""
-                e.set_text(p)
-                r += 1
-                
-        tv = self.xml.get_widget("table_textview")
-        tv.get_buffer().set_text(th.get_create_table())
-
-        t = self.table_description
-        for c in t.get_children():
-            self.table_description.remove(c)
-        self.table_description.resize(len(th.describe_headers), len(th.fields) + 1)
-        c = 0
-        for h in th.describe_headers:
-            l = gtk.Label(h)
-            t.attach(l, c, c + 1, 0, 1, gtk.FILL, 0)
-            l.show()
-            c += 1
-        r = 1
-        for fn in th.field_order:
-            v = th.fields[fn]
-            for c in range(len(th.describe_headers)):
-                s = v[c]
-                if s is None:
-                    s = ""
-                l = gtk.Label(s)
-                t.attach(l, c, c + 1, r, r + 1, gtk.FILL, 0)
-                l.set_alignment(0, 0.5)
-                l.set_selectable(True)
-                l.show()
-            r += 1
-        self.xml.get_widget("vbox14").check_resize()
-        self.tableslist.tables_count = 0
-        self.tableslist.redraw()
-        
     def on_mainwindow_key_release_event(self, _window, event):
         if event.keyval == keysyms.F3:
             self.on_local_search_button_clicked(None, True)
