@@ -196,9 +196,3 @@ class ConnectionWindow:
         if widget is None:
             raise AttributeError(name)
         return widget
-
-
-if __name__ == "__main__":
-    cw = ConnectionWindow()
-    cw.show('new')
-    gtk.main()

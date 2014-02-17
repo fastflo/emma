@@ -1,4 +1,6 @@
 import gtk
+from About import About
+from ChangeLog import ChangeLog
 
 
 def alert(message):

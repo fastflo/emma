@@ -57,12 +57,10 @@ class ConnectionsTreeView(gtk.TreeView):
             if not self.emma.config.unpickled:
                 prefix = "connection_"
                 if name.startswith(prefix) and value == "::sqlite::":
-                    print 'sqlite'
                     filename = name[len(prefix):]
                     self.add_sqlite(filename)
                     continue
                 if name.startswith(prefix):
-                    print 'mysql'
                     v = value.split(",")
                     port = ""
                     p = v[0].rsplit(":", 1)
@@ -148,7 +146,7 @@ class ConnectionsTreeView(gtk.TreeView):
 
         if len(path) == 3 and nb.get_current_page() == 3:
             print "update table view..."
-            self.emma.update_table_view(path)
+            self.emma.table_view.update(path)
 
         if self.emma.current_query:
             q = self.emma.current_query
@@ -310,7 +308,7 @@ class ConnectionsTreeView(gtk.TreeView):
         if what == "refresh_table":
             table.refresh()
             self.redraw_table(table, _iter)
-            self.emma.update_table_view()
+            self.emma.table_view.update()
         elif what == "truncate_table":
             if not dialogs.confirm("truncate table",
                                    "do you really want to truncate the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name),
@@ -319,7 +317,7 @@ class ConnectionsTreeView(gtk.TreeView):
             if table.db.query("truncate `%s`" % table.name):
                 table.refresh()
                 self.redraw_table(table, _iter)
-                self.emma.update_table_view()
+                self.emma.table_view.update()
         elif what == "drop_table":
             if not dialogs.confirm("drop table",
                                    "do you really want to DROP the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name),

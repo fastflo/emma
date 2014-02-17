@@ -23,6 +23,7 @@ if __name__ != 'emmalib':
 
 import os
 import sys
+import time
 
 # package: python-gobject
 try:
@@ -60,7 +61,6 @@ from query_regular_expression import *
 import providers
 
 from ConnectionTreeView import ConnectionsTreeView
-from ConnectionWindow import ConnectionWindow
 from OutputHandler import OutputHandler
 from Config import Config
 import dialogs
@@ -121,6 +121,10 @@ class Emma:
 
         self.current_query = None
 
+        # init dialogs
+        self.about_dialog = dialogs.About()
+        self.changelog_dialog = dialogs.ChangeLog(emma_path)
+
         # init all notebooks
         self.message_notebook = self.xml.get_widget("message_notebook")
         self.main_notebook = self.xml.get_widget("main_notebook")
@@ -139,6 +143,10 @@ class Emma:
         self.blob_tv.set_sensitive(False)
         self.blob_buffer = self.blob_tv.get_buffer()
         self.blob_view_visible = False
+
+        # table view
+        self.table_view = widgets.TabTable(self)
+        self.main_notebook.prepend_page(self.table_view, gtk.Label('Table'))
 
         # process list
         self.tableslist = widgets.TabTablesList(self)
@@ -161,11 +169,6 @@ class Emma:
         self.field_edit = self.xml.get_widget("field_edit")
         self.field_edit_content = self.xml.get_widget("edit_field_content")
 
-        self.table_property_labels = []
-        self.table_property_entries = []
-        self.table_description_size = (0, 0)
-        self.table_description = self.xml.get_widget("table_description")
-        
         self.tooltips = gtk.Tooltips()
         self.sort_timer_running = False
         self.execution_timer_running = False
@@ -178,7 +181,7 @@ class Emma:
         self.config = Config(self)
         self.config.load()
 
-        #self.add_query_tab(providers.mysql.MySqlQueryTab(self.xml, self.query_notebook))
+        self.add_query_tab(providers.mysql.MySqlQueryTab(self.xml, self.query_notebook))
 
         connections_tv_container = self.xml.get_widget("connections_tv_container")
         self.connections_tv = ConnectionsTreeView(self)
@@ -285,16 +288,16 @@ class Emma:
             else:
                 plugin = __import__(_plugin_name)
             self.plugins[_plugin_name] = plugin
-            ret = self.init_plugin(plugin)
+            self.init_plugin(plugin)
         for path in self.plugin_pathes:
             for plugin_name in os.listdir(path):
                 plugin_dir = os.path.join(path, plugin_name)
                 if not os.path.isdir(plugin_dir) or plugin_name[0] == ".":
                     continue
-                try:
-                    _load(plugin_name)
-                except:
-                    print "could not load plugin %r" % plugin_name
+                #try:
+                _load(plugin_name)
+                #except Exception as e:
+                #    print "!!!could not load plugin %r" % plugin_name, e.message
 
     def unload_plugins(self):
         """ not really an unload - i just asks the module to cleanup """
@@ -305,7 +308,7 @@ class Emma:
         
     def init_plugins(self):
         plugins_pathes = [
-            os.path.join(self.config.config_path, "plugins"),
+            # os.path.join(self.config.config_path, "plugins"),
             os.path.join(emma_path, "plugins")
         ]
         self.plugin_pathes = []
@@ -370,12 +373,13 @@ class Emma:
         return True
         
     def is_query_appendable(self, query):
+        pat = r'(?i)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(union)|(select[ \r\n\t]+(.*)[ \r\n\t]+from[ \r\n\t]+(.*))'
         if not self.current_host:
             return False
         try:
             r = self.query_select_re
         except:
-            r = self.query_select_re = re.compile(r'(?i)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(union)|(select[ \r\n\t]+(.*)[ \r\n\t]+from[ \r\n\t]+(.*))')
+            r = self.query_select_re = re.compile(pat)
         _start = 0
         result = False
         while 1:
@@ -739,7 +743,9 @@ class Emma:
     def on_query_change_data(self, cellrenderer, path, new_value, col_num, force_update=False):
         q = self.current_query
         row_iter = q.model.get_iter(path)
-        if q.append_iter and q.model.iter_is_valid(q.append_iter) and q.model.get_path(q.append_iter) == q.model.get_path(row_iter):
+        if q.append_iter \
+                and q.model.iter_is_valid(q.append_iter) \
+                and q.model.get_path(q.append_iter) == q.model.get_path(row_iter):
             q.filled_fields[q.treeview.get_column(col_num).get_title().replace("__", "_")] = new_value
             q.model.set_value(row_iter, col_num, new_value)
             return
@@ -834,7 +840,9 @@ class Emma:
         if not path:
             return
         row_iter = q.model.get_iter(path)
-        if q.append_iter and q.model.iter_is_valid(q.append_iter) and q.model.get_path(q.append_iter) == q.model.get_path(row_iter):
+        if q.append_iter \
+                and q.model.iter_is_valid(q.append_iter) \
+                and q.model.get_path(q.append_iter) == q.model.get_path(row_iter):
             q.append_iter = None
             q.apply_record.set_sensitive(False)
         else:
@@ -1045,7 +1053,8 @@ class Emma:
             return None, len(query)
         return match.start(0), match.end(0)
         
-    def read_one_query(self, fp, _start=None, count_lines=0, update_function=None, only_use_queries=False, start_line=1):
+    def read_one_query(self, fp, _start=None, count_lines=0, update_function=None,
+                       only_use_queries=False, start_line=1):
         current_query = []
         self.read_one_query_started = True
         while self.read_one_query_started:
@@ -1131,7 +1140,9 @@ class Emma:
                 fp = file(filename, "rb")
                 self.last_query_line = fp.readline()
             except:
-                dialogs.show_message("execute query from disk", "error opening query from file %s: %s" % (filename, sys.exc_value))
+                dialogs.show_message(
+                    "execute query from disk",
+                    "error opening query from file %s: %s" % (filename, sys.exc_value))
                 return
         d.hide()
         
@@ -1155,7 +1166,8 @@ class Emma:
         limit_db = self.get_widget("eqfd_limit_db").get_active() and limit_dbname != ""
 
         if limit_db:
-            limit_re = re.compile("(?is)^use[ \r\n\t]+`?" + re.escape(limit_dbname) + "`?|^create database[^`]+`?" + re.escape(limit_dbname) + "`?")
+            limit_re = re.compile("(?is)^use[ \r\n\t]+`?" + re.escape(limit_dbname) + "`?|^create database[^`]+`?" +
+                                  re.escape(limit_dbname) + "`?")
             limit_end_re = re.compile("(?is)^use[ \r\n\t]+`?.*`?|^create database")
         
         last = 0
@@ -1338,8 +1350,13 @@ class Emma:
             # if stop on error is enabled
             if not ret:
                 print "mysql error: %r" % (host.last_error, )
-                message = "error at: %s" % host.last_error.replace("You have an error in your SQL syntax.  Check the manual that corresponds to your MySQL server version for the right syntax to use near ", "")
-                message = "error at: %s" % message.replace("You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ", "")
+                message = "error at: %s" % host.last_error.replace(
+                    "You have an error in your SQL syntax.  "
+                    "Check the manual that corresponds to your MySQL server version for the right syntax to use near ",
+                    "")
+                message = "error at: %s" % message.replace("You have an error in your SQL syntax; "
+                                                           "check the manual that corresponds to your MySQL server "
+                                                           "version for the right syntax to use near ", "")
                 
                 line_pos = 0
                 pos = message.find("at line ")
@@ -1918,25 +1935,16 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         gtk.main_quit()
         
     def on_about_activate(self, item):
-        aboutdialog = self.xml.get_widget("aboutdialog")
-        aboutdialog.set_version(version)
-        aboutdialog.run()
-        aboutdialog.hide()
+        self.about_dialog.run()
+        self.about_dialog.hide()
+        # aboutdialog = self.xml.get_widget("aboutdialog")
+        # aboutdialog.set_version(version)
+        # aboutdialog.run()
+        # aboutdialog.hide()
 
     def on_changelog_activate(self, item):
-        fp = file(os.path.join(emma_path, "../changelog"))
-        changelog = fp.read()
-        fp.close()
-        w = self.xml.get_widget("changelog_window")
-        tv = self.xml.get_widget("changelog_text")
-        tv.get_buffer().set_text(changelog.decode("latin1", "replace"))
-        w.connect('delete-event', self.on_changelog_delete)
-        w.show()
-        
-    def on_changelog_delete(self, window, event):
-        window.hide()
-        return True
-        
+        self.changelog_dialog.show()
+
     def on_nb_change_page(self, np, pointer, page):
         if page == 2:
             self.tableslist.redraw()
@@ -1945,83 +1953,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if not path:
             return
         if len(path) == 3 and page == 3:
-            self.update_table_view(path)
+            self.table_view.update(path)
     
-    def update_table_view(self, path=None):
-        if not path:
-            path, column = self.connections_tv.get_cursor()
-            if len(path) != 3:
-                return
-        _iter = self.connections_tv.connections_model.get_iter(path)
-        th = self.connections_tv.connections_model.get_value(_iter, 0)
-        
-        table = self.xml.get_widget("table_properties")
-        prop_count = len(th.props)
-        if len(self.table_property_labels) != prop_count:
-            for c in self.table_property_labels:
-                table.remove(c)
-            for c in self.table_property_entries:
-                table.remove(c)
-            self.table_property_labels = []
-            self.table_property_entries = []
-            table.resize(prop_count, 2)
-            r = 0
-            for h, p in zip(th.db.status_headers, th.props):
-                l = gtk.Label(h)
-                l.set_alignment(0, 0.5)
-                e = gtk.Entry()
-                e.set_editable(False)
-                if p is None:
-                    p = ""
-                e.set_text(p)
-                table.attach(l, 0, 1, r, r + 1, gtk.FILL, 0)
-                table.attach(e, 1, 2, r, r + 1, gtk.EXPAND | gtk.FILL | gtk.SHRINK, 0)
-                l.show()
-                e.show()
-                self.table_property_labels.append(l)
-                self.table_property_entries.append(e)
-                r += 1
-        else:
-            r = 0
-            for h, p in zip(th.db.status_headers, th.props):
-                l = self.table_property_labels[r]
-                e = self.table_property_entries[r]
-                l.set_label(h)
-                if p is None:
-                    p = ""
-                e.set_text(p)
-                r += 1
-                
-        tv = self.xml.get_widget("table_textview")
-        tv.get_buffer().set_text(th.get_create_table())
-
-        t = self.table_description
-        for c in t.get_children():
-            self.table_description.remove(c)
-        self.table_description.resize(len(th.describe_headers), len(th.fields) + 1)
-        c = 0
-        for h in th.describe_headers:
-            l = gtk.Label(h)
-            t.attach(l, c, c + 1, 0, 1, gtk.FILL, 0)
-            l.show()
-            c += 1
-        r = 1
-        for fn in th.field_order:
-            v = th.fields[fn]
-            for c in range(len(th.describe_headers)):
-                s = v[c]
-                if s is None:
-                    s = ""
-                l = gtk.Label(s)
-                t.attach(l, c, c + 1, r, r + 1, gtk.FILL, 0)
-                l.set_alignment(0, 0.5)
-                l.set_selectable(True)
-                l.show()
-            r += 1
-        self.xml.get_widget("vbox14").check_resize()
-        self.tableslist.tables_count = 0
-        self.tableslist.redraw()
-        
     def on_mainwindow_key_release_event(self, _window, event):
         if event.keyval == keysyms.F3:
             self.on_local_search_button_clicked(None, True)
@@ -2322,7 +2255,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             if not current_table:
                 dialogs.show_message(
                     "info",
-                    "no table selected!\nyou can't execute a template with $table$ in it, if you have no table selected!")
+                    "no table selected!\nyou can't execute a template with $table$ in it, "
+                    "if you have no table selected!")
                 return
             t = t.replace("$table$", self.current_host.escape_table(current_table.name))
             
@@ -2331,7 +2265,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             if not current_table:
                 dialogs.show_message(
                     "info",
-                    "no table selected!\nyou can't execute a template with $primary_key$ in it, if you have no table selected!")
+                    "no table selected!\nyou can't execute a template with $primary_key$ in it, "
+                    "if you have no table selected!")
                 return
             if not current_table.fields:
                 dialogs.show_message(
@@ -2416,7 +2351,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             if not current_table:
                 dialogs.show_message(
                     "info",
-                    "no table selected!\nyou can't execute a template with $field_conditions$ in it, if you have no table selected!")
+                    "no table selected!\nyou can't execute a template with "
+                    "$field_conditions$ in it, if you have no table selected!")
                 return
                 
             last_field = []
@@ -2460,7 +2396,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 )
             )
             for i in range(1, self.fc_count):
-                if self.fc_logic_combobox[i - 1].get_active_text() == "disabled" or self.fc_combobox[i].get_active_text() == "" or self.fc_op_combobox[i].get_active_text() == "":
+                if self.fc_logic_combobox[i - 1].get_active_text() == "disabled" \
+                        or self.fc_combobox[i].get_active_text() == "" \
+                        or self.fc_op_combobox[i].get_active_text() == "":
                     continue
                 conditions += " %s %s" % (
                     self.fc_logic_combobox[i - 1].get_active_text(),
@@ -2670,7 +2608,7 @@ def start(args):
             usage()
 
     # this singleton will be accessible as sys.stdout!
-    OutputHandler(debug_output, log_file, log_flush)
+    # OutputHandler(debug_output, log_file, log_flush)
 
     e = Emma()
 
