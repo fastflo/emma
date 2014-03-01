@@ -52,7 +52,7 @@
                     <property name="receives_default">False</property>
                     <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
-                    <signal name="clicked" handler="on_cancel_execute_from_disk_clicked"/>
+                    <signal name="clicked" handler="on_cancel_execute_from_disk_clicked" swapped="no"/>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
@@ -229,7 +229,7 @@
             <property name="use_action_appearance">False</property>
             <property name="use_underline">True</property>
             <property name="draw_indicator">True</property>
-            <signal name="toggled" handler="on_eqfd_exclude_toggled"/>
+            <signal name="toggled" handler="on_eqfd_exclude_toggled" swapped="no"/>
           </widget>
           <packing>
             <property name="right_attach">2</property>
@@ -266,7 +266,7 @@
             <property name="use_action_appearance">False</property>
             <property name="use_underline">True</property>
             <property name="draw_indicator">True</property>
-            <signal name="toggled" handler="on_eqfd_limit_db_toggled"/>
+            <signal name="toggled" handler="on_eqfd_limit_db_toggled" swapped="no"/>
           </widget>
           <packing>
             <property name="right_attach">2</property>
@@ -434,7 +434,7 @@
                 <property name="receives_default">False</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_abort_execute_from_disk_clicked"/>
+                <signal name="clicked" handler="on_abort_execute_from_disk_clicked" swapped="no"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -451,7 +451,7 @@
                 <property name="receives_default">False</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_start_execute_from_disk_clicked"/>
+                <signal name="clicked" handler="on_start_execute_from_disk_clicked" swapped="no"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -564,7 +564,7 @@
                     <property name="receives_default">False</property>
                     <property name="use_action_appearance">False</property>
                     <property name="use_underline">True</property>
-                    <signal name="clicked" handler="on_fc_reset_clicked"/>
+                    <signal name="clicked" handler="on_fc_reset_clicked" swapped="no"/>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
@@ -800,10 +800,11 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">emma</property>
+    <property name="window_position">center</property>
     <property name="default_width">1024</property>
     <property name="default_height">768</property>
     <property name="icon_name">gtk-network</property>
-    <signal name="key_release_event" handler="on_mainwindow_key_release_event"/>
+    <signal name="key_release_event" handler="on_mainwindow_key_release_event" swapped="no"/>
     <child>
       <widget class="GtkVPaned" id="vpaned1">
         <property name="visible">True</property>
@@ -837,7 +838,7 @@
                             <property name="use_action_appearance">False</property>
                             <property name="label" translatable="yes">execute query from disk</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="on_execute_query_from_disk_activate"/>
+                            <signal name="activate" handler="on_execute_query_from_disk_activate" swapped="no"/>
                           </widget>
                         </child>
                         <child>
@@ -848,7 +849,7 @@
                             <property name="use_action_appearance">False</property>
                             <property name="label" translatable="yes">reload plugins</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="on_reload_plugins_activate"/>
+                            <signal name="activate" handler="on_reload_plugins_activate" swapped="no"/>
                           </widget>
                         </child>
                         <child>
@@ -859,7 +860,7 @@
                             <property name="use_action_appearance">False</property>
                             <property name="label" translatable="yes">reload config</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="on_reread_config_activate"/>
+                            <signal name="activate" handler="on_reread_config_activate" swapped="no"/>
                           </widget>
                         </child>
                         <child>
@@ -870,7 +871,7 @@
                             <property name="use_action_appearance">False</property>
                             <property name="label" translatable="yes">reload self</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="on_reload_self_activate"/>
+                            <signal name="activate" handler="on_reload_self_activate" swapped="no"/>
                           </widget>
                         </child>
                         <child>
@@ -881,7 +882,7 @@
                             <property name="use_action_appearance">False</property>
                             <property name="label" translatable="yes">save workspace</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="on_save_workspace_activate"/>
+                            <signal name="activate" handler="on_save_workspace_activate" swapped="no"/>
                           </widget>
                         </child>
                         <child>
@@ -898,7 +899,7 @@
                             <property name="use_action_appearance">False</property>
                             <property name="label" translatable="yes">restore workspace</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="on_restore_workspace_activate"/>
+                            <signal name="activate" handler="on_restore_workspace_activate" swapped="no"/>
                           </widget>
                         </child>
                         <child>
@@ -936,7 +937,7 @@
                             <property name="use_action_appearance">False</property>
                             <property name="label" translatable="yes">Changelog</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="on_changelog_activate"/>
+                            <signal name="activate" handler="on_changelog_activate" swapped="no"/>
                           </widget>
                         </child>
                         <child>
@@ -948,7 +949,7 @@
                             <property name="use_action_appearance">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">False</property>
-                            <signal name="activate" handler="on_about_activate"/>
+                            <signal name="activate" handler="on_about_activate" swapped="no"/>
                             <child internal-child="image">
                               <widget class="GtkImage" id="menu-item-image22">
                                 <property name="visible">True</property>
@@ -992,7 +993,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="show_border">False</property>
-                    <signal name="switch_page" handler="on_nb_change_page"/>
+                    <signal name="switch_page" handler="on_nb_change_page" swapped="no"/>
                     <child>
                       <widget class="GtkVBox" id="vbox9">
                         <property name="visible">True</property>
@@ -1010,9 +1011,9 @@
                                 <property name="label" translatable="yes">Execute</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-execute</property>
-                                <signal name="clicked" handler="on_execute_query_clicked"/>
-                                <accelerator key="F9" signal="clicked"/>
+                                <signal name="clicked" handler="on_execute_query_clicked" swapped="no"/>
                                 <accelerator key="Return" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                                <accelerator key="F9" signal="clicked"/>
                               </widget>
                               <packing>
                                 <property name="expand">False</property>
@@ -1036,7 +1037,7 @@
                                     <property name="adjustment">0 0 99 0.5 10 0</property>
                                     <property name="climb_rate">0.5</property>
                                     <property name="digits">1</property>
-                                    <signal name="changed" handler="on_reexecution_spin_changed"/>
+                                    <signal name="changed" handler="on_reexecution_spin_changed" swapped="no"/>
                                   </widget>
                                 </child>
                               </widget>
@@ -1053,7 +1054,7 @@
                                 <property name="label" translatable="yes">Save</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-save</property>
-                                <signal name="clicked" handler="on_save_query_clicked"/>
+                                <signal name="clicked" handler="on_save_query_clicked" swapped="no"/>
                                 <accelerator key="S" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                               <packing>
@@ -1070,7 +1071,7 @@
                                 <property name="label" translatable="yes">Load</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-open</property>
-                                <signal name="clicked" handler="on_load_query_clicked"/>
+                                <signal name="clicked" handler="on_load_query_clicked" swapped="no"/>
                                 <accelerator key="O" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                               <packing>
@@ -1096,7 +1097,7 @@
                                 <property name="label" translatable="yes">Query Font</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-select-font</property>
-                                <signal name="clicked" handler="on_query_font_clicked"/>
+                                <signal name="clicked" handler="on_query_font_clicked" swapped="no"/>
                               </widget>
                               <packing>
                                 <property name="expand">False</property>
@@ -1121,7 +1122,7 @@
                                 <property name="label" translatable="yes">New Query</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-new</property>
-                                <signal name="clicked" handler="on_newquery_button_clicked"/>
+                                <signal name="clicked" handler="on_newquery_button_clicked" swapped="no"/>
                                 <accelerator key="T" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                               <packing>
@@ -1138,7 +1139,7 @@
                                 <property name="label" translatable="yes">Close</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-close</property>
-                                <signal name="clicked" handler="on_closequery_button_clicked"/>
+                                <signal name="clicked" handler="on_closequery_button_clicked" swapped="no"/>
                                 <accelerator key="W" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                               <packing>
@@ -1154,7 +1155,7 @@
                                 <property name="use_action_appearance">False</property>
                                 <property name="label" translatable="yes">Rename</property>
                                 <property name="stock_id">gtk-bold</property>
-                                <signal name="clicked" handler="on_rename_query_tab_clicked"/>
+                                <signal name="clicked" handler="on_rename_query_tab_clicked" swapped="no"/>
                               </widget>
                               <packing>
                                 <property name="expand">False</property>
@@ -1183,7 +1184,7 @@
                             <property name="can_focus">True</property>
                             <property name="show_border">False</property>
                             <property name="scrollable">True</property>
-                            <signal name="switch_page" handler="on_query_notebook_switch_page"/>
+                            <signal name="switch_page" handler="on_query_notebook_switch_page" swapped="no"/>
                             <child>
                               <widget class="GtkVPaned" id="first_query">
                                 <property name="visible">True</property>
@@ -1238,7 +1239,7 @@
                                             <property name="tooltip" translatable="yes">add new record</property>
                                             <property name="use_action_appearance">False</property>
                                             <property name="stock_id">gtk-add</property>
-                                            <signal name="clicked" handler="on_add_record_tool_clicked"/>
+                                            <signal name="clicked" handler="on_add_record_tool_clicked" swapped="no"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1253,7 +1254,7 @@
                                             <property name="tooltip" translatable="yes">delete record (ctrl+del)</property>
                                             <property name="use_action_appearance">False</property>
                                             <property name="stock_id">gtk-delete</property>
-                                            <signal name="clicked" handler="on_delete_record_tool_clicked"/>
+                                            <signal name="clicked" handler="on_delete_record_tool_clicked" swapped="no"/>
                                             <accelerator key="Delete" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                                           </widget>
                                           <packing>
@@ -1270,7 +1271,7 @@
                                             <property name="use_action_appearance">False</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-apply</property>
-                                            <signal name="clicked" handler="on_apply_record_tool_clicked"/>
+                                            <signal name="clicked" handler="on_apply_record_tool_clicked" swapped="no"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1287,7 +1288,7 @@
                                             <property name="label" translatable="yes">save result as csv</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-save-as</property>
-                                            <signal name="clicked" handler="on_save_result_clicked"/>
+                                            <signal name="clicked" handler="on_save_result_clicked" swapped="no"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1302,7 +1303,7 @@
                                             <property name="use_action_appearance">False</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-save-as</property>
-                                            <signal name="clicked" handler="on_save_result_sql_clicked"/>
+                                            <signal name="clicked" handler="on_save_result_sql_clicked" swapped="no"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1317,7 +1318,7 @@
                                             <property name="tooltip" translatable="yes">search for regular expression in this result (Ctrl+f / F3)</property>
                                             <property name="use_action_appearance">False</property>
                                             <property name="stock_id">gtk-find</property>
-                                            <signal name="clicked" handler="on_local_search_button_clicked"/>
+                                            <signal name="clicked" handler="on_local_search_button_clicked" swapped="no"/>
                                             <accelerator key="F" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                                           </widget>
                                           <packing>
@@ -1333,7 +1334,7 @@
                                             <property name="use_action_appearance">False</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-select-font</property>
-                                            <signal name="clicked" handler="on_query_result_font_clicked"/>
+                                            <signal name="clicked" handler="on_query_result_font_clicked" swapped="no"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1349,7 +1350,7 @@
                                             <property name="use_action_appearance">False</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-cancel</property>
-                                            <signal name="clicked" handler="on_remove_order_clicked"/>
+                                            <signal name="clicked" handler="on_remove_order_clicked" swapped="no"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1364,7 +1365,7 @@
                                             <property name="use_action_appearance">False</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-dialog-warning</property>
-                                            <signal name="clicked" handler="on_remember_order_clicked"/>
+                                            <signal name="clicked" handler="on_remember_order_clicked" swapped="no"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1406,9 +1407,9 @@
                                               <widget class="GtkTreeView" id="query_view">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
-                                                <signal name="cursor_changed" handler="on_query_view_cursor_changed"/>
-                                                <signal name="key_press_event" handler="on_query_view_key_press_event"/>
-                                                <signal name="button_release_event" handler="on_query_view_button_release_event"/>
+                                                <signal name="cursor_changed" handler="on_query_view_cursor_changed" swapped="no"/>
+                                                <signal name="key_press_event" handler="on_query_view_key_press_event" swapped="no"/>
+                                                <signal name="button_release_event" handler="on_query_view_button_release_event" swapped="no"/>
                                               </widget>
                                             </child>
                                           </widget>
@@ -1427,7 +1428,7 @@
                                               <widget class="GtkEventBox" id="query_bottom_eventbox">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
-                                                <signal name="button_press_event" handler="on_query_bottom_eventbox_button_press_event"/>
+                                                <signal name="button_press_event" handler="on_query_bottom_eventbox_button_press_event" swapped="no"/>
                                                 <child>
                                                   <widget class="GtkLabel" id="query_bottom_label">
                                                     <property name="visible">True</property>
@@ -1450,7 +1451,7 @@
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="tooltip" translatable="yes">click here to jump to the selected host/database</property>
-                                                <signal name="button_press_event" handler="on_query_db_eventbox_button_press_event"/>
+                                                <signal name="button_press_event" handler="on_query_db_eventbox_button_press_event" swapped="no"/>
                                                 <child>
                                                   <widget class="GtkLabel" id="query_db_label">
                                                     <property name="visible">True</property>
@@ -1510,7 +1511,7 @@
                                   <widget class="GtkEventBox" id="tab_close_eventbox">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <signal name="button_release_event" handler="on_tab_close_eventbox_button_press_event" after="yes"/>
+                                    <signal name="button_release_event" handler="on_tab_close_eventbox_button_press_event" after="yes" swapped="no"/>
                                     <child>
                                       <widget class="GtkImage" id="image362">
                                         <property name="visible">True</property>
@@ -1580,7 +1581,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="show_border">False</property>
-            <signal name="switch_page" handler="on_message_notebook_switch_page"/>
+            <signal name="switch_page" handler="on_message_notebook_switch_page" swapped="no"/>
             <child>
               <widget class="GtkVBox" id="vbox15">
                 <property name="visible">True</property>
@@ -1599,7 +1600,7 @@
                         <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="draw_indicator">False</property>
-                        <signal name="clicked" handler="on_blob_wrap_check_clicked"/>
+                        <signal name="clicked" handler="on_blob_wrap_check_clicked" swapped="no"/>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
@@ -1616,7 +1617,7 @@
                         <property name="tooltip" translatable="yes">click here to store your changes back to the database</property>
                         <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
-                        <signal name="clicked" handler="on_blob_update_clicked"/>
+                        <signal name="clicked" handler="on_blob_update_clicked" swapped="no"/>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
@@ -1643,7 +1644,7 @@
                         <property name="tooltip" translatable="yes">save contents to file</property>
                         <property name="use_action_appearance">False</property>
                         <property name="relief">none</property>
-                        <signal name="clicked" handler="on_blob_save_clicked"/>
+                        <signal name="clicked" handler="on_blob_save_clicked" swapped="no"/>
                         <child>
                           <widget class="GtkImage" id="image334">
                             <property name="visible">True</property>
@@ -1666,7 +1667,7 @@
                         <property name="tooltip" translatable="yes">read contents from file</property>
                         <property name="use_action_appearance">False</property>
                         <property name="relief">none</property>
-                        <signal name="clicked" handler="on_blob_load_clicked"/>
+                        <signal name="clicked" handler="on_blob_load_clicked" swapped="no"/>
                         <child>
                           <widget class="GtkImage" id="image335">
                             <property name="visible">True</property>
@@ -1750,7 +1751,7 @@
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">latin1</property>
         <property name="use_underline">True</property>
-        <signal name="activate" handler="select_query_encoding"/>
+        <signal name="activate" handler="select_query_encoding" swapped="no"/>
       </widget>
     </child>
   </widget>
@@ -1764,7 +1765,7 @@
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="on_query_popup"/>
+        <signal name="activate" handler="on_query_popup" swapped="no"/>
         <child internal-child="image">
           <widget class="GtkImage" id="image378">
             <property name="visible">True</property>
@@ -1783,7 +1784,7 @@
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="on_query_popup"/>
+        <signal name="activate" handler="on_query_popup" swapped="no"/>
         <child internal-child="image">
           <widget class="GtkImage" id="image379">
             <property name="visible">True</property>
@@ -1801,7 +1802,7 @@
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">copy record as quoted csv</property>
         <property name="use_underline">True</property>
-        <signal name="activate" handler="on_query_popup"/>
+        <signal name="activate" handler="on_query_popup" swapped="no"/>
       </widget>
     </child>
     <child>
@@ -1812,7 +1813,7 @@
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="on_query_popup"/>
+        <signal name="activate" handler="on_query_popup" swapped="no"/>
         <child internal-child="image">
           <widget class="GtkImage" id="image380">
             <property name="visible">True</property>
@@ -1830,7 +1831,7 @@
         <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">copy column as quoted csv</property>
         <property name="use_underline">True</property>
-        <signal name="activate" handler="on_query_popup"/>
+        <signal name="activate" handler="on_query_popup" swapped="no"/>
       </widget>
     </child>
     <child>
@@ -1841,7 +1842,7 @@
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="on_query_popup"/>
+        <signal name="activate" handler="on_query_popup" swapped="no"/>
         <child internal-child="image">
           <widget class="GtkImage" id="image381">
             <property name="visible">True</property>
@@ -1875,7 +1876,7 @@
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="on_add_record_tool_clicked"/>
+        <signal name="activate" handler="on_add_record_tool_clicked" swapped="no"/>
         <child internal-child="image">
           <widget class="GtkImage" id="image387">
             <property name="visible">True</property>
@@ -1894,7 +1895,7 @@
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="on_delete_record_tool_clicked"/>
+        <signal name="activate" handler="on_delete_record_tool_clicked" swapped="no"/>
         <child internal-child="image">
           <widget class="GtkImage" id="image388">
             <property name="visible">True</property>

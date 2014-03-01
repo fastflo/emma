@@ -9,6 +9,7 @@ from PopUpProcessList import PopUpProcessList
 
 from TabSqlLog import TabSqlLog
 from TabMsgLog import TabMsgLog
+from TabBlobView import TabBlobView
 
 from TabProcessList import TabProcessList
 from TabTable import TabTable

@@ -138,6 +138,9 @@ class Emma:
         self.sql_log = widgets.TabSqlLog(self)
         self.message_notebook.prepend_page(self.sql_log, gtk.Label('SQL Log'))
 
+        self.blob_view = widgets.TabBlobView(self)
+        self.message_notebook.append_page(self.blob_view, gtk.Label('New Blob View'))
+
         # BLOB view
         self.blob_tv = self.xml.get_widget("blob_tv")
         self.blob_tv.set_sensitive(False)
@@ -969,16 +972,18 @@ class Emma:
             self.on_query_view_cursor_changed(self.current_query.treeview)
         
     def on_query_view_cursor_changed(self, tv):
+        print 'on_query_view_cursor_changed'
         q = self.current_query
+        self.blob_encoding = q.encoding
         path, column = q.treeview.get_cursor()
         
         if not path:
             return
         
         if self.blob_view_visible and column:
+            print 'aaa'
             _iter = q.model.get_iter(path)
             col = q.treeview.get_columns().index(column)
-            self.blob_encoding = q.encoding
             value = q.model.get_value(_iter, col)
             if value is None:
                 # todo signal null value
