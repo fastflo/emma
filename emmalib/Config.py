@@ -1,5 +1,4 @@
 import os
-import gtk
 import sys
 import dialogs
 
@@ -41,10 +40,45 @@ class Config:
             "result_view_column_width_max": "300",
             "result_view_column_resizable": "false",
             "result_view_column_sort_timeout": "750",
-            "syntax_highlight_keywords": "lock, unlock, tables, kill, truncate table, alter table, host, database, field, comment, show table status, show index, add index, drop index, add primary key, add unique, drop primary key, show create table, values, insert into, into, select, show databases, show tables, show processlist, show tables, from, where, order by, group by, limit, left, join, right, inner, after, alter, as, asc, before, begin, case, column, change column, commit, create table, default, delete, desc, describe, distinct, drop, table, first, grant, having, insert, interval, insert into, limit, null, order, primary key, primary, auto_increment, rollback, set, start, temporary, union, unique, update, create database, use, key, type, uniqe key, on, type, not, unsigned",
-            "syntax_highlight_functions": "date_format, now, floor, rand, hour, if, minute, month, right, year, isnull",
-            "syntax_highlight_functions": "abs, acos, adddate, addtime, aes_decrypt, aes_encrypt, ascii, asin, atan, benchmark, bin, bit_length, ceil, ceiling, char, character_length, char_length, charset, coercibility, collation, compress, concat, concat_ws, connection_id, conv, convert_tz, cos, cot, crypt, curdate, current_date, current_time, current_timestamp, current_user, curtime, database, date, date_add, datediff, date_format, date_sub, day, dayname, dayofmonth, dayofweek, dayofyear, decode, default, degrees, des_decrypt, des_encrypt, elt, encode, encrypt, exp, export_set, extract, field, find_in_set, floor, format, found_rows, from_days, from_unixtime, get_format, get_lock, hex, hour, if, ifnull, inet_aton, inet_ntoa, insert, instr, is_free_lock, is_used_lock, last_day, last_insert_id, lcase, left, length, ln, load_file, localtime, localtimestamp, locate, log, lower, lpad, ltrim, makedate, make_set, maketime, master_pos_wait, microsecond, mid, minute, mod, month, monthname, mysql_insert_id, now, nullif, oct, octet_length, old_password, ord, order by rand, password, period_add, period_diff, pi, position, pow, power, quarter, quote, radians, rand, release_lock, repeat, replace, reverse, right, round, row_count, rpad, rtrim, schema, second, sec_to_time, session_user, sha, sign, sin, sleep, soundex, space, sqrt, str_to_date, subdate, substr, substring, substring_index, subtime, sysdate, system_user, tan, time, timediff, time_format, timestamp, timestampadd, timestampdiff, time_to_sec, to_days, trim, truncate, ucase, uncompress, uncompressed_length, unhex, unix_timestamp, upper, user, utc_date, utc_time, utc_timestamp, uuid, version, week, weekday, weekofyear, year, yearweek",
-            "syntax_highlight_datatypes": "binary, bit, blob, boolean, char, character, dec, decimal, double, float, int, integer, numeric, smallint, timestamp, varchar, datetime, text, mediumint, bigint, tinyint, date",
+            "syntax_highlight_keywords": "lock, unlock, tables, kill, truncate table, alter table, "
+                                         "host, database, field, comment, show table status, show index, "
+                                         "add index, drop index, add primary key, add unique, drop primary key, "
+                                         "show create table, values, insert into, into, select, show databases, "
+                                         "show tables, show processlist, show tables, from, where, order by, "
+                                         "group by, limit, left, join, right, inner, after, alter, as, asc, before, "
+                                         "begin, case, column, change column, commit, create table, default, delete, "
+                                         "desc, describe, distinct, drop, table, first, grant, having, insert, "
+                                         "interval, insert into, limit, null, order, primary key, primary, "
+                                         "auto_increment, rollback, set, start, temporary, union, unique, update, "
+                                         "create database, use, key, type, uniqe key, on, type, not, unsigned",
+            "syntax_highlight_functions": "date_format, now, floor, rand, hour, if, minute, month, right, year, isnull"
+                                          "abs, acos, adddate, addtime, aes_decrypt, aes_encrypt, ascii, asin, atan, "
+                                          "benchmark, bin, bit_length, ceil, ceiling, char, character_length, "
+                                          "char_length, charset, coercibility, collation, compress, concat, concat_ws, "
+                                          "connection_id, conv, convert_tz, cos, cot, crypt, curdate, current_date, "
+                                          "current_time, current_timestamp, current_user, curtime, database, date, "
+                                          "date_add, datediff, date_format, date_sub, day, dayname, dayofmonth, "
+                                          "dayofweek, dayofyear, decode, default, degrees, des_decrypt, des_encrypt, "
+                                          "elt, encode, encrypt, exp, export_set, extract, field, find_in_set, floor, "
+                                          "format, found_rows, from_days, from_unixtime, get_format, get_lock, hex, "
+                                          "hour, if, ifnull, inet_aton, inet_ntoa, insert, instr, is_free_lock, "
+                                          "is_used_lock, last_day, last_insert_id, lcase, left, length, ln, load_file, "
+                                          "localtime, localtimestamp, locate, log, lower, lpad, ltrim, makedate, "
+                                          "make_set, maketime, master_pos_wait, microsecond, mid, minute, mod, month, "
+                                          "monthname, mysql_insert_id, now, nullif, oct, octet_length, old_password, "
+                                          "ord, order by rand, password, period_add, period_diff, pi, position, pow, "
+                                          "power, quarter, quote, radians, rand, release_lock, repeat, replace, "
+                                          "reverse, right, round, row_count, rpad, rtrim, schema, second, sec_to_time, "
+                                          "session_user, sha, sign, sin, sleep, soundex, space, sqrt, str_to_date, "
+                                          "subdate, substr, substring, substring_index, subtime, sysdate, system_user, "
+                                          "tan, time, timediff, time_format, timestamp, timestampadd, timestampdiff, "
+                                          "time_to_sec, to_days, trim, truncate, ucase, uncompress, "
+                                          "uncompressed_length, unhex, unix_timestamp, upper, user, utc_date, "
+                                          "utc_time, utc_timestamp, uuid, version, week, weekday, weekofyear, "
+                                          "year, yearweek",
+            "syntax_highlight_datatypes": "binary, bit, blob, boolean, char, character, dec, decimal, double, float, "
+                                          "int, integer, numeric, smallint, timestamp, varchar, datetime, text, "
+                                          "mediumint, bigint, tinyint, date",
             "syntax_highlight_operators": "not, and, or, like, \\<, \\>",
             "syntax_highlight_fg_keyword": "#00007F",
             "syntax_highlight_fg_function": "darkblue",
@@ -69,19 +103,19 @@ class Config:
             "connect_timeout": "7",
             "db_encoding": "latin1",
             "supported_db_encodings":
-                "latin1 (iso8859-1, cp819); "
-                "latin2 (iso8859-2); "
-                "iso8859_15 (iso8859-15); "
-                "utf8;"
-                "utf7;"
-                "utf16; "
-                "ascii (646);"
-                "cp437 (IBM437);"
-                "cp500 (EBCDIC-CP-BE); "
-                "cp850 (IBM850); "
-                "cp1140 (ibm1140); "
-                "cp1252 (windows-1252); "
-                "mac_latin2; mac_roman"
+                                        "latin1 (iso8859-1, cp819); "
+                                        "latin2 (iso8859-2); "
+                                        "iso8859_15 (iso8859-15); "
+                                        "utf8;"
+                                        "utf7;"
+                                        "utf16; "
+                                        "ascii (646);"
+                                        "cp437 (IBM437);"
+                                        "cp500 (EBCDIC-CP-BE); "
+                                        "cp850 (IBM850); "
+                                        "cp1140 (ibm1140); "
+                                        "cp1252 (windows-1252); "
+                                        "mac_latin2; mac_roman"
         }
 
     def load(self, unpickled=False):
@@ -101,8 +135,10 @@ class Config:
                 for line in fp:
                     line_no += 1
                     line.lstrip(" \t\r\n")
-                    if not line: continue
-                    if line[0] == '#': continue
+                    if not line:
+                        continue
+                    if line[0] == '#':
+                        continue
                     varval = line.split("=", 1)
                     name, value = map(lambda a: a.strip("\r\n \t"), varval)
                     value = varval[1].strip("\r\n \t")
