@@ -139,13 +139,7 @@ class Emma:
         self.message_notebook.prepend_page(self.sql_log, gtk.Label('SQL Log'))
 
         self.blob_view = widgets.TabBlobView(self)
-        self.message_notebook.append_page(self.blob_view, gtk.Label('New Blob View'))
-
-        # BLOB view
-        self.blob_tv = self.xml.get_widget("blob_tv")
-        self.blob_tv.set_sensitive(False)
-        self.blob_buffer = self.blob_tv.get_buffer()
-        self.blob_view_visible = False
+        self.message_notebook.append_page(self.blob_view, gtk.Label('Blob View'))
 
         # table view
         self.table_view = widgets.TabTable(self)
@@ -773,70 +767,6 @@ class Emma:
             return True
         return False
         
-    def on_blob_wrap_check_clicked(self, button):
-        if button.get_active():
-            self.blob_tv.set_wrap_mode(gtk.WRAP_WORD)
-        else:
-            self.blob_tv.set_wrap_mode(gtk.WRAP_NONE)
-        
-    def on_blob_load_clicked(self, button):
-        d = self.assign_once(
-            "load dialog",
-            gtk.FileChooserDialog,
-            "load blob contents",
-            self.mainwindow,
-            gtk.FILE_CHOOSER_ACTION_OPEN,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
-        
-        d.set_default_response(gtk.RESPONSE_ACCEPT)
-        answer = d.run()
-        d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT:
-            return
-            
-        filename = d.get_filename()
-        try:
-            fp = file(filename, "rb")
-            query_text = fp.read().decode(self.current_query.encoding, "ignore")
-            fp.close()
-        except:
-            dialogs.show_message("load blob contents", "loading blob contents from file %s: %s" % (filename,
-                                                                                                   sys.exc_value))
-            return
-        self.blob_tv.get_buffer().set_text(query_text)
-        
-    def on_blob_save_clicked(self, button):
-        d = self.assign_once(
-            "save dialog",
-            gtk.FileChooserDialog,
-            "save blob contents",
-            self.mainwindow,
-            gtk.FILE_CHOOSER_ACTION_SAVE,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
-        
-        d.set_default_response(gtk.RESPONSE_ACCEPT)
-        answer = d.run()
-        d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT:
-            return
-        filename = d.get_filename()
-        if os.path.exists(filename):
-            if not os.path.isfile(filename):
-                dialogs.show_message("save blob contents", "%s already exists and is not a file!" % filename)
-                return
-            if not dialogs.confirm(
-                    "overwrite file?", "%s already exists! do you want to overwrite it?" % filename,
-                    self.mainwindow):
-                return
-        b = self.blob_tv.get_buffer()
-        new_value = b.get_text(b.get_start_iter(), b.get_end_iter()).encode(self.current_query.encoding, "ignore")
-        try:
-            fp = file(filename, "wb")
-            fp.write(new_value)
-            fp.close()
-        except:
-            dialogs.show_message("save blob contents", "error writing query to file %s: %s" % (filename, sys.exc_value))
-        
     def on_delete_record_tool_clicked(self, button):
         q = self.current_query
         path, column = q.treeview.get_cursor()
@@ -967,34 +897,28 @@ class Emma:
         return True
         
     def on_message_notebook_switch_page(self, nb, pointer, page):
-        self.blob_view_visible = (page == 2)
-        if self.blob_view_visible:
+        if self.current_query:
             self.on_query_view_cursor_changed(self.current_query.treeview)
         
     def on_query_view_cursor_changed(self, tv):
         print 'on_query_view_cursor_changed'
         q = self.current_query
-        self.blob_encoding = q.encoding
+        self.blob_view.encoding = q.encoding
         path, column = q.treeview.get_cursor()
         
         if not path:
             return
         
-        if self.blob_view_visible and column:
-            print 'aaa'
-            _iter = q.model.get_iter(path)
-            col = q.treeview.get_columns().index(column)
-            value = q.model.get_value(_iter, col)
-            if value is None:
-                # todo signal null value
-                self.blob_buffer.set_text("")
-            else:
-                self.blob_buffer.set_text(value)
-            self.blob_tv.set_sensitive(True)
+        _iter = q.model.get_iter(path)
+        col = q.treeview.get_columns().index(column)
+        value = q.model.get_value(_iter, col)
+        if value is None:
+            # todo signal null value
+            self.blob_view.buffer.set_text("")
         else:
-            self.blob_buffer.set_text("")
-            self.blob_tv.set_sensitive(False)
-        
+            self.blob_view.buffer.set_text(value)
+        self.blob_view.tv.set_sensitive(True)
+
         if q.append_iter:
             if path == q.model.get_path(q.append_iter):
                 return
@@ -1531,9 +1455,9 @@ class Emma:
         result.append(")")
     
         q.label.set_text(' '.join(result))
-        self.blob_tv.set_editable(q.editable)
-        self.get_widget("blob_update").set_sensitive(q.editable)
-        self.get_widget("blob_load").set_sensitive(q.editable)
+        self.blob_view.tv.set_editable(q.editable)
+        self.blob_view.blob_update.set_sensitive(q.editable)
+        self.blob_view.blob_load.set_sensitive(q.editable)
         # todo update_buttons()
         gc.collect()
         return True
@@ -2056,27 +1980,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         self.execution_timer_interval = value
         gobject.timeout_add(int(value * 1000), self.on_execution_timeout, button)
 
-    def on_blob_update_clicked(self, button):
-        q = self.current_query
-        path, column = q.treeview.get_cursor()
-        if not q.model:
-            return
-        _iter = q.model.get_iter(path)
-        
-        b = self.blob_tv.get_buffer()
-        new_value = b.get_text(b.get_start_iter(), b.get_end_iter())
-        
-        col_max = q.model.get_n_columns()
-        for col_num in range(col_max):
-            if column == q.treeview.get_column(col_num):
-                break
-        else:
-            print "column not found!"
-            return
-        crs = column.get_cell_renderers()
-        return self.on_query_change_data(crs[0], path, new_value, col_num,
-                                         force_update=self.blob_encoding != q.encoding)
-        
     def on_query_popup(self, item):
         q = self.current_query
         path, column = q.treeview.get_cursor()
