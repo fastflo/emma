@@ -929,7 +929,7 @@ class Emma:
             dialogs.show_message("execute query from disk", "no host selected!")
             return
             
-        d = self.get_widget("execute_query_from_disk")
+        d = self.get_widget("execute_query_from_disk1")
         fc = self.assign_once("eqfd_file_chooser", self.xml.get_widget, "eqfd_file_chooser")
         if filename:
             fc.set_filename(filename)
