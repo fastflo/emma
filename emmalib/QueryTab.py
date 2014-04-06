@@ -22,9 +22,11 @@ import gtk
 import traceback
 import gtksourceview2
 
+from QueryTabRememberOrder import QueryTabRememberOrder
 
-class MySqlQueryTab:
-    def __init__(self, xml, nb):
+
+class QueryTab:
+    def __init__(self, xml, nb, emma):
         self.xml = xml
         self.nb = nb
 
@@ -43,13 +45,17 @@ class MySqlQueryTab:
             "query_bottom_label": "query_bottom_label",
             "query_db_label": "query_db_label",
             "query_text_sw": "query_text_sw",
-            "toolbar": "inner_query_toolbar"
+            #"toolbar": "inner_query_toolbar"
         }
 
         for attribute, xmlname in renameload.iteritems():
             self.__dict__[attribute] = xml.get_widget(xmlname)
 
+        self.toolbar = xml.get_widget('inner_query_toolbar')
+        #self.toolbar = gtk.Toolbar()
         self.toolbar.set_style(gtk.TOOLBAR_ICONS)
+
+        del self.toolbar
 
         # replace textview with gtksourcevice
         try:
@@ -73,7 +79,7 @@ class MySqlQueryTab:
             sv.set_insert_spaces_instead_of_tabs(False)
             sv.set_show_right_margin(True)
             sv.set_smart_home_end(True)
-            sv.set_right_margin_position(40)
+            sv.set_right_margin_position(80)
 
             # sv config
             # for pt, pn, pd in (
@@ -133,6 +139,11 @@ class MySqlQueryTab:
         if hasattr(self, "query"):
             self.textview.get_buffer().set_text(self.query)
         self.last_auto_name = None
+        #
+        #   INIT Query tab actions
+        #
+
+        self.remember_order_action = QueryTabRememberOrder(emma)
 
     def __getstate__(self):
         b = self.textview.get_buffer()
@@ -179,7 +190,8 @@ class MySqlQueryTab:
 
     def destroy(self):
         # try to free some memory
-        if self.model: self.model.clear()
+        if self.model:
+            self.model.clear()
         self.textview.get_buffer().set_text("")
         del self.treeview
         del self.model
@@ -211,9 +223,9 @@ class MySqlQueryTab:
             hname = "%s(%s)" % (h.name, h.host)
 
         self.query_db_label.set_label("%s: %s@%s%s" % (
-        title,
-        h.user, hname,
-        dname
+            title,
+            h.user, hname,
+            dname
         ))
         self.auto_rename("%s%s" % (h.name, dname))
 

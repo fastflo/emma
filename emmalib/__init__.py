@@ -63,6 +63,7 @@ import providers
 from ConnectionTreeView import ConnectionsTreeView
 from OutputHandler import OutputHandler
 from Config import Config
+from QueryTab import QueryTab
 import dialogs
 import widgets
 
@@ -99,6 +100,7 @@ class Emma:
         self.sql = sql
         self.created_once = {}
         self.query_changed_listener = []
+        self.stored_orders = {}
         self.query_count = 0
         self.glade_path = glade_path
         self.icons_path = icons_path
@@ -178,7 +180,7 @@ class Emma:
         self.config = Config(self)
         self.config.load()
 
-        self.add_query_tab(providers.mysql.MySqlQueryTab(self.xml, self.query_notebook))
+        self.add_query_tab(QueryTab(self.xml, self.query_notebook, self))
 
         connections_tv_container = self.xml.get_widget("connections_tv_container")
         self.connections_tv = ConnectionsTreeView(self)
@@ -437,32 +439,6 @@ class Emma:
                 break
             _start += 1  # comma
         return current_order
-        
-    def on_remember_order_clicked(self, button):
-        query = self.current_query.last_source
-        current_order = self.get_order_from_query(query)
-        result = self.is_query_appendable(query)
-        if not result:
-            return None, None, None, None, None
-        table_list = result.group(7)
-        table_list = table_list.replace(" join ", ",")
-        table_list = re.sub("(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)",
-                            "", table_list)
-        table_list = table_list.replace("`", "")
-        tables = map(lambda s: s.strip(), table_list.split(","))
-        
-        if len(tables) > 1:
-            dialogs.show_message("store table order", "can't store table order of multi-table queries!")
-            return
-        table = tables[0]
-        
-        print "table: %s order: %s" % (table, current_order)
-        config_name = "stored_order_db_%s_table_%s" % (self.current_host.current_db.name, table)
-        self.config.config[config_name] = str(current_order)
-        if not self.current_host.current_db.name in self.stored_orders:
-            self.stored_orders[self.current_host.current_db.name] = {}
-        self.stored_orders[self.current_host.current_db.name][table] = current_order
-        self.config.save()
         
     def get_field_list(self, s):
         # todo USE IT!
@@ -1803,7 +1779,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         xml = gtk.glade.XML(self.glade_file, "first_query")
         tab_label_hbox = gtk.glade.XML(self.glade_file, "tab_label_hbox")
         new_page = xml.get_widget("first_query")
-        self.add_query_tab(providers.mysql.MySqlQueryTab(xml, self.query_notebook))
+        self.add_query_tab(QueryTab(xml, self.query_notebook, self))
         label = tab_label_hbox.get_widget("tab_label_hbox")
         qtlabel = tab_label_hbox.get_widget("query_tab_label")
         #qtlabel.set_text("query%d" % self.query_count)

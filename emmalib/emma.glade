@@ -1365,7 +1365,6 @@
                                             <property name="use_action_appearance">False</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-dialog-warning</property>
-                                            <signal name="clicked" handler="on_remember_order_clicked"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
