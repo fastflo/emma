@@ -5,9 +5,10 @@ import dialogs
 
 class QueryTabLocalSearch:
 
-    def __init__(self, emma):
+    def __init__(self, query, emma):
         self.emma = emma
-        button = self.emma.xml.get_widget('local_search_button')
+        self.query = query
+        button = self.query.xml.get_widget('local_search_button')
         button.connect('clicked', self.on_local_search_button_clicked)
 
     def on_local_search_button_clicked(self, button, again=False):

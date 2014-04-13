@@ -17,10 +17,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
+import os
 import pango
 import gtk
 import traceback
 import gtksourceview2
+
+from gtk import keysyms
+from gtk import glade
 
 from QueryTabRememberOrder import QueryTabRememberOrder
 from QueryTabRemoveOrder import QueryTabRemoveOrder
@@ -30,36 +34,49 @@ from QueryTabSaveResultSql import QueryTabSaveResultSql
 from QueryTabSaveResultCsv import QueryTabSaveResultCsv
 from QueryTabManageRow import QueryTabManageRow
 
+from QueryTabTreeView import QueryTabTreeView
+
 
 class QueryTab:
-    def __init__(self, xml, nb, emma):
-        self.xml = xml
+    def __init__(self, nb, emma):
+        self.xml = gtk.glade.XML(os.path.join(emma.glade_path, 'querytab.glade'), "first_query")
+        self.xml.signal_autoconnect(self)
         self.nb = nb
+        self.emma = emma
 
         renameload = {
-            "textview": "query_text",
-            "treeview": "query_view",
             "save_result": "save_result",
             "save_result_sql": "save_result_sql",
-            "add_record": "add_record_tool",
-            "delete_record": "delete_record_tool",
             "local_search": "local_search_button",
             "remove_order": "remove_order",
             "label": "query_label",
-            "query_bottom_label": "query_bottom_label",
-            "query_db_label": "query_db_label",
-            "query_text_sw": "query_text_sw",
         }
 
         for attribute, xmlname in renameload.iteritems():
-            self.__dict__[attribute] = xml.get_widget(xmlname)
+            self.__dict__[attribute] = self.xml.get_widget(xmlname)
 
-        self.apply_record = xml.get_widget('apply_record_tool')
-        self.page = xml.get_widget('first_query')
-        self.toolbar = xml.get_widget('inner_query_toolbar')
+        self.add_record = self.xml.get_widget('add_record_tool')
+        self.delete_record = self.xml.get_widget('delete_record_tool')
+
+        self.query_bottom_label = self.xml.get_widget('query_bottom_label')
+        self.query_db_label = self.xml.get_widget('query_db_label')
+
+        self.textview = self.xml.get_widget('query_text')
+
+        self.query_text_sw = self.xml.get_widget('query_text_sw')
+        self.apply_record = self.xml.get_widget('apply_record_tool')
+        self.page = self.xml.get_widget('first_query')
+        self.toolbar = self.xml.get_widget('inner_query_toolbar')
         self.toolbar.set_style(gtk.TOOLBAR_ICONS)
 
-        del self.toolbar
+        self.scrolledwindow6 = self.xml.get_widget('scrolledwindow6')
+        self.treeview = QueryTabTreeView(emma)
+        self.scrolledwindow6.add(self.treeview)
+        self.treeview.show()
+
+        self.treeview.connect('cursor_changed', self.on_query_view_cursor_changed)
+        self.treeview.connect('key_press_event', self.on_query_view_key_press_event)
+        self.treeview.connect('button_release_event', self.on_query_view_button_release_event)
 
         # replace textview with gtksourcevice
         try:
@@ -108,9 +125,6 @@ class QueryTab:
             #         v = pd
             #     method = getattr(sv, "set_%s" % pn)
             #     method(v)
-
-
-
             # sb config
             # for pt, pn, pd in (
             #     (bool, "check_brackets", True),
@@ -138,8 +152,8 @@ class QueryTab:
         self.last_source = None
         self.result_info = None
         self.append_iter = None
-        self.save_result_sql.set_sensitive(False)
         self.last_path = None
+        self.encoding = None
         if hasattr(self, "query"):
             self.textview.get_buffer().set_text(self.query)
         self.last_auto_name = None
@@ -148,13 +162,13 @@ class QueryTab:
         #   INIT Query tab actions
         #
 
-        self.remember_order_action = QueryTabRememberOrder(emma)
-        self.remove_order_action = QueryTabRemoveOrder(emma)
-        self.set_result_font_action = QueryTabSetResultFont(emma)
-        self.local_search_action = QueryTabLocalSearch(emma)
-        self.save_result_sql_action = QueryTabSaveResultSql(emma)
-        self.save_result_csv_action = QueryTabSaveResultCsv(emma)
-        self.manage_row_action = QueryTabManageRow(emma)
+        self.remember_order_action = QueryTabRememberOrder(self, emma)
+        self.remove_order_action = QueryTabRemoveOrder(self, emma)
+        self.set_result_font_action = QueryTabSetResultFont(self, emma)
+        self.local_search_action = QueryTabLocalSearch(self, emma)
+        self.save_result_sql_action = QueryTabSaveResultSql(self, emma)
+        self.save_result_csv_action = QueryTabSaveResultCsv(self, emma)
+        self.manage_row_action = QueryTabManageRow(self, emma)
 
     def __getstate__(self):
         b = self.textview.get_buffer()
@@ -164,6 +178,66 @@ class QueryTab:
         }
         print "query will pickle:", d
         return d
+
+    def on_query_view_cursor_changed(self, tv):
+        self.emma.blob_view.encoding = self.encoding
+        path, column = self.treeview.get_cursor()
+
+        if not path:
+            return
+
+        _iter = self.model.get_iter(path)
+        if column is not None:
+            col = self.treeview.get_columns().index(column)
+        else:
+            col = 0
+        value = self.model.get_value(_iter, col)
+        if value is None:
+            # todo signal null value
+            self.emma.blob_view.buffer.set_text("")
+        else:
+            self.emma.blob_view.buffer.set_text(value)
+        self.emma.blob_view.tv.set_sensitive(True)
+
+        if self.append_iter:
+            if path == self.model.get_path(self.append_iter):
+                return
+            self.manage_row_action.on_apply_record_tool_clicked(None)
+
+    def on_query_view_key_press_event(self, tv, event):
+        path, column = self.treeview.get_cursor()
+        if event.keyval == keysyms.F2:
+            self.treeview.set_cursor(path, column, True)
+            return True
+
+        _iter = self.model.get_iter(path)
+        if event.keyval == keysyms.Down and not self.model.iter_next(_iter):
+            if self.append_iter and not self.manage_row_action.on_apply_record_tool_clicked(None):
+                return True
+            self.manage_row_action.on_add_record_tool_clicked(None)
+            return True
+
+    def on_query_view_button_release_event(self, tv, event):
+        if not event.button == 3:
+            return False
+        res = tv.get_path_at_pos(int(event.x), int(event.y))
+        menu = self.emma.xml.get_widget("result_popup")
+        if res:
+            sensitive = True
+        else:
+            sensitive = False
+        for c in menu.get_children():
+            for s in ["edit", "set ", "delete"]:
+                if c.name.find(s) != -1:
+                    c.set_sensitive(sensitive and self.emma.current_query.editable)
+                    break
+            else:
+                if c.name not in ["add_record"]:
+                    c.set_sensitive(sensitive)
+                else:
+                    c.set_sensitive(self.add_record.get_property("sensitive"))
+        menu.popup(None, None, None, 0, event.time)  # strange!
+        return True
 
     def auto_rename(self, new_auto_name):
         label = self.get_label()
@@ -195,7 +269,7 @@ class QueryTab:
         return labels[0]
 
     def user_rename(self, new_name):
-        tab_widget = self.nb.get_tab_label(self.page)
+        # tab_widget = self.nb.get_tab_label(self.page)
         label = self.get_label()
         label.set_text(new_name)
 

@@ -82,8 +82,6 @@ class table_editor:
             self.glade_file = os.path.join(self.emma.glade_path, "table_editor.glade")
             if not os.access(self.glade_file, os.R_OK):
                 raise ValueError("glade file %s not found!" % self.glade_file)
-        else:
-            print "glade file: %r" % self.glade_file
 
         self.xml = gtk.glade.XML(self.glade_file)
         self.window = self.xml.get_widget("table_editor")

@@ -1,22 +1,19 @@
-import re
-import os
-import gtk
-import sys
 import dialogs
 
 
 class QueryTabManageRow:
 
-    def __init__(self, emma):
+    def __init__(self, query, emma):
         self.emma = emma
+        self.query = query
 
-        button_add = self.emma.xml.get_widget('add_record_tool')
+        button_add = self.query.xml.get_widget('add_record_tool')
         button_add.connect('clicked', self.on_add_record_tool_clicked)
 
-        button_del = self.emma.xml.get_widget('delete_record_tool')
+        button_del = self.query.xml.get_widget('delete_record_tool')
         button_del.connect('clicked', self.on_delete_record_tool_clicked)
 
-        button_apl = self.emma.xml.get_widget('apply_record_tool')
+        button_apl = self.query.xml.get_widget('apply_record_tool')
         button_apl.connect('clicked', self.on_apply_record_tool_clicked)
 
     def on_add_record_tool_clicked(self, button):

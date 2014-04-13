@@ -1,4 +1,3 @@
-import re
 import os
 import gtk
 import sys
@@ -7,9 +6,10 @@ import dialogs
 
 class QueryTabSaveResultCsv:
 
-    def __init__(self, emma):
+    def __init__(self, query, emma):
         self.emma = emma
-        button = self.emma.xml.get_widget('save_result')
+        self.query = query
+        button = self.query.xml.get_widget('save_result')
         button.connect('clicked', self.on_save_result_clicked)
 
     def on_save_result_clicked(self, button):

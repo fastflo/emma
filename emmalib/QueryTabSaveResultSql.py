@@ -7,10 +7,12 @@ import dialogs
 
 class QueryTabSaveResultSql:
 
-    def __init__(self, emma):
+    def __init__(self, query, emma):
         self.emma = emma
-        button = self.emma.xml.get_widget('save_result_sql')
-        button.connect('clicked', self.on_save_result_sql_clicked)
+        self.query = query
+        self.button = self.query.xml.get_widget('save_result_sql')
+        self.button.connect('clicked', self.on_save_result_sql_clicked)
+        self.button.set_sensitive(False)
 
     def on_save_result_sql_clicked(self, button):
         if not self.emma.current_query:

@@ -180,12 +180,12 @@ class Emma:
         self.config = Config(self)
         self.config.load()
 
-        self.add_query_tab(QueryTab(self.xml, self.query_notebook, self))
-
         connections_tv_container = self.xml.get_widget("connections_tv_container")
         self.connections_tv = ConnectionsTreeView(self)
         connections_tv_container.add(self.connections_tv)
         self.connections_tv.show()
+
+        self.add_query_tab(QueryTab(self.query_notebook, self))
 
         self.first_template = None
         # keys = self.config.config.keys()
@@ -276,9 +276,6 @@ class Emma:
         except:
             return True
         
-    def on_tab_close_eventbox_button_press_event(self, eventbox, event):
-        self.on_closequery_button_clicked(None)
-        
     def load_plugins(self):
         def _load(_plugin_name):
             print "loading plugin %r" % _plugin_name
@@ -333,6 +330,28 @@ class Emma:
         else:
             qt.set_wrap_mode(gtk.WRAP_NONE)
         qt.set_current_host(self.current_host)
+
+        tab_label_hbox = gtk.HBox()
+        tab_label_label = gtk.Label('Query')
+        tab_label_label.show()
+        tab_label_ebox = gtk.EventBox()
+        img = gtk.Image()
+        img.set_from_stock(gtk.STOCK_CLOSE, 1)
+        img.show()
+        tab_label_ebox.add(img)
+        tab_label_ebox.show()
+        tab_label_ebox.connect('button_release_event', self.on_closequery_label_button_clicked)
+
+        tab_label_hbox.pack_start(tab_label_label)
+        tab_label_hbox.pack_end(tab_label_ebox)
+        tab_label_hbox.show()
+
+        self.query_notebook.append_page(qt.xml.get_widget('first_query'), tab_label_hbox)
+        self.query_notebook.set_current_page(len(self.queries) - 1)
+        self.current_query.textview.grab_focus()
+
+    def on_closequery_label_button_clicked(self, button, event):
+        self.on_closequery_button_clicked(None)
 
     def del_query_tab(self, qt):
         if self.current_query == qt:
@@ -733,34 +752,8 @@ class Emma:
 
     def on_message_notebook_switch_page(self, nb, pointer, page):
         if self.current_query:
-            self.on_query_view_cursor_changed(self.current_query.treeview)
+            self.current_query.on_query_view_cursor_changed(self.current_query.treeview)
         
-    def on_query_view_cursor_changed(self, tv):
-        q = self.current_query
-        self.blob_view.encoding = q.encoding
-        path, column = q.treeview.get_cursor()
-        
-        if not path:
-            return
-        
-        _iter = q.model.get_iter(path)
-        if column is not None:
-            col = q.treeview.get_columns().index(column)
-        else:
-            col = 0
-        value = q.model.get_value(_iter, col)
-        if value is None:
-            # todo signal null value
-            self.blob_view.buffer.set_text("")
-        else:
-            self.blob_view.buffer.set_text(value)
-        self.blob_view.tv.set_sensitive(True)
-
-        if q.append_iter:
-            if path == q.model.get_path(q.append_iter):
-                return
-            q.manage_row_action.on_apply_record_tool_clicked(None)
-            
     def on_execute_query_from_disk_activate(self, button, filename=None):
         if not self.current_host:
             dialogs.show_message("execute query from disk", "no host selected!")
@@ -1461,19 +1454,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         self.config.save()
 
     def on_newquery_button_clicked(self, button):
-        xml = gtk.glade.XML(self.glade_file, "first_query")
-        tab_label_hbox = gtk.glade.XML(self.glade_file, "tab_label_hbox")
-        new_page = xml.get_widget("first_query")
-        self.add_query_tab(QueryTab(xml, self.query_notebook, self))
-        label = tab_label_hbox.get_widget("tab_label_hbox")
-        qtlabel = tab_label_hbox.get_widget("query_tab_label")
-        #qtlabel.set_text("query%d" % self.query_count)
-        self.query_notebook.append_page(new_page, label)
-        self.query_notebook.set_current_page(len(self.queries) - 1)
-        self.current_query.textview.grab_focus()
-        xml.signal_autoconnect(self)
-        tab_label_hbox.signal_autoconnect(self)
-        
+        self.add_query_tab(QueryTab(self.query_notebook, self))
+
     def on_query_notebook_switch_page(self, nb, pointer, page):
         if page >= len(self.queries):
             page = len(self.queries) - 1
@@ -1550,43 +1532,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.current_query.local_search_action.on_local_search_button_clicked(None, True)
             return True
         
-    def on_query_view_key_press_event(self, tv, event):
-        q = self.current_query
-        path, column = q.treeview.get_cursor()
-        if event.keyval == keysyms.F2:
-            q.treeview.set_cursor(path, column, True)
-            return True
-        
-        _iter = q.model.get_iter(path)
-        if event.keyval == keysyms.Down and not q.model.iter_next(_iter):
-            if q.append_iter and not q.manage_row_action.on_apply_record_tool_clicked(None):
-                return True
-            q.manage_row_action.on_add_record_tool_clicked(None)
-            return True
-            
-    def on_query_view_button_release_event(self, tv, event):
-        if not event.button == 3:
-            return False
-        res = tv.get_path_at_pos(int(event.x), int(event.y))
-        menu = self.xml.get_widget("result_popup")
-        if res:
-            sensitive = True
-        else:
-            sensitive = False
-        for c in menu.get_children():
-            for s in ["edit", "set ", "delete"]:
-                if c.name.find(s) != -1:
-                    c.set_sensitive(sensitive and self.current_query.editable)
-                    break
-            else:
-                if c.name not in ["add_record"]:
-                    c.set_sensitive(sensitive)
-                else:
-                    c.set_sensitive(self.current_query.add_record.get_property("sensitive"))
-        #menu.popup(None, None, None, event.button, event.time)
-        menu.popup(None, None, None, 0, event.time)  # strange!
-        return True
-
     def get_current_table(self):
         path, column = self.connections_tv.get_cursor()
         _iter = self.connections_tv.connections_model.get_iter(path)

@@ -1,11 +1,11 @@
 import re
-import dialogs
 
 
 class QueryTabRemoveOrder:
-    def __init__(self, emma):
+    def __init__(self, query, emma):
         self.emma = emma
-        button = self.emma.xml.get_widget('remove_order')
+        self.query = query
+        button = self.query.xml.get_widget('remove_order')
         button.connect('clicked', self.on_remove_order_clicked)
 
     def on_remove_order_clicked(self, button):

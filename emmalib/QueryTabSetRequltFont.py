@@ -3,9 +3,10 @@ import gtk
 
 class QueryTabSetResultFont:
 
-    def __init__(self, emma):
+    def __init__(self, query, emma):
         self.emma = emma
-        button = self.emma.xml.get_widget('query_result_font')
+        self.query = query
+        button = self.query.xml.get_widget('query_result_font')
         button.connect('clicked', self.on_query_result_font_clicked)
 
     def on_query_result_font_clicked(self, button):

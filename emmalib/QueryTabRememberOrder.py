@@ -3,9 +3,10 @@ import dialogs
 
 
 class QueryTabRememberOrder:
-    def __init__(self, emma):
+    def __init__(self, query, emma):
         self.emma = emma
-        button = self.emma.xml.get_widget('remember_order')
+        self.query = query
+        button = self.query.xml.get_widget('remember_order')
         button.connect('clicked', self.on_remember_order_clicked)
 
     def on_remember_order_clicked(self, button):
