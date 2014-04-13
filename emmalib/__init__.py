@@ -1460,7 +1460,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if page >= len(self.queries):
             page = len(self.queries) - 1
         q = self.current_query = self.queries[page]
-        self.on_query_db_eventbox_button_press_event(None, None)
+        q.on_query_db_eventbox_button_press_event(None, None)
         self.query_changed(q)
 
     def query_changed(self, q):
@@ -1981,54 +1981,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def on_reread_config_activate(self, item):
         self.config.load()
         
-    def on_query_bottom_eventbox_button_press_event(self, ebox, event):
-        self.xml.get_widget("query_encoding_menu").popup(None, None, None, event.button, event.time)
-        
-    def on_query_db_eventbox_button_press_event(self, ebox, event):
-        q = self.current_query
-        host = q.current_host
-        db = q.current_db
-        if q.last_path is not None:
-            try:
-                self.connections_tv.connections_model.get_iter(q.last_path)
-                self.connections_tv.set_cursor(q.last_path)
-                return
-            except:
-                # path was not valid
-                pass
-
-        i = self.connections_tv.connections_model.get_iter_root()
-        while i and self.connections_tv.connections_model.iter_is_valid(i):
-            if self.connections_tv.connections_model[i][0] == host:
-                break
-            i = self.connections_tv.connections_model.iter_next(i)
-        else:
-            print "host not found in connections list!"
-            q.current_host = q.current_db = None
-            q.update_db_label()
-            return
-            
-        host_path = self.connections_tv.connections_model.get_path(i)
-        self.connections_tv.scroll_to_cell(host_path, column=None, use_align=True, row_align=0.0, col_align=0.0)
-        if db is None:
-            self.connections_tv.set_cursor(host_path)
-            return
-        k = self.connections_tv.connections_model.iter_children(i)
-        while k and self.connections_tv.connections_model.iter_is_valid(k):
-            if self.connections_tv.connections_model[k][0] == db:
-                break
-            k = self.connections_tv.connections_model.iter_next(k)
-        else:
-            print "database not found in connections list!"
-            q.current_db = None
-            q.update_db_label()
-            self.connections_tv.set_cursor(host_path)
-            return
-        path = self.connections_tv.connections_model.get_path(k)
-        #self.connections_tv.scroll_to_cell(path, column=None, use_align=True, row_align=0.125, col_align=0.0)
-        self.connections_tv.set_cursor(path)
-        return
-
     def on_query_encoding_changed(self, menuitem, data):
         self.current_query.set_query_encoding(data[0])
         
