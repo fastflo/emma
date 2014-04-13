@@ -23,6 +23,12 @@ import traceback
 import gtksourceview2
 
 from QueryTabRememberOrder import QueryTabRememberOrder
+from QueryTabRemoveOrder import QueryTabRemoveOrder
+from QueryTabSetRequltFont import QueryTabSetResultFont
+from QueryTabLocalSearch import QueryTabLocalSearch
+from QueryTabSaveResultSql import QueryTabSaveResultSql
+from QueryTabSaveResultCsv import QueryTabSaveResultCsv
+from QueryTabManageRow import QueryTabManageRow
 
 
 class QueryTab:
@@ -37,22 +43,20 @@ class QueryTab:
             "save_result_sql": "save_result_sql",
             "add_record": "add_record_tool",
             "delete_record": "delete_record_tool",
-            "apply_record": "apply_record_tool",
             "local_search": "local_search_button",
             "remove_order": "remove_order",
             "label": "query_label",
-            "page": "first_query",
             "query_bottom_label": "query_bottom_label",
             "query_db_label": "query_db_label",
             "query_text_sw": "query_text_sw",
-            #"toolbar": "inner_query_toolbar"
         }
 
         for attribute, xmlname in renameload.iteritems():
             self.__dict__[attribute] = xml.get_widget(xmlname)
 
+        self.apply_record = xml.get_widget('apply_record_tool')
+        self.page = xml.get_widget('first_query')
         self.toolbar = xml.get_widget('inner_query_toolbar')
-        #self.toolbar = gtk.Toolbar()
         self.toolbar.set_style(gtk.TOOLBAR_ICONS)
 
         del self.toolbar
@@ -139,11 +143,18 @@ class QueryTab:
         if hasattr(self, "query"):
             self.textview.get_buffer().set_text(self.query)
         self.last_auto_name = None
+
         #
         #   INIT Query tab actions
         #
 
         self.remember_order_action = QueryTabRememberOrder(emma)
+        self.remove_order_action = QueryTabRemoveOrder(emma)
+        self.set_result_font_action = QueryTabSetResultFont(emma)
+        self.local_search_action = QueryTabLocalSearch(emma)
+        self.save_result_sql_action = QueryTabSaveResultSql(emma)
+        self.save_result_csv_action = QueryTabSaveResultCsv(emma)
+        self.manage_row_action = QueryTabManageRow(emma)
 
     def __getstate__(self):
         b = self.textview.get_buffer()

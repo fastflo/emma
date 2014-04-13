@@ -619,21 +619,6 @@ class Emma:
             return table, where, field, value, row_iter, fields
         return table, where, field, value, row_iter
         
-    def on_remove_order_clicked(self, button):
-        query = self.current_query.last_source
-        try:
-            r = self.query_order_re
-        except:
-            r = self.query_order_re = re.compile(re_src_query_order)
-        match = re.search(r, query)
-        if not match: 
-            return
-        before, order, after = match.groups()
-        new_query = re.sub("(?i)order[ \r\n\t]+by[ \r\n\t]+", "", before + after)
-        self.current_query.set(new_query)
-        self.sort_timer_running = False
-        self.on_execute_query_clicked()
-        
     def on_query_column_sort(self, column, col_num):
         query = self.current_query.last_source
         current_order = self.get_order_from_query(query)
@@ -743,141 +728,14 @@ class Emma:
             return True
         return False
         
-    def on_delete_record_tool_clicked(self, button):
-        q = self.current_query
-        path, column = q.treeview.get_cursor()
-        if not path:
-            return
-        row_iter = q.model.get_iter(path)
-        if q.append_iter \
-                and q.model.iter_is_valid(q.append_iter) \
-                and q.model.get_path(q.append_iter) == q.model.get_path(row_iter):
-            q.append_iter = None
-            q.apply_record.set_sensitive(False)
-        else:
-            table, where, field, value, row_iter = self.get_unique_where(q.last_source, path)
-            if not table or not where:
-                dialogs.show_message("delete record", "could not delete this record!?")
-                return
-            if self.current_host.__class__.__name__ == "sqlite_host":
-                limit = ""
-            else:
-                limit = " limit 1"
-            update_query = "delete from `%s` where %s%s" % (table, where, limit)
-            if not self.current_host.query(update_query, encoding=q.encoding):
-                return
-        if not q.model.remove(row_iter):
-            row_iter = q.model.get_iter_first()
-            while row_iter:
-                new = q.model.iter_next(row_iter)
-                if new is None:
-                    break
-                row_iter = new
-        if row_iter:
-            q.treeview.set_cursor(q.model.get_path(row_iter))
-            
-    def on_add_record_tool_clicked(self, button):
-        q = self.current_query
-        if not q.add_record.get_property("sensitive"):
-            return
-            
-        path, column = q.treeview.get_cursor()
-        if path:
-            _iter = q.model.insert_after(q.model.get_iter(path))
-        else:
-            _iter = q.model.append()
-        q.treeview.grab_focus()
-        q.treeview.set_cursor(q.model.get_path(_iter))
-        q.filled_fields = dict()
-        q.append_iter = _iter
-        q.apply_record.set_sensitive(True)
-        
     def on_reload_self_activate(self, item):
         pass
 
-    def on_apply_record_tool_clicked(self, button):
-        q = self.current_query
-        if not q.append_iter:
-            return
-        query = ""
-        for field, value in q.filled_fields.iteritems():
-            if query:
-                query += ", "
-            if not value.isdigit():
-                value = "'%s'" % self.current_host.escape(value)
-            query += "%s=%s" % (self.current_host.escape_field(field), value)
-        if query: 
-            table, where, field, value, row_iter, fields = self.get_unique_where(q.last_source, return_fields=True)
-            if self.last_th.host.__class__.__name__ == "sqlite_host":
-                print (table, where, field, value, row_iter, fields)
-                keys = []
-                values = []
-                for key, value in self._kv_list:
-                    keys.append(key)
-                    if type(value) == str:
-                        values.append("'%s'" % value)
-                    else:
-                        values.append("%s" % value)
-                update_query = "insert into `%s` (%s) values (%s)" % (table, ", ".join(keys), ", ".join(values))
-            else:
-                update_query = "insert into `%s` set %s" % (table, query)
-            if not self.current_host.query(update_query, encoding=q.encoding):
-                return False
-                
-            insert_id = self.current_host.insert_id()
-            print "insert id: %r" % insert_id
-            where_fields = map(lambda s: s.strip(), where.split(","))
-            print "where fields: %r" % (where_fields, )
-            print "select fields: %r" % (fields, )
-            print "from %r" % ((table, where, field, value, row_iter), )
-            if not where_fields:
-                print "no possible key found to retrieve newly created record"
-            else:
-                th = self.current_host.current_db.tables[table]
-                wc = []
-                for field in where_fields:
-                    props = th.fields[field]
-                    auto_increment = props[5].find("auto_increment") != -1
-                    if auto_increment:
-                        value = insert_id
-                    else:
-                        if field in q.filled_fields:
-                            # use filled value
-                            value = "'%s'" % self.current_host.escape(q.filled_fields[field])
-                        else:
-                            # use field default value (maybe none)
-                            value = props[4]
-                            if not value is None:
-                                value = "'%s'" % self.current_host.escape(value)
-                    wc.append("%s=%s" % (self.current_host.escape_field(field), value))
-                where = " and ".join(wc)
-                print "select where: %r" % where
-                if fields == ["*"]:
-                    field_selector = "*"
-                else:
-                    field_selector = ", ".join(map(self.current_host.escape_field, fields))
-                self.current_host.query("select %s from `%s` where %s limit 1" % (field_selector, table, where))
-                result = self.current_host.handle.store_result().fetch_row(0)
-                if len(result) < 1:
-                    print "error: can't find modfied row!?"
-                else:
-                    row = result[0]
-                    for index, value in enumerate(row):
-                        if not value is None:
-                            value = value.decode(q.encoding)
-                        q.model.set_value(q.append_iter, index, value)
-        else:
-            q.model.remove(q.append_iter)
-        q.append_iter = None
-        q.apply_record.set_sensitive(False)
-        return True
-        
     def on_message_notebook_switch_page(self, nb, pointer, page):
         if self.current_query:
             self.on_query_view_cursor_changed(self.current_query.treeview)
         
     def on_query_view_cursor_changed(self, tv):
-        print 'on_query_view_cursor_changed'
         q = self.current_query
         self.blob_view.encoding = q.encoding
         path, column = q.treeview.get_cursor()
@@ -886,7 +744,10 @@ class Emma:
             return
         
         _iter = q.model.get_iter(path)
-        col = q.treeview.get_columns().index(column)
+        if column is not None:
+            col = q.treeview.get_columns().index(column)
+        else:
+            col = 0
         value = q.model.get_value(_iter, col)
         if value is None:
             # todo signal null value
@@ -898,7 +759,7 @@ class Emma:
         if q.append_iter:
             if path == q.model.get_path(q.append_iter):
                 return
-            self.on_apply_record_tool_clicked(None)
+            q.manage_row_action.on_apply_record_tool_clicked(None)
             
     def on_execute_query_from_disk_activate(self, button, filename=None):
         if not self.current_host:
@@ -1438,121 +1299,6 @@ class Emma:
         gc.collect()
         return True
         
-    def on_save_result_clicked(self, button):
-        if not self.current_query:
-            return
-        
-        d = self.assign_once(
-            "save results dialog",
-            gtk.FileChooserDialog, "save results", self.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE, 
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
-        
-        d.set_default_response(gtk.RESPONSE_ACCEPT)
-        answer = d.run()
-        d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT:
-            return
-        filename = d.get_filename()
-        if os.path.exists(filename):
-            if not os.path.isfile(filename):
-                dialogs.show_message("save results", "%s already exists and is not a file!" % filename)
-                return
-            if not dialogs.confirm(
-                    "overwrite file?",
-                    "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
-                return
-        q = self.current_query
-        _iter = q.model.get_iter_first()
-        indices = range(q.model.get_n_columns())
-        field_delim = self.config.get("save_result_as_csv_delim")
-        line_delim = self.config.get("save_result_as_csv_line_delim")
-        try:
-            fp = file(filename, "wb")
-            for search, replace in {"\\n": "\n", "\\r": "\r", "\\t": "\t", "\\0": "\0"}.iteritems():
-                field_delim = field_delim.replace(search, replace)
-                line_delim = line_delim.replace(search, replace)
-            while _iter:
-                row = q.model.get(_iter, *indices)
-                for field in row:
-                    value = field
-                    if value is None:
-                        value = ""
-                    fp.write(value.replace(field_delim, "\\" + field_delim))
-                    fp.write(field_delim)
-                fp.write(line_delim)
-                _iter = q.model.iter_next(_iter)
-            fp.close()
-        except:
-            dialogs.show_message("save results", "error writing query to file %s: %s" % (filename, sys.exc_value))
-        
-    def on_save_result_sql_clicked(self, button):
-        if not self.current_query:
-            return
-        title = "save results as sql insert script"
-        d = self.assign_once(
-            "save results dialog",
-            gtk.FileChooserDialog, title, self.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE, 
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
-        
-        d.set_default_response(gtk.RESPONSE_ACCEPT)
-        answer = d.run()
-        d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT:
-            return
-        filename = d.get_filename()
-        if os.path.exists(filename):
-            if not os.path.isfile(filename):
-                dialogs.show_message(title, "%s already exists and is not a file!" % filename)
-                return
-            if not dialogs.confirm(
-                    "overwrite file?",
-                    "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
-                return
-        q = self.current_query
-        _iter = q.model.get_iter_first()
-        indices = range(q.model.get_n_columns())
-        
-        # try to guess target table name from query
-        table_name = ""
-        query = self.current_query.last_source
-        result = self.is_query_appendable(query)
-        if result:
-            table_list = result.group(7)
-            table_list = table_list.replace(" join ", ",")
-            table_list = re.sub("(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)", "",
-                                table_list)
-            table_list = table_list.replace("`", "")
-            tables = map(lambda s: s.strip(), table_list.split(","))
-            table_name = "_".join(tables)
-        table_name = dialogs.input_dialog(title, "Please enter the name of the target table:", table_name,
-                                          self.mainwindow)
-        if table_name is None:
-            return
-        table_name = self.current_host.escape_table(table_name)
-        
-        output_row = None
-        try:
-            fp = file(filename, "wb")
-            fp.write("insert into %s values" % table_name)
-            row_delim = "\n\t"
-            while _iter:
-                row = q.model.get(_iter, *indices)
-                if not output_row:
-                    output_row = range(len(row))
-                for i, field in enumerate(row):
-                    if field is None:
-                        field = "NULL"
-                    elif not field.isdigit():
-                        field = "'%s'" % q.current_host.escape(field.encode(q.encoding))
-                    output_row[i] = field
-                fp.write("%s(%s)" % (row_delim, ",".join(output_row)))
-                row_delim = ",\n\t"
-                _iter = q.model.iter_next(_iter)
-            fp.write("\n;\n")
-            fp.close()
-        except:
-            dialogs.show_message(title, "error writing to file %s: %s" % (filename, sys.exc_value))
-
     def assign_once(self, name, creator, *args):
         try:
             return self.created_once[name]
@@ -1702,55 +1448,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     # def __setstate__(self, state):
     #     self.state = state
         
-    def on_local_search_button_clicked(self, button, again=False):
-        if not self.current_query.local_search.get_property("sensitive"):
-            return
-            
-        query_view = self.current_query.treeview
-        self.local_search_start_at_first_row.set_active(False)
-        if not again or not self.local_search_entry.get_text():
-            self.local_search_entry.grab_focus()
-            answer = self.local_search_window.run()
-            self.local_search_window.hide()
-            if not answer == gtk.RESPONSE_OK:
-                return
-        regex = self.local_search_entry.get_text()
-        if self.local_search_case_sensitive.get_active():
-            regex = "(?i)" + regex
-        tm = self.current_query.model
-        fields = tm.get_n_columns()
-        _start = tm.get_iter_root()
-        start_column_index = -1
-        start_path = None
-        if not self.local_search_start_at_first_row.get_active():
-            start_path, start_column = query_view.get_cursor()
-            if start_path:
-                _start = tm.get_iter(start_path)
-                for k in range(fields):
-                    if query_view.get_column(k) == start_column:
-                        start_column_index = k
-                        break
-            else:
-                start_path = None
-        while _start:
-            for k in range(fields):
-                v = tm.get_value(_start, k)
-                if v is None:
-                    continue
-                if re.search(regex, v):
-                    path = tm.get_path(_start)
-                    if start_path and start_path == path and k <= start_column_index:
-                        continue  # skip!
-                    column = query_view.get_column(k)
-                    query_view.set_cursor(path, column)
-                    query_view.scroll_to_cell(path, column)
-                    query_view.grab_focus()
-                    return
-            _start = tm.iter_next(_start)
-        dialogs.show_message(
-            "local regex search",
-            "sorry, no match found!\ntry to search from the beginning or execute a less restrictive query...")
-        
     def on_query_font_clicked(self, button):
         d = self.assign_once("query text font", gtk.FontSelectionDialog, "select query font")
         d.set_font_name(self.config.get("query_text_font"))
@@ -1763,18 +1460,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         self.config.config["query_text_font"] = font_name
         self.config.save()
 
-    def on_query_result_font_clicked(self, button):
-        d = self.assign_once("query result font", gtk.FontSelectionDialog, "select result font")
-        d.set_font_name(self.config.get("query_result_font"))
-        answer = d.run()
-        d.hide()
-        if not answer == gtk.RESPONSE_OK:
-            return
-        font_name = d.get_font_name()
-        self.current_query.set_result_font(font_name)
-        self.config.config["query_result_font"] = font_name
-        self.config.save()
-        
     def on_newquery_button_clicked(self, button):
         xml = gtk.glade.XML(self.glade_file, "first_query")
         tab_label_hbox = gtk.glade.XML(self.glade_file, "tab_label_hbox")
@@ -1862,7 +1547,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     
     def on_mainwindow_key_release_event(self, _window, event):
         if event.keyval == keysyms.F3:
-            self.on_local_search_button_clicked(None, True)
+            self.current_query.local_search_action.on_local_search_button_clicked(None, True)
             return True
         
     def on_query_view_key_press_event(self, tv, event):
@@ -1874,9 +1559,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         
         _iter = q.model.get_iter(path)
         if event.keyval == keysyms.Down and not q.model.iter_next(_iter):
-            if q.append_iter and not self.on_apply_record_tool_clicked(None):
+            if q.append_iter and not q.manage_row_action.on_apply_record_tool_clicked(None):
                 return True
-            self.on_add_record_tool_clicked(None)
+            q.manage_row_action.on_add_record_tool_clicked(None)
             return True
             
     def on_query_view_button_release_event(self, tv, event):

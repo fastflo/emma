@@ -1239,7 +1239,6 @@
                                             <property name="tooltip" translatable="yes">add new record</property>
                                             <property name="use_action_appearance">False</property>
                                             <property name="stock_id">gtk-add</property>
-                                            <signal name="clicked" handler="on_add_record_tool_clicked"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1254,7 +1253,6 @@
                                             <property name="tooltip" translatable="yes">delete record (ctrl+del)</property>
                                             <property name="use_action_appearance">False</property>
                                             <property name="stock_id">gtk-delete</property>
-                                            <signal name="clicked" handler="on_delete_record_tool_clicked"/>
                                             <accelerator key="Delete" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                                           </widget>
                                           <packing>
@@ -1271,7 +1269,6 @@
                                             <property name="use_action_appearance">False</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-apply</property>
-                                            <signal name="clicked" handler="on_apply_record_tool_clicked"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1288,7 +1285,6 @@
                                             <property name="label" translatable="yes">save result as csv</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-save-as</property>
-                                            <signal name="clicked" handler="on_save_result_clicked"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1303,7 +1299,6 @@
                                             <property name="use_action_appearance">False</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-save-as</property>
-                                            <signal name="clicked" handler="on_save_result_sql_clicked"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1318,7 +1313,6 @@
                                             <property name="tooltip" translatable="yes">search for regular expression in this result (Ctrl+f / F3)</property>
                                             <property name="use_action_appearance">False</property>
                                             <property name="stock_id">gtk-find</property>
-                                            <signal name="clicked" handler="on_local_search_button_clicked"/>
                                             <accelerator key="F" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                                           </widget>
                                           <packing>
@@ -1334,7 +1328,6 @@
                                             <property name="use_action_appearance">False</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-select-font</property>
-                                            <signal name="clicked" handler="on_query_result_font_clicked"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1350,7 +1343,6 @@
                                             <property name="use_action_appearance">False</property>
                                             <property name="use_underline">True</property>
                                             <property name="stock_id">gtk-cancel</property>
-                                            <signal name="clicked" handler="on_remove_order_clicked"/>
                                           </widget>
                                           <packing>
                                             <property name="expand">False</property>
