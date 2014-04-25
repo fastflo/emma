@@ -22,6 +22,7 @@ import gtk.glade
 import gobject
 import pprint
 import re
+import gc
 
 pp = pprint.PrettyPrinter()
 
@@ -101,7 +102,7 @@ class table_editor:
         self.treeview.connect("drag-begin", self.drag_begin)
         self.treeview.connect("drag-end", self.drag_end)
 
-    def row_changed(self, model, path, iter):
+    def row_changed(self, model, path, _iter):
         if self.changed_handler:
             self.model.disconnect(self.changed_handler)
         l = list(model[path][3])
@@ -122,14 +123,14 @@ class table_editor:
             del item
         self.popup_items = []
 
-    def install_popup_item(self, popup_name, item_catpion, callback):
+    def install_popup_item(self, popup_name, item_caption, callback):
         popup = self.emma.connections_tv.pop_up_table
         if popup:
             for child in popup.get_children():
-                if child.get_child().get_text() == item_catpion:
+                if child.get_child().get_text() == item_caption:
                     print "%s: warning: there already is a menu item called '%s' in '%s'" % (
                         __name__, item_caption, popup_name)
-            item = gtk.MenuItem(item_catpion)
+            item = gtk.MenuItem(item_caption)
             item.connect("activate", callback)
             item.show()
             popup.append(item)
@@ -138,7 +139,7 @@ class table_editor:
             print 'Cannot find popup "%s"' % popup_name
 
     def edit_table(self, menuitem):
-        path, column, iter, table = self.emma.get_current_table()
+        path, column, _iter, table = self.emma.get_current_table()
         self.table = table
         tname = self.xml.get_widget("table_name")
         if not tname:
@@ -149,7 +150,7 @@ class table_editor:
         self.model.clear()
         for name in table.field_order:
             field = table.fields[name]
-            comment = self.extract_comment(field[5]) # todo
+            comment = self.extract_comment(field[5])  # todo
             self.model.append(row=(field[0], field[1], comment, list(field), field))
         self.xml.get_widget("table_deletefield").set_sensitive(False)
         self.xml.get_widget("table_field_properties").set_sensitive(False)
@@ -157,6 +158,7 @@ class table_editor:
         self.window.show_all()
 
     def on_table_addfield_clicked(self, button):
+        field_name = ''
         unnamed_count = 0
         while True:
             field_name = "unnamed_%d" % unnamed_count
@@ -167,8 +169,8 @@ class table_editor:
                 break
             unnamed_count += 1
         row = [field_name, "int", "", "", "", ""]
-        iter = self.model.append(row=(row[0], row[1], "", list(row), None))
-        self.treeview.set_cursor(self.model.get_path(iter))
+        _iter = self.model.append(row=(row[0], row[1], "", list(row), None))
+        self.treeview.set_cursor(self.model.get_path(_iter))
         self.xml.get_widget("table_field_name").grab_focus()
 
     def on_table_columns_row_activated(self, *args):
@@ -209,10 +211,9 @@ class table_editor:
     def set_type_restrictions(self, ftype, capabilities=None):
         if capabilities is None:
             capabilities = self.get_field_capabilities(ftype)
-        set = self.set_field
-        set("table_field_length_sensitive", capabilities & LEN)
-        set("table_field_unsigned_sensitive", capabilities & UNSIGNED)
-        set("table_field_binary_sensitive", capabilities & BINARY)
+        self.set_field("table_field_length_sensitive", capabilities & LEN)
+        self.set_field("table_field_unsigned_sensitive", capabilities & UNSIGNED)
+        self.set_field("table_field_binary_sensitive", capabilities & BINARY)
 
     def set_field(self, xml_name, value):
         if xml_name.endswith("_sensitive"):
@@ -240,27 +241,27 @@ class table_editor:
 
     def set_current_field(self, field):
         self.ignore_changes = True
-        set = self.set_field
-        set("table_field_name", field[0])
+        _s = self.set_field
+        _s("table_field_name", field[0])
         ftype, length = self.parse_type(field[1])
-        set("table_field_type", ftype)
+        _s("table_field_type", ftype)
         if length is None:
-            set("table_field_length", "")
+            _s("table_field_length", "")
         else:
-            set("table_field_length", length)
+            _s("table_field_length", length)
 
         default = not field[4] is None or field[2] == "YES"
-        set("table_field_hasdefault", default)
-        set("table_field_default_sensitive", default)
+        _s("table_field_hasdefault", default)
+        _s("table_field_default_sensitive", default)
         if default:
-            set("table_field_default", test(field[4] is None, "NULL", field[4]))
+            _s("table_field_default", test(field[4] is None, "NULL", field[4]))
         else:
-            set("table_field_default", "")
-        set("table_field_notnull", field[2] != "YES")
-        set("table_field_comment", self.extract_comment(field[5]))
-        set("table_field_isautoincrement", field[5].find("auto_increment") != -1)
-        set("table_field_unsigned", field[5].find("unsigned") != -1)
-        set("table_field_binary", field[5].find("binary") != -1)
+            _s("table_field_default", "")
+        _s("table_field_notnull", field[2] != "YES")
+        _s("table_field_comment", self.extract_comment(field[5]))
+        _s("table_field_isautoincrement", field[5].find("auto_increment") != -1)
+        _s("table_field_unsigned", field[5].find("unsigned") != -1)
+        _s("table_field_binary", field[5].find("binary") != -1)
         self.xml.get_widget("table_field_properties").set_sensitive(True)
         self.set_type_restrictions(ftype)
         self.ignore_changes = False
@@ -275,17 +276,17 @@ class table_editor:
         if self.ignore_changes:
             return
 
-        def propagate_back(field, row):
-            row[0] = field[0] # name
-            row[1] = field[1] # type
+        def propagate_back(field, _row):
+            _row[0] = field[0]  # name
+            _row[1] = field[1]  # type
 
         def set_extra(name, active):
-            current = set(split_strings(row[3][5]))
+            _current = set(split_strings(row[3][5]))
             if active:
-                current.add(name)
+                _current.add(name)
             else:
-                current.discard(name)
-            row[3][5] = " ".join(current)
+                _current.discard(name)
+            row[3][5] = " ".join(_current)
 
         fname = widget.name
         if fname.startswith("table_"):
@@ -340,58 +341,59 @@ class table_editor:
             mode = args[1]
         else:
             mode = "close"
-        """ render alter table sql """
+
+        # render alter table sql
         esc = self.table.host.escape
         query = "alter table `%s` " % esc(self.table.name)
         no_changes = query
         add = ""
 
-        """ deleted columns """
+        # deleted columns
         for f in self.deleted:
             query += "%sdrop column `%s`" % (add, esc(f))
-            add = ",";
+            add = ","
 
-        """ modified or new columns """
+        # modified or new columns
         last_field = None
         for f in self.model:
-            if tuple(f[3]) == f[4]: # no changes on this field
-                last_field = f[0];
-                continue;
+            if tuple(f[3]) == f[4]:  # no changes on this field
+                last_field = f[0]
+                continue
             #print "this field changed from\n%s to\n%s" % (f[4], f[3])
-            if not f[4] is None: # modified existing field
-                if f[4][0] != f[3][0]: # name changed
+            if not f[4] is None:  # modified existing field
+                if f[4][0] != f[3][0]:  # name changed
                     query += "%schange column `%s` `%s` %s " % (
-                    add,
-                    esc(f[4][0]),
-                    esc(f[3][0]),
-                    f[3][1]
+                        add,
+                        esc(f[4][0]),
+                        esc(f[3][0]),
+                        f[3][1]
                     )
                 else:
                     query += "%smodify column `%s` %s " % (
+                        add,
+                        esc(f[3][0]),
+                        f[3][1]
+                    )
+            else:  # new field
+                query += "%sadd column `%s` %s " % (
                     add,
                     esc(f[3][0]),
                     f[3][1]
-                    )
-            else: # new field
-                query += "%sadd column `%s` %s " % (
-                add,
-                esc(f[3][0]),
-                f[3][1]
                 )
 
-            if f[3][2] == "YES": # NULL allowed?
+            if f[3][2] == "YES":  # NULL allowed?
                 query += "null "
             else:
                 query += "not null "
 
-            if not f[3][4] is None: # default value?
+            if not f[3][4] is None:  # default value?
                 query += "default '%s' " % esc(f[3][4])
 
-            if f[3][5]: # extra?
-                query += f[3][5] + " ";
+            if f[3][5]:  # extra?
+                query += f[3][5] + " "
 
             if last_field is None:
-                query += "FIRST ";
+                query += "FIRST "
             else:
                 query += "AFTER `%s` " % esc(last_field)
             add = ","
@@ -414,15 +416,15 @@ class table_editor:
             add = ""
             table_changed = True
 
-        """ ask user """
+        # ask user
         if query != no_changes:
             if not self.emma.confirm(
                     "edit table",
                     "do you really want to edit the <b>%s</b> table in database <b>%s</b> on <b>%s</b> with this sql:\n<b>%s</b>" % (
-                    self.table.name,
-                    self.table.db.name,
-                    self.table.db.host.name,
-                    query
+                            self.table.name,
+                            self.table.db.name,
+                            self.table.db.host.name,
+                            query
                     ),
                     window=self.window):
                 return
@@ -430,10 +432,10 @@ class table_editor:
             self.window.hide()
             return
 
-        """ execute sql """
+        # execute sql
         print "executing"
-        if self.table.db.query(query): # success
-            """ close dialog """
+        if self.table.db.query(query):  # success
+            # close dialog
             self.table.create_table = None
             self.table.refresh()
             new_tables = self.table.db.refresh()
@@ -442,22 +444,21 @@ class table_editor:
             self.window.hide()
             return
         self.emma.show_message("edit table", "sorry, can't change table - sql error")
-        """
-        table_editor->hide();
 
-        if(old_name != new_name) {
-            TreePath p = TreePath(table_iter);
-            p.up();
-            table_iter = connections_model->get_iter(p);
-            mysql_database_entry* db = ((mysql_table_entry*)edit_table->db)->db;
-
-            db->refresh();
-            update_database(db, table_iter);
-        } else {
-            ((mysql_table_entry*)edit_table->db)->refresh();
-            on_connections_cursor_changed();
-        }
-        """
+        # table_editor->hide();
+        #
+        # if(old_name != new_name) {
+        #     TreePath p = TreePath(table_iter);
+        #     p.up();
+        #     table_iter = connections_model->get_iter(p);
+        #     mysql_database_entry* db = ((mysql_table_entry*)edit_table->db)->db;
+        #
+        #     db->refresh();
+        #     update_database(db, table_iter);
+        # } else {
+        #     ((mysql_table_entry*)edit_table->db)->refresh();
+        #     on_connections_cursor_changed();
+        # }
 
     def on_table_apply_and_open(self, button):
         self.on_table_apply(button, "key_editor")

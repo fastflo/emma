@@ -4,6 +4,7 @@ from emmalib.providers.sqlite.SQLiteTable import SQLiteTable
 
 class SQLiteDb(MySqlDb):
     def __init__(self, host, name=None):
+        MySqlDb.__init__(self, host)
         self.handle = host.handle
         self.host = host
         self.charset = self.host.charset
@@ -20,14 +21,15 @@ class SQLiteDb(MySqlDb):
         return d
 
     def refresh(self):
-        if not self.host.query("SELECT name, sql FROM sqlite_master WHERE type='table' ORDER BY name"): return
+        if not self.host.query("SELECT name, sql FROM sqlite_master WHERE type='table' ORDER BY name"):
+            return
         new_tables = []
         result = self.handle.store_result()
         old = dict(zip(self.tables.keys(), range(len(self.tables))))
         for row in result.fetch_row(0):
             if not row[0] in old:
                 #print "new table", row[0]
-                self.tables[row[0]] = SQLiteTable(self, row)
+                self.tables[row[0]] = SQLiteTable(self, row, '')
                 new_tables.append(row[0])
             else:
                 del old[row[0]]

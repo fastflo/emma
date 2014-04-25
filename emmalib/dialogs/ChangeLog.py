@@ -3,8 +3,8 @@ import gtk
 
 
 class ChangeLog(gtk.Window):
-    def __init__(self, emma_path):
-        super(gtk.Window, self).__init__()
+    def __init__(self, emma_path, *args, **kwargs):
+        super(ChangeLog, self).__init__(*args, **kwargs)
 
         self.set_position(gtk.WIN_POS_CENTER)
         self.resize(640, 480)

@@ -11,10 +11,10 @@ class SQLiteHandle(object):
         self.result = None
 
     def affected_rows(self):
-        return 0 # todo
+        return 0  # todo
 
     def insert_id(self):
-        return 0 # todo
+        return 0  # todo
 
     def execute(self, query):
         self.c.execute(query)

@@ -26,7 +26,8 @@ from emmalib.providers.sqlite.SQLiteHandle import SQLiteHandle
 
 
 class SQLiteHost(MySqlHost):
-    def __init__(self, sql_log, msg_log, filename):
+    def __init__(self, sql_log, msg_log, filename, *args):
+        MySqlHost.__init__(self, *args)
         self.sql_log, self.msg_log, self.filename = sql_log, msg_log, filename
         self.name = self.filename
         self.host = "localhost"
@@ -37,11 +38,9 @@ class SQLiteHost(MySqlHost):
         self.handle = None
         self.current_db = None
         self.databases = {}
-
         self.processlist = None
         self.update_ui = None
         self.last_error = ""
-
         self.query_time = 0
 
     def __getstate__(self):
@@ -119,7 +118,7 @@ class SQLiteHost(MySqlHost):
         pass
 
     def insert_id(self):
-        raise Exception("todo") # return self.handle.insert_id()
+        raise Exception("todo")  # return self.handle.insert_id()
 
     def escape(self, s):
         print "todo: sqlite escape!"

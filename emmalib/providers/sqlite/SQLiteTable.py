@@ -2,13 +2,13 @@ from emmalib.providers.mysql.MySqlTable import *
 
 
 class SQLiteTable(MySqlTable):
-    def __init__(self, db, props):
+    def __init__(self, db, props, props_description):
+        MySqlTable.__init__(self, db, props, props_description)
         self.handle = db.handle
         self.host = db.host
         self.db = db
         self.props = props
         self.name = props[0]
-
         self.fields = {}
         self.field_order = []
         self.expanded = False
@@ -51,7 +51,8 @@ class SQLiteTable(MySqlTable):
         return output
 
     def get_create_table(self):
-        if not self.host.query("SELECT sql FROM sqlite_master WHERE type='table' and name='%s'" % self.name): return
+        if not self.host.query("SELECT sql FROM sqlite_master WHERE type='table' and name='%s'" % self.name):
+            return
         result = self.handle.store_result()
         if not result:
             print "can't get create table for %s at %s and %s" % (self.name, self, self.handle)

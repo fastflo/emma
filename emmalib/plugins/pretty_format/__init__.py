@@ -24,6 +24,7 @@ import pprint
 import cStringIO
 import copy
 import traceback
+import gc
 
 
 def test(c, t, f):
@@ -49,6 +50,7 @@ def strcspn(text, reject, pos=0):
 
 
 def search_string_end(text, delim, p):
+    l = 0
     s = p
     while True:
         l = strcspn(text, delim, s)
@@ -61,7 +63,7 @@ def search_string_end(text, delim, p):
         escaped = count % 2 == 1
         if not escaped:
             break
-        s = s + l
+        s += l
     return s + l
 
 
@@ -114,7 +116,7 @@ def get_token(text, p, allow_functions=False):
     l = strcspn(text, " \r\n\t(,;=", p)
     s = p + l
     if s >= len(text):
-        print "********last token? : %r" % text[p:] # todo?
+        print "********last token? : %r" % text[p:]  # todo?
         return ttype, text[p:], len(text)
 
     print "found first    %r" % text[s]
@@ -260,7 +262,7 @@ select * from user;
                         output.write("\t" * (depth - 1))
                     elif t not in (",", "left join"):
                         output.write(" ")
-                    elif t in ("left join"):
+                    elif t in "left join":
                         output.write("\n" + "\t" * (depth - 1))
                     #output.write(str(parents) + ":" + t)
                     output.write(t)
@@ -272,12 +274,12 @@ select * from user;
                 else:
                     inner_parent = copy.copy(parents)
                     inner_parent.append(next_parent)
-                    if index != 0: # first in group is again a new group
+                    if index != 0:  # first in group is again a new group
                         next_depth = depth + 1
                     else:
                         next_depth = depth
                     do(t, next_depth, do_newline, inner_parent)
-                    if next_parent != None:
+                    if next_parent is not None:
                         do_newline = True
             return
 
@@ -323,7 +325,7 @@ select * from user;
                 break
             op = l[1]
             print "op:", op
-            l = l[2][1:] # next
+            l = l[2][1:]  # next
 
     def format_tables(self, tokens, depth=0, at_new_line=True):
         skip = 0
@@ -359,10 +361,10 @@ select * from user;
                 self.out.write("\n")
                 skip = 1
                 if len(next_token) > 2:
-                    self.out.write("\t" * (depth) + "(")
+                    self.out.write("\t" * depth + "(")
                 self.format(next_token, depth + 1, at_new_line=True)
                 if len(next_token) > 2:
-                    self.out.write("\t" * (depth) + ")")
+                    self.out.write("\t" * depth + ")")
                 self.out.write("\n")
                 continue
             # normal table name
@@ -392,7 +394,7 @@ select * from user;
                 self.out.write(t)
             else:
                 self.format(t, depth + 1)
-        output.write("\n")
+        self.out.write("\n")
 
     def format(self, tokens, depth=0, at_new_line=True):
         print "-------" + ",".join(self.format_stack)
@@ -418,7 +420,7 @@ select * from user;
         #keywords = "select,from,left,join,right,inner,where,and,or,on,order,by,having,group,limit,union,distinct"
         #if tt == "function call":
         try:
-            r = self.emma.sql.grammer.parseString(code)
+            r = self.emma.sql.grammer.parseString(text)  # ???
         except:
             print sys.exc_type, sys.exc_value
             return

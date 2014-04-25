@@ -114,7 +114,8 @@ class MySqlHost:
         if len(args) == 2:
             # unpickle
             self.sql_log, self.msg_log = args
-            print "unpickle host!"
+            #print "unpickle host!"
+            db_name = ''
             if self.connected:
                 db_name = self.current_db.name
                 self.current_db = None
@@ -275,8 +276,10 @@ class MySqlHost:
         return True
 
     def _use_db(self, name, do_query=True):
-        if self.current_db and name == self.current_db.name: return
-        if do_query: self.query("use `%s`" % name, False)
+        if self.current_db and name == self.current_db.name:
+            return
+        if do_query:
+            self.query("use `%s`" % name, False)
         try:
             self.current_db = self.databases[name]
         except KeyError:

@@ -3,17 +3,17 @@ import gtk
 import gtk.glade
 import sys
 import dialogs
+from Constants import *
 
 
 class ConnectionWindow:
     def __init__(self, emma=None):
-        import emmalib
 
         self.host = None
         self.emma = emma
         self.cw_mode = None
         self.text_fields = ["name", "host", "port", "user", "password", "database"]
-        self.glade_file = os.path.join(emmalib.emma_path, "ConnectionWindow.glade")
+        self.glade_file = os.path.join(emma_path, "ConnectionWindow.glade")
         self.glade = gtk.glade.XML(self.glade_file)
         self.window = self.connection_window
         self.cw_apply_button.connect("clicked", self.on_apply_button_clicked)

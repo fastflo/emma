@@ -6,6 +6,7 @@ import gobject
 import dialogs
 import widgets
 from ConnectionWindow import ConnectionWindow
+from Constants import *
 
 
 class ConnectionsTreeView(gtk.TreeView):
@@ -280,7 +281,6 @@ class ConnectionsTreeView(gtk.TreeView):
             cell.set_property("text", o.name)
 
     def load_icons(self):
-        from emmalib import icons_path
         for icon in ["offline_host", "host", "db", "table", "field"]:
             filename = os.path.join(icons_path, icon + ".png")
             try:
