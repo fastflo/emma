@@ -10,9 +10,6 @@ re_src_after_order = "(?:[ \r\n\t]" + re_src_after_order_end + ")"
 re_src_query_order = "(?is)(.*order[ \r\n\t]+by[ \r\n\t]+)(.*?)([ \r\n\t]*" + re_src_after_order_end + ")"
 
 emmalib_file = os.path.abspath(__file__)
-
-#print "sys prefix:", sys.prefix
-
 emma_path = os.path.dirname(emmalib_file)
 
 if os.path.isdir("emmalib"):
