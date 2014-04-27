@@ -247,7 +247,7 @@ class MySqlHost:
             self.handle.query(query)
             self.query_time = time.time() - start
         except:
-            print "error executing query:\n%s" % traceback.format_exc()
+            # print "error executing query:\n%s" % traceback.format_exc()
             try:
                 self.last_error = sys.exc_value[1]
             except:

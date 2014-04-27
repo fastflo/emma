@@ -63,13 +63,14 @@ class MySqlTable:
         self.host.query("describe %s" % self.host.escape_table(self.name))
         result = self.handle.store_result()
         self.describe_headers = []
-        for h in result.describe():
-            self.describe_headers.append(h[0])
         self.fields = {}
         self.field_order = []
-        for row in result.fetch_row(0):
-            self.field_order.append(row[0])
-            self.fields[row[0]] = row
+        if result is not None:
+            for h in result.describe():
+                self.describe_headers.append(h[0])
+            for row in result.fetch_row(0):
+                self.field_order.append(row[0])
+                self.fields[row[0]] = row
         self.last_field_read = time.time()
         return
 
