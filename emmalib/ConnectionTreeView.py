@@ -1,4 +1,3 @@
-import os
 import gtk
 import gtk.glade
 import time
@@ -269,16 +268,27 @@ class ConnectionsTreeView(gtk.TreeView):
         o = model.get_value(itr, 0)
         if isinstance(o, str):
             cell.set_property("text", o)
+            cell.set_property("weight-set", True)
+            cell.set_property("weight", 400)
             return
         if d == 0:
             if o.connected:
-                cell.set_property("text", o.name)
+                databases_count = o.databases.__len__()
+                cell.set_property("text", "%s (%s)" % (o.name, databases_count))
+                cell.set_property("weight-set", True)
+                cell.set_property("weight", 700)
             else:
-                cell.set_property("text", "(%s)" % o.name)
+                cell.set_property("text", "%s" % o.name)
+                cell.set_property("weight-set", True)
+                cell.set_property("weight", 400)
         elif d == 3:
             cell.set_property("text", "%s %s" % (o[0], o[1]))
+            cell.set_property("weight-set", True)
+            cell.set_property("weight", 400)
         else:
             cell.set_property("text", o.name)
+            cell.set_property("weight-set", True)
+            cell.set_property("weight", 400)
 
     def load_icons(self):
         for icon in ["offline_host", "host", "db", "table", "field"]:
