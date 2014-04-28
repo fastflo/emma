@@ -112,9 +112,9 @@ class Emma:
         self.config = Config(self)
         self.config.load()
 
-        connections_tv_container = self.xml.get_widget("connections_tv_container")
+        self.connections_tv_container = self.xml.get_widget("connections_tv_container")
         self.connections_tv = ConnectionsTreeView(self)
-        connections_tv_container.add(self.connections_tv)
+        self.connections_tv_container.add(self.connections_tv)
         self.connections_tv.show()
 
         self.add_query_tab(QueryTab(self.query_notebook, self))
@@ -1237,9 +1237,22 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if len(path) == 3 and page == 3:
             self.table_view.update(path)
 
+    def on_mainwindow_key_press_event(self, _window, event):
+        if event.keyval == keysyms.Control_L:
+            self.left_control_key_is_pressed = True
+
     def on_mainwindow_key_release_event(self, _window, event):
         if event.keyval == keysyms.F3:
             self.current_query.local_search_action.on_local_search_button_clicked(None, True)
+            return True
+        if event.keyval == keysyms.m and self.left_control_key_is_pressed:
+            self.message_notebook.set_visible(not self.message_notebook.get_visible())
+            return True
+        if event.keyval == keysyms.h and self.left_control_key_is_pressed:
+            self.connections_tv_container.set_visible(not self.connections_tv_container.get_visible())
+            return True
+        if event.keyval == keysyms.Control_L:
+            self.left_control_key_is_pressed = False
             return True
 
     def get_current_table(self):

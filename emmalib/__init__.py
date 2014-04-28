@@ -21,8 +21,6 @@ if __name__ != 'emmalib':
     print "Don't run __init__.py - run ../emma instead"
     exit()
 
-import sys
-
 # package: python-gobject
 try:
     import gobject
@@ -46,6 +44,7 @@ except:
     print "No gtk.glade. Emma cannot start.", sys.exc_value
     exit(-1)
 
+from OutputHandler import OutputHandler
 from Constants import *
 from Emma import Emma
 
@@ -88,7 +87,7 @@ def start(args):
             usage()
 
     # this singleton will be accessible as sys.stdout!
-    # OutputHandler(debug_output, log_file, log_flush)
+    OutputHandler(debug_output, log_file, log_flush)
 
     e = Emma()
 
@@ -102,7 +101,3 @@ def start(args):
         e.__init__()
 
     return 0
-
-if __name__ == "__main__":
-    sys.exit(start(sys.argv[1:]))
-
