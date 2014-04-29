@@ -1,5 +1,5 @@
-import time
 from stat import *
+import time
 import gc
 import pickle
 import datetime
@@ -9,16 +9,15 @@ import glib
 
 import gtk
 import gtk.gdk
-from gtk import keysyms
 import gtk.glade
 import gobject
 
 from query_regular_expression import *
 
 from ConnectionTreeView import ConnectionsTreeView
-from OutputHandler import OutputHandler
 from Config import Config
 from QueryTab import QueryTab
+from KeyMap import KeyMap
 import dialogs
 import widgets
 
@@ -118,6 +117,10 @@ class Emma:
         self.connections_tv.show()
 
         self.add_query_tab(QueryTab(self.query_notebook, self))
+
+        self.key_map = KeyMap(self)
+        self.mainwindow.connect('key_release_event', self.key_map.on_mainwindow_key_release_event)
+        self.mainwindow.connect('key_press_event', self.key_map.on_mainwindow_key_press_event)
 
         self.first_template = None
         # keys = self.config.config.keys()
@@ -726,6 +729,7 @@ class Emma:
         return match.start(0), match.end(0)
 
     def on_execute_query_clicked(self, button=None, query=None):
+        field_count = 0
         if not self.current_query:
             return
         q = self.current_query
@@ -1219,10 +1223,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
     def on_about_activate(self, item):
         self.about_dialog.run()
         self.about_dialog.hide()
-        # aboutdialog = self.xml.get_widget("aboutdialog")
-        # aboutdialog.set_version(version)
-        # aboutdialog.run()
-        # aboutdialog.hide()
 
     def on_changelog_activate(self, item):
         self.changelog_dialog.show()
@@ -1236,24 +1236,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             return
         if len(path) == 3 and page == 3:
             self.table_view.update(path)
-
-    def on_mainwindow_key_press_event(self, _window, event):
-        if event.keyval == keysyms.Control_L:
-            self.left_control_key_is_pressed = True
-
-    def on_mainwindow_key_release_event(self, _window, event):
-        if event.keyval == keysyms.F3:
-            self.current_query.local_search_action.on_local_search_button_clicked(None, True)
-            return True
-        if event.keyval == keysyms.m and self.left_control_key_is_pressed:
-            self.message_notebook.set_visible(not self.message_notebook.get_visible())
-            return True
-        if event.keyval == keysyms.h and self.left_control_key_is_pressed:
-            self.connections_tv_container.set_visible(not self.connections_tv_container.get_visible())
-            return True
-        if event.keyval == keysyms.Control_L:
-            self.left_control_key_is_pressed = False
-            return True
 
     def get_current_table(self):
         path, column = self.connections_tv.get_cursor()

@@ -335,8 +335,6 @@
     <property name="default_width">1024</property>
     <property name="default_height">768</property>
     <property name="icon_name">gtk-network</property>
-    <signal name="key_release_event" handler="on_mainwindow_key_release_event"/>
-    <signal name="key_press_event" handler="on_mainwindow_key_press_event"/>
     <child>
       <widget class="GtkVPaned" id="vpaned1">
         <property name="visible">True</property>

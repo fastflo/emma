@@ -75,10 +75,8 @@ class ConnectionsTreeView(gtk.TreeView):
         _iter = self.connections_model.get_iter(path)
         o = self.connections_model.get_value(_iter, 0)
 
-        try:
-            nb = self.emma.xml.get_widget("main_notebook")
-        except:
-            nb = None
+        nb = self.emma.xml.get_widget("main_notebook")
+
         if depth == 1:
             self.current_host = host = o
             if host.connected:
@@ -295,11 +293,12 @@ class ConnectionsTreeView(gtk.TreeView):
             filename = os.path.join(icons_path, icon + ".png")
             try:
                 self.icons[icon] = gtk.gdk.pixbuf_new_from_file(filename)
-            except:
+            except gobject.GError:
                 print "could not load %r" % filename
 
     def add_mysql_host(self, name, hostname, port, user, password, database):
         from providers.mysql.MySqlHost import MySqlHost
+
         host = MySqlHost(self.emma.sql_log.log, self.emma.msg_log.log, name, hostname, port, user, password, database,
                          self.emma.config.get("connect_timeout"))
         _iter = self.connections_model.append(None, [host])
@@ -307,6 +306,7 @@ class ConnectionsTreeView(gtk.TreeView):
 
     def add_sqlite(self, filename):
         from providers.sqlite.SQLiteHost import SQLiteHost
+
         host = SQLiteHost(self.emma.sql_log.log, self.emma.msg_log.log, filename)
         _iter = self.connections_model.append(None, [host])
         host.set_update_ui(self.redraw_host, _iter)
@@ -321,7 +321,9 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.table_view.update()
         elif what == "truncate_table":
             if not dialogs.confirm("truncate table",
-                                   "do you really want to truncate the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name),
+                                   "do you really want to truncate the <b>%s</b> "
+                                   "table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name,
+                                                                                  table.db.host.name),
                                    self.emma.mainwindow):
                 return
             if table.db.query("truncate `%s`" % table.name):
@@ -330,7 +332,8 @@ class ConnectionsTreeView(gtk.TreeView):
                 self.emma.table_view.update()
         elif what == "drop_table":
             if not dialogs.confirm("drop table",
-                                   "do you really want to DROP the <b>%s</b> table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name),
+                                   "do you really want to DROP the <b>%s</b> table in database "
+                                   "<b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name),
                                    self.emma.mainwindow):
                 return
             db = table.db
@@ -360,14 +363,17 @@ class ConnectionsTreeView(gtk.TreeView):
             self.redraw_db(db, _iter, new_tables)
             self.emma.tableslist.redraw()
         elif what == "drop_database":
-            if not dialogs.confirm("drop database", "do you really want to drop the <b>%s</b> database on <b>%s</b>?" % (db.name, db.host.name), self.emma.mainwindow):
+            if not dialogs.confirm("drop database",
+                                   "do you really want to drop the <b>%s</b> database on <b>%s</b>?" % (
+                                   db.name, db.host.name), self.emma.mainwindow):
                 return
             host = db.host
             if host.query("drop database`%s`" % db.name):
                 host.refresh()
                 self.redraw_host(host, self.emma.get_host_iter(host))
         elif what == "new_table":
-            name = dialogs.input_dialog("New table", "Please enter the name of the new table:", window=self.emma.mainwindow)
+            name = dialogs.input_dialog("New table", "Please enter the name of the new table:",
+                                        window=self.emma.mainwindow)
             if not name:
                 return
             if db.query("create table `%s` (`%s_id` int primary key auto_increment)" % (name, name)):
@@ -426,21 +432,3 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.config.save()
         elif what == "new_connection":
             self.connection_window.show("new")
-        # elif what == "new_sqlite_connection":
-        #     resp = self.sqlite_connection_dialog.run()
-        #     self.sqlite_connection_dialog.hide()
-        #     print "resp:", resp
-        #     if resp:
-        #         self.add_sqlite(self.sqlite_connection_dialog.get_filename())
-        #         self.config.save()
-
-
-# if __name__ == '__main__':
-#     con = ConnectionsTreeView()
-#     window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-#     window.connect("delete_event", lambda *x: gtk.main_quit())
-#     window.set_size_request(640, 480)
-#     window.set_position(gtk.WIN_POS_CENTER)
-#     window.add(con)
-#     window.show_all()
-#     gtk.main()

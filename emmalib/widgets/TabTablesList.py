@@ -1,7 +1,5 @@
 import gtk
-import time
 import gobject
-from PopUpTabSqlLog import PopUpTabSqlLog
 
 
 class TabTablesList(gtk.ScrolledWindow):
@@ -26,7 +24,7 @@ class TabTablesList(gtk.ScrolledWindow):
         db = self.emma.current_host.current_db
         if not db:
             return
-        if not "tables_tv" in self.__dict__:
+        if not "tv" in self.__dict__:
             self.model = None
             self.tables_db = None
 
