@@ -1,5 +1,7 @@
 import gtk
+
 import gtk.glade
+
 import dialogs
 from Constants import *
 

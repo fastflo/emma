@@ -19,12 +19,12 @@
 
 import os
 import sys
-import gtk.glade
 import pprint
 import cStringIO
 import copy
 import traceback
-import gc
+
+import gtk.glade
 
 
 def test(c, t, f):

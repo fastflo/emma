@@ -17,24 +17,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import os
 import gc
-import re
 import gtk
-import sys
-import sql
 import time
 import pango
 import gobject
 import traceback
 import gtksourceview2
-
 from gtk import keysyms
 from gtk import glade
 from stat import *
 
 import dialogs
-
 from QueryTabRememberOrder import QueryTabRememberOrder
 from QueryTabRemoveOrder import QueryTabRemoveOrder
 from QueryTabSetRequltFont import QueryTabSetResultFont
@@ -42,12 +36,10 @@ from QueryTabLocalSearch import QueryTabLocalSearch
 from QueryTabSaveResultSql import QueryTabSaveResultSql
 from QueryTabSaveResultCsv import QueryTabSaveResultCsv
 from QueryTabManageRow import QueryTabManageRow
-
 from QueryTabTreeView import QueryTabTreeView
-
 from query_regular_expression import *
-
 from Constants import *
+
 
 class QueryTab:
     def __init__(self, nb, emma):

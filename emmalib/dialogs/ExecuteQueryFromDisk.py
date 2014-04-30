@@ -2,12 +2,13 @@ import gc
 import bz2
 import gtk
 import time
-import gtk.gdk
-import dialogs
 import datetime
+from stat import *
+
+import gtk.gdk
 import gtk.glade
 
-from stat import *
+import dialogs
 from query_regular_expression import *
 from Constants import *
 

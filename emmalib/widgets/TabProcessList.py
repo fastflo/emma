@@ -1,5 +1,6 @@
 import gtk
 import gobject
+
 from PopUpProcessList import PopUpProcessList
 from emmalib import dialogs
 

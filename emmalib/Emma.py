@@ -1,26 +1,20 @@
-from stat import *
-import time
 import gc
 import pickle
-import datetime
-import bz2
-import sql
 import glib
-
 import gtk
-import gtk.gdk
-import gtk.glade
 import gobject
 
-from query_regular_expression import *
+import gtk.gdk
+import gtk.glade
 
+import sql
+from query_regular_expression import *
 from ConnectionTreeView import ConnectionsTreeView
 from Config import Config
 from QueryTab import QueryTab
 from KeyMap import KeyMap
 import dialogs
 import widgets
-
 from Constants import *
 
 

@@ -1,4 +1,5 @@
 import gtk
+
 from About import About
 from ChangeLog import ChangeLog
 from ExecuteQueryFromDisk import ExecuteQueryFromDisk
