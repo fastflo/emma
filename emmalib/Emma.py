@@ -447,14 +447,17 @@ class Emma:
     def close_query(self, button):
         if len(self.queries) == 1:
             return
-        self.current_query.destroy()
+        page = self.main_notebook.get_current_page()
+        for q in self.queries:
+            if q.page_index == page:
+                self.current_query.destroy()
+                i = self.queries.index(self.current_query)
+                del self.queries[i]
+                self.current_query = None
 
-        i = self.queries.index(self.current_query)
-        del self.queries[i]
-        self.current_query = None
-
-        self.main_notebook.remove_page(self.main_notebook.get_current_page())
-        gc.collect()
+                self.main_notebook.remove_page(self.main_notebook.get_current_page())
+                gc.collect()
+                return
 
     def on_fc_reset_clicked(self, button):
         for i in range(self.fc_count):
