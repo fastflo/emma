@@ -13,8 +13,8 @@ class QueryTabRememberOrder:
         query = self.emma.current_query.last_source
         if not query:
             return None, None, None, None, None
-        current_order = self.emma.get_order_from_query(query)
-        result = self.emma.is_query_appendable(query)
+        current_order = self.query.get_order_from_query(query)
+        result = self.query.is_query_appendable(query)
         if not result:
             return None, None, None, None, None
         table_list = result.group(7)

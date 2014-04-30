@@ -293,7 +293,6 @@ class MySqlHost:
         self.query("show databases")
         result = self.handle.store_result()
         old = dict(self.databases)
-        db_id = len(old)
         for row in result.fetch_row(0):
             if not row[0] in old:
                 self.databases[row[0]] = MySqlDb(self, row[0])

@@ -44,7 +44,7 @@ class QueryTabManageRow:
             q.append_iter = None
             q.apply_record.set_sensitive(False)
         else:
-            table, where, field, value, row_iter = self.emma.get_unique_where(q.last_source, path)
+            table, where, field, value, row_iter = self.query.get_unique_where(q.last_source, path)
             if not table or not where:
                 dialogs.show_message("delete record", "could not delete this record!?")
                 return
@@ -66,7 +66,7 @@ class QueryTabManageRow:
             q.treeview.set_cursor(q.model.get_path(row_iter))
 
     def on_apply_record_tool_clicked(self, button):
-        q = self.emma.current_query
+        q = self.query
         if not q.append_iter:
             return
         query = ""
@@ -77,7 +77,7 @@ class QueryTabManageRow:
                 value = "'%s'" % self.emma.current_host.escape(value)
             query += "%s=%s" % (self.emma.current_host.escape_field(field), value)
         if query:
-            table, where, field, value, row_iter, fields = self.emma.get_unique_where(q.last_source, return_fields=True)
+            table, where, field, value, row_iter, fields = q.get_unique_where(q.last_source, return_fields=True)
             if self.emma.last_th.host.__class__.__name__ == "sqlite_host":
                 print (table, where, field, value, row_iter, fields)
                 keys = []

@@ -433,15 +433,15 @@ select * from user;
 plugin_instance = None
 
 
-def plugin_init(emma_instance):
-    global plugin_instance
-    plugin_instance = pretty_format(emma_instance)
-    return plugin_instance
+# def plugin_init(emma_instance):
+#     global plugin_instance
+#     plugin_instance = pretty_format(emma_instance)
+#     return plugin_instance
 
 
-def plugin_unload():
-    global plugin_instance
-    plugin_instance.cleanup()
-    del plugin_instance
-    plugin_instance = None
-    gc.collect()
+# def plugin_unload():
+#     global plugin_instance
+#     plugin_instance.cleanup()
+#     del plugin_instance
+#     plugin_instance = None
+#     gc.collect()

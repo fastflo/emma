@@ -43,8 +43,8 @@ class QueryTabSaveResultSql:
 
         # try to guess target table name from query
         table_name = ""
-        query = self.emma.current_query.last_source
-        result = self.emma.is_query_appendable(query)
+        query = self.query.last_source
+        result = self.query.is_query_appendable(query)
         if result:
             table_list = result.group(7)
             table_list = table_list.replace(" join ", ",")
