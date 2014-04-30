@@ -515,7 +515,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         if value < 0.1:
             self.execution_timer_running = False
             return False
-        if not self.emma.on_execute_query_clicked():
+        if not self.on_execute_query_clicked():
             # stop on error
             button.set_value(0)
             value = 0

@@ -313,7 +313,7 @@ class ConnectionsTreeView(gtk.TreeView):
         _iter = self.connections_model.append(None, [host])
         host.set_update_ui(self.redraw_host, _iter)
 
-    def on_table_popup(self, item):
+    def on_table_popup(self, item, arg):
         path, column, _iter, table = self.emma.get_current_table()
         what = item.name
 
@@ -347,12 +347,12 @@ class ConnectionsTreeView(gtk.TreeView):
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
             self.emma.xml.get_widget("main_notebook").set_current_page(4)
-            self.emma.on_execute_query_clicked(None, "check table `%s`" % table.name)
+            self.emma.current_query.on_execute_query_clicked(None, "check table `%s`" % table.name)
         elif what == "repair_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
             self.emma.xml.get_widget("main_notebook").set_current_page(4)
-            self.emma.on_execute_query_clicked(None, "repair table `%s`" % table.name)
+            self.emma.current_query.on_execute_query_clicked(None, "repair table `%s`" % table.name)
 
     def on_db_popup(self, popup, item):
         path, column = self.get_cursor()
@@ -386,14 +386,14 @@ class ConnectionsTreeView(gtk.TreeView):
             self.current_host = db.host
             self.current_host.select_database(db)
             self.emma.xml.get_widget("main_notebook").set_current_page(4)
-            self.emma.on_execute_query_clicked(
+            self.emma.current_query.on_execute_query_clicked(
                 None,
                 "check table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
         elif what == "repair_tables":
             self.current_host = db.host
             self.current_host.select_database(db)
             self.emma.xml.get_widget("main_notebook").set_current_page(4)
-            self.emma.on_execute_query_clicked(
+            self.emma.current_query.on_execute_query_clicked(
                 None,
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
 
