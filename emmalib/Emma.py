@@ -256,11 +256,11 @@ class Emma:
             qt.set_wrap_mode(gtk.WRAP_NONE)
         qt.set_current_host(self.current_host)
 
-        tab_label_hbox = gtk.HBox()
+        tab_label_hbox = gtk.HBox(False, 4)
 
         # add icon
         icon = gtk.Image()
-        icon.set_from_file(os.path.join(icons_path, 'table.png'))
+        icon.set_from_file(os.path.join(icons_path, 'page_code.png'))
         icon.show()
         tab_label_hbox.pack_start(icon)
 

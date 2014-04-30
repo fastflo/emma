@@ -256,7 +256,10 @@ class ConnectionsTreeView(gtk.TreeView):
         elif d == 1:
             cell.set_property("pixbuf", self.icons["db"])
         elif d == 2:
-            cell.set_property("pixbuf", self.icons["table"])
+            if o.is_table:
+                cell.set_property("pixbuf", self.icons["table"])
+            else:
+                cell.set_property("pixbuf", self.icons["table_lightning"])
         elif d == 3:
             cell.set_property("pixbuf", self.icons["field"])
 
@@ -288,7 +291,7 @@ class ConnectionsTreeView(gtk.TreeView):
             cell.set_property("weight", 400)
 
     def load_icons(self):
-        for icon in ["offline_host", "host", "db", "table", "field"]:
+        for icon in ["offline_host", "host", "db", "table", "table_lightning", "field"]:
             filename = os.path.join(icons_path, icon + ".png")
             try:
                 self.icons[icon] = gtk.gdk.pixbuf_new_from_file(filename)

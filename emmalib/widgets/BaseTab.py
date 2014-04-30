@@ -8,7 +8,7 @@ class BaseTab(object):
         self.tab_label.show()
         self.ui = None
 
-        self.tab_label_hbox = gtk.HBox()
+        self.tab_label_hbox = gtk.HBox(False, 4)
 
         # add icon
         self.tab_label_icon = gtk.Image()
