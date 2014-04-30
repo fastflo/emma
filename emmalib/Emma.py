@@ -76,10 +76,6 @@ class Emma:
         self.tableslist = widgets.TabTablesList(self)
         #self.main_notebook.prepend_page(self.tableslist, gtk.Label('Tables List'))
 
-        # tables list
-        self.processlist = widgets.TabProcessList(self)
-        #self.main_notebook.prepend_page(self.processlist, gtk.Label('Process List'))
-
         # Local Search Window
         self.local_search_window = self.xml.get_widget("localsearch_window")
         self.local_search_entry = self.xml.get_widget("local_search_entry")
@@ -940,5 +936,10 @@ class Emma:
             return self.connections_tv.connections_model.get_value(_iter, 0)
         return None
 
+    def add_process_list_page(self):
+        process_list = widgets.TabProcessList(self)
+        process_list.close_tab_callback(self.on_process_list_close_tab)
+        self.main_notebook.append_page(process_list.get_ui(), process_list.get_label_ui())
 
-
+    def on_process_list_close_tab(self, button, event):
+        self.main_notebook.remove_page(self.main_notebook.get_current_page())

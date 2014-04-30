@@ -84,7 +84,6 @@ class MySqlTable:
         if not self.create_table:
             self.db.host.select_database(self.db)
             self.host.query("show create table `%s`" % self.name)
-            print "create with:", self.handle
             result = self.handle.store_result()
             if not result:
                 print "can't get create table for %s at %s and %s" % (self.name, self, self.handle)

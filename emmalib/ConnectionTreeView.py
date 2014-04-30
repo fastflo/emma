@@ -88,9 +88,6 @@ class ConnectionsTreeView(gtk.TreeView):
                 host.connect()
                 if not host.connected:
                     return
-                self.emma.processlist.refresh()
-                if nb:
-                    nb.set_current_page(1)
             self.redraw_host(host, _iter, True)
             self.emma.current_query.set_current_host(self.current_host)
 
@@ -313,7 +310,7 @@ class ConnectionsTreeView(gtk.TreeView):
         _iter = self.connections_model.append(None, [host])
         host.set_update_ui(self.redraw_host, _iter)
 
-    def on_table_popup(self, item, arg):
+    def on_table_popup(self, popup, item):
         path, column, _iter, table = self.emma.get_current_table()
         what = item.name
 
@@ -434,3 +431,5 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.config.save()
         elif what == "new_connection":
             self.connection_window.show("new")
+        elif what == "show_processes":
+            self.emma.add_process_list_page()
