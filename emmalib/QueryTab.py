@@ -77,6 +77,8 @@ class QueryTab:
         self.scrolledwindow6.add(self.treeview)
         self.treeview.show()
 
+        self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+
         self.treeview.connect('cursor_changed', self.on_query_view_cursor_changed)
         self.treeview.connect('key_press_event', self.on_query_view_key_press_event)
         self.treeview.connect('button_release_event', self.on_query_view_button_release_event)
