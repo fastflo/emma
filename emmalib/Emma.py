@@ -261,8 +261,23 @@ class Emma:
         qt.set_current_host(self.current_host)
 
         tab_label_hbox = gtk.HBox()
+
+        # add icon
+        icon = gtk.Image()
+        icon.set_from_file(os.path.join(icons_path, 'table.png'))
+        icon.show()
+        tab_label_hbox.pack_start(icon)
+
+        # add label
+        tab_label_label_ebox = gtk.EventBox()
         tab_label_label = gtk.Label('Query')
         tab_label_label.show()
+        tab_label_label_ebox.add(tab_label_label)
+        tab_label_label_ebox.show()
+        tab_label_label_ebox.connect('button_release_event', self.on_query_tab_label_button_clicked)
+        tab_label_hbox.pack_start(tab_label_label_ebox)
+
+        # add close tab button
         tab_label_ebox = gtk.EventBox()
         img = gtk.Image()
         img.set_from_stock(gtk.STOCK_CLOSE, 1)
@@ -270,15 +285,18 @@ class Emma:
         tab_label_ebox.add(img)
         tab_label_ebox.show()
         tab_label_ebox.connect('button_release_event', self.on_closequery_label_button_clicked)
-
-        tab_label_hbox.pack_start(tab_label_label)
         tab_label_hbox.pack_end(tab_label_ebox)
+
+        # show tab title
         tab_label_hbox.show()
 
-        new_page_index = self.main_notebook.append_page(qt.xml.get_widget('first_query'), tab_label_hbox)
+        new_page_index = self.main_notebook.append_page(qt.page, tab_label_hbox)
         qt.page_index = new_page_index
         self.main_notebook.set_current_page(new_page_index)
         self.current_query.textview.grab_focus()
+
+    def on_query_tab_label_button_clicked(self, button, event):
+        pass
 
     def on_closequery_label_button_clicked(self, button, event):
         self.close_query(None)

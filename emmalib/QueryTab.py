@@ -153,8 +153,7 @@ class QueryTab:
             #     method = getattr(sb, "set_%s" % pn)
             #     method(v)
         except:
-            from emmalib.dialogs import alert
-            alert(traceback.format_exc())
+            dialogs.alert(traceback.format_exc())
 
         self.current_host = None
         self.current_db = None
@@ -814,7 +813,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
 
     def on_query_column_sort(self, column, col_num):
         query = self.last_source
-        current_order = self.emma.get_order_from_query(query)
+        current_order = self.get_order_from_query(query)
         col = column.get_title().replace("__", "_")
         new_order = []
         for c, o in current_order:
@@ -878,7 +877,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.sort_timer_running = True
             gobject.timeout_add(
                 100 + int(self.emma.config.get("result_view_column_sort_timeout")),
-                self.emma.on_sort_timer
+                self.on_sort_timer
             )
         self.sort_timer_execute = time.time() + int(self.emma.config.get("result_view_column_sort_timeout")) / 1000.
 
@@ -1026,7 +1025,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             row_iter = self.model.get_iter(path)
 
         # get unique where_clause
-        self._kv_list = []
+        self.kv_list = []
         self.last_th = th
         for field, field_pos in zip(th.field_order, range(len(th.field_order))):
             props = th.fields[field]
@@ -1051,7 +1050,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                         if primary:
                             primary += " and "
                         primary += "`%s`='%s'" % (field, value)
-                        self._kv_list.append((field, value))
+                        self.kv_list.append((field, value))
             if uni_okay >= 0 and props[3] == "UNI":
                 if possible_unique:
                     possible_unique += ", "
@@ -1071,7 +1070,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                         if unique:
                             unique += " and "
                         unique += "`%s`='%s'" % (field, value)
-                        self._kv_list.append((field, value))
+                        self.kv_list.append((field, value))
 
         if uni_okay < 1 and pri_okay < 1:
             possible_key = "(i can't see any key-fields in this table...)"

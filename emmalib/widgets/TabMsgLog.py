@@ -28,7 +28,8 @@ class TabMsgLog(gtk.ScrolledWindow):
         if not log:
             return
         log.replace(
-            "You have an error in your SQL syntax.  Check the manual that corresponds to your MySQL server version for the right syntax to use near",
+            "You have an error in your SQL syntax.  "
+            "Check the manual that corresponds to your MySQL server version for the right syntax to use near",
             "syntax error at "
         )
         now = time.time()

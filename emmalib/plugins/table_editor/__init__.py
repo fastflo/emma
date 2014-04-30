@@ -422,12 +422,12 @@ class table_editor:
         if query != no_changes:
             if not self.emma.confirm(
                     "edit table",
-                    "do you really want to edit the <b>%s</b> table in database <b>%s</b> on <b>%s</b> with this sql:\n<b>%s</b>" % (
-                            self.table.name,
-                            self.table.db.name,
-                            self.table.db.host.name,
-                            query
-                    ),
+                    "do you really want to edit the <b>%s</b> table in database <b>%s</b> "
+                    "on <b>%s</b> with this sql:\n<b>%s</b>" % (self.table.name,
+                                                                self.table.db.name,
+                                                                self.table.db.host.name,
+                                                                query
+                                                                ),
                     window=self.window):
                 return
         else:
