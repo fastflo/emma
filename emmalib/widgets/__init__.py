@@ -14,3 +14,5 @@ from TabBlobView import TabBlobView
 from TabProcessList import TabProcessList
 from TabTable import TabTable
 from TabTablesList import TabTablesList
+
+from MainMenu import MainMenu

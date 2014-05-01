@@ -3,7 +3,6 @@ import gobject
 
 
 class PopUpDatabase(gtk.Menu):
-
     __gsignals__ = {
         'item-selected': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_OBJECT,))
     }
