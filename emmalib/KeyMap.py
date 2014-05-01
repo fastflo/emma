@@ -31,6 +31,10 @@ class KeyMap(gobject.GObject):
         if event.keyval == keysyms.F9:
             self.emma.current_query.on_execute_query_clicked()
 
+        if event.keyval == keysyms.Return and self.if_ctrl():
+            self.emma.current_query.on_execute_query_clicked()
+            return False
+
         if event.keyval == keysyms.t and self.if_ctrl():
             self.emma.add_query_tab()
         if event.keyval == keysyms.w and self.if_ctrl():

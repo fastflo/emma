@@ -192,6 +192,7 @@ class QueryTab(widgets.BaseTab):
         #
 
         self.emma.key_map.connect('key-release', self.key_release)
+        self.init_from_config()
 
     def init_from_config(self):
         self.set_query_encoding(self.emma.config.get("db_encoding"))
