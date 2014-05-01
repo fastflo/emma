@@ -40,6 +40,10 @@ class Emma:
         self.mainwindow.connect('destroy', lambda *args: gtk.main_quit())
         self.xml.signal_autoconnect(self)
 
+        self.key_map = KeyMap(self)
+        self.mainwindow.connect('key_release_event', self.key_map.on_mainwindow_key_release_event)
+        self.mainwindow.connect('key_press_event', self.key_map.on_mainwindow_key_press_event)
+
         try:
             icon = gtk.gdk.pixbuf_new_from_file(os.path.join(icons_path, "emma.png"))
             self.mainwindow.set_icon(icon)
@@ -106,11 +110,7 @@ class Emma:
         self.connections_tv_container.add(self.connections_tv)
         self.connections_tv.show()
 
-        self.add_query_tab(QueryTab(self.main_notebook, self))
-
-        self.key_map = KeyMap(self)
-        self.mainwindow.connect('key_release_event', self.key_map.on_mainwindow_key_release_event)
-        self.mainwindow.connect('key_press_event', self.key_map.on_mainwindow_key_press_event)
+        self.add_query_tab()
 
         self.first_template = None
         # keys = self.config.config.keys()
@@ -243,59 +243,15 @@ class Emma:
             self.plugin_pathes.append(path)
         self.load_plugins()
 
-    def add_query_tab(self, qt):
+    def add_query_tab(self):
+        qt = QueryTab(self)
         self.query_count += 1
         self.current_query = qt
         self.queries.append(qt)
-        qt.set_query_encoding(self.config.get("db_encoding"))
-        qt.set_query_font(self.config.get("query_text_font"))
-        qt.set_result_font(self.config.get("query_result_font"))
-        if self.config.get_bool("query_text_wrap"):
-            qt.set_wrap_mode(gtk.WRAP_WORD)
-        else:
-            qt.set_wrap_mode(gtk.WRAP_NONE)
-        qt.set_current_host(self.current_host)
-
-        tab_label_hbox = gtk.HBox(False, 4)
-
-        # add icon
-        icon = gtk.Image()
-        icon.set_from_file(os.path.join(icons_path, 'page_code.png'))
-        icon.show()
-        tab_label_hbox.pack_start(icon)
-
-        # add label
-        tab_label_label_ebox = gtk.EventBox()
-        tab_label_label = gtk.Label('Query')
-        tab_label_label.show()
-        tab_label_label_ebox.add(tab_label_label)
-        tab_label_label_ebox.show()
-        tab_label_label_ebox.connect('button_release_event', self.on_query_tab_label_button_clicked)
-        tab_label_hbox.pack_start(tab_label_label_ebox)
-
-        # add close tab button
-        tab_label_ebox = gtk.EventBox()
-        img = gtk.Image()
-        img.set_from_stock(gtk.STOCK_CLOSE, 1)
-        img.show()
-        tab_label_ebox.add(img)
-        tab_label_ebox.show()
-        tab_label_ebox.connect('button_release_event', self.on_closequery_label_button_clicked)
-        tab_label_hbox.pack_end(tab_label_ebox)
-
-        # show tab title
-        tab_label_hbox.show()
-
-        new_page_index = self.main_notebook.append_page(qt.page, tab_label_hbox)
+        new_page_index = self.main_notebook.append_page(qt.get_ui(), qt.get_label_ui())
         qt.page_index = new_page_index
         self.main_notebook.set_current_page(new_page_index)
         self.current_query.textview.grab_focus()
-
-    def on_query_tab_label_button_clicked(self, button, event):
-        pass
-
-    def on_closequery_label_button_clicked(self, button, event):
-        self.close_query(None)
 
     def on_connection_ping(self):
         _iter = self.connections_tv.connections_model.get_iter_root()
@@ -444,7 +400,7 @@ class Emma:
             except:
                 print "query_change_listener %r had exception" % f
 
-    def close_query(self, button):
+    def close_query_tab(self):
         if len(self.queries) == 1:
             return
         page = self.main_notebook.get_current_page()
