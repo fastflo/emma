@@ -34,6 +34,15 @@ class MySqlTable:
         self.last_field_read = 0
         self.create_table = ""
         self.describe_headers = []
+        self.props_description = props_description
+        self.engine = props[1]
+        self.comment = props[17]
+        self.is_table = False
+        self.is_view = False
+        if self.engine:
+            self.is_table = True
+        else:
+            self.is_view = True
 
     def __getstate__(self):
         d = dict(self.__dict__)
@@ -84,7 +93,6 @@ class MySqlTable:
         if not self.create_table:
             self.db.host.select_database(self.db)
             self.host.query("show create table `%s`" % self.name)
-            print "create with:", self.handle
             result = self.handle.store_result()
             if not result:
                 print "can't get create table for %s at %s and %s" % (self.name, self, self.handle)

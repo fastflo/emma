@@ -122,9 +122,6 @@ class Config:
     def load(self, unpickled=False):
         self.unpickled = unpickled
         filename = os.path.join(self.config_path, self.config_file)
-        # todo get_charset(self.config["db_codeset"]);
-        # printf("system charset: '%s'\n", self.config["db_codeset"].c_str());
-        # syntax_highlight_functions: grep -E -e "^[ \\t]+<code class=\"literal[^>]*>[^\(<90-9]+\(" mysql_fun.html fun*.html | sed -r -e "s/^[^<]*<code[^>]+>//" -e "s/\(.*$/,/" | tr "[:upper:]" "[:lower:]" | sort | uniq | xargs echo
 
         if not os.path.exists(filename):
             print "no config file %r found. using defaults." % filename

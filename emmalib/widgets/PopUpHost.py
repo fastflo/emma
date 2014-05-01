@@ -32,6 +32,9 @@ class PopUpHost(gtk.Menu):
         self.menu_delete_connection.connect('activate', self.activated)
         self.append(self.menu_delete_connection)
 
+        item = gtk.SeparatorMenuItem()
+        self.append(item)
+
         self.menu_new_connection = gtk.ImageMenuItem(gtk.STOCK_NEW)
         self.menu_new_connection.set_name('new_connection')
         self.menu_new_connection.set_label('New Connection')
@@ -39,15 +42,22 @@ class PopUpHost(gtk.Menu):
         self.menu_new_connection.connect('activate', self.activated)
         self.append(self.menu_new_connection)
 
-        item = gtk.SeparatorMenuItem()
-        self.append(item)
-
         self.menu_new_database = gtk.ImageMenuItem(gtk.STOCK_NEW)
         self.menu_new_database.set_name('new_database')
         self.menu_new_database.set_label('New Database')
         self.menu_new_database.set_always_show_image(True)
         self.menu_new_database.connect('activate', self.activated)
         self.append(self.menu_new_database)
+
+        item = gtk.SeparatorMenuItem()
+        self.append(item)
+
+        self.menu_show_processes = gtk.ImageMenuItem(gtk.STOCK_INFO)
+        self.menu_show_processes.set_name('show_processes')
+        self.menu_show_processes.set_label('Show Processes')
+        self.menu_show_processes.set_always_show_image(True)
+        self.menu_show_processes.connect('activate', self.activated)
+        self.append(self.menu_show_processes)
 
         self.show_all()
 

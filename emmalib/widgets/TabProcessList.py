@@ -1,13 +1,17 @@
 import gtk
 import gobject
+from BaseTab import BaseTab
 
 from PopUpProcessList import PopUpProcessList
 from emmalib import dialogs
 
 
-class TabProcessList(gtk.VBox):
+class TabProcessList(BaseTab):
     def __init__(self, emma):
-        super(TabProcessList, self).__init__(False, 0)
+        super(TabProcessList, self).__init__()
+
+        self.ui = gtk.VBox(False, 0)
+        self.tab_label.set_text('Process List')
 
         self.emma = emma
 
@@ -20,8 +24,8 @@ class TabProcessList(gtk.VBox):
         self.button_refresh.connect('clicked', self.refresh)
         self.toolbar.add(self.button_refresh)
 
-        self.pack_start(self.toolbar, False, False)
-        self.pack_end(self.treeviewcontainer)
+        self.ui.pack_start(self.toolbar, False, False)
+        self.ui.pack_end(self.treeviewcontainer)
 
         self.model = None
         self.current_processlist_host = None
@@ -33,7 +37,7 @@ class TabProcessList(gtk.VBox):
         self.popup = PopUpProcessList()
         self.popup.connect('item-selected', self.on_kill_process)
 
-        self.show_all()
+        self.ui.show_all()
         pass
 
     def refresh(self, *args):

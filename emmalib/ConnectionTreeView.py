@@ -88,9 +88,6 @@ class ConnectionsTreeView(gtk.TreeView):
                 host.connect()
                 if not host.connected:
                     return
-                self.emma.processlist.refresh()
-                if nb:
-                    nb.set_current_page(1)
             self.redraw_host(host, _iter, True)
             self.emma.current_query.set_current_host(self.current_host)
 
@@ -259,7 +256,10 @@ class ConnectionsTreeView(gtk.TreeView):
         elif d == 1:
             cell.set_property("pixbuf", self.icons["db"])
         elif d == 2:
-            cell.set_property("pixbuf", self.icons["table"])
+            if o.is_table:
+                cell.set_property("pixbuf", self.icons["table"])
+            else:
+                cell.set_property("pixbuf", self.icons["table_lightning"])
         elif d == 3:
             cell.set_property("pixbuf", self.icons["field"])
 
@@ -291,7 +291,7 @@ class ConnectionsTreeView(gtk.TreeView):
             cell.set_property("weight", 400)
 
     def load_icons(self):
-        for icon in ["offline_host", "host", "db", "table", "field"]:
+        for icon in ["offline_host", "host", "db", "table", "table_lightning", "field"]:
             filename = os.path.join(icons_path, icon + ".png")
             try:
                 self.icons[icon] = gtk.gdk.pixbuf_new_from_file(filename)
@@ -313,7 +313,7 @@ class ConnectionsTreeView(gtk.TreeView):
         _iter = self.connections_model.append(None, [host])
         host.set_update_ui(self.redraw_host, _iter)
 
-    def on_table_popup(self, item):
+    def on_table_popup(self, popup, item):
         path, column, _iter, table = self.emma.get_current_table()
         what = item.name
 
@@ -347,12 +347,12 @@ class ConnectionsTreeView(gtk.TreeView):
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
             self.emma.xml.get_widget("main_notebook").set_current_page(4)
-            self.emma.on_execute_query_clicked(None, "check table `%s`" % table.name)
+            self.emma.current_query.on_execute_query_clicked(None, "check table `%s`" % table.name)
         elif what == "repair_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
             self.emma.xml.get_widget("main_notebook").set_current_page(4)
-            self.emma.on_execute_query_clicked(None, "repair table `%s`" % table.name)
+            self.emma.current_query.on_execute_query_clicked(None, "repair table `%s`" % table.name)
 
     def on_db_popup(self, popup, item):
         path, column = self.get_cursor()
@@ -386,14 +386,14 @@ class ConnectionsTreeView(gtk.TreeView):
             self.current_host = db.host
             self.current_host.select_database(db)
             self.emma.xml.get_widget("main_notebook").set_current_page(4)
-            self.emma.on_execute_query_clicked(
+            self.emma.current_query.on_execute_query_clicked(
                 None,
                 "check table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
         elif what == "repair_tables":
             self.current_host = db.host
             self.current_host.select_database(db)
             self.emma.xml.get_widget("main_notebook").set_current_page(4)
-            self.emma.on_execute_query_clicked(
+            self.emma.current_query.on_execute_query_clicked(
                 None,
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
 
@@ -434,3 +434,5 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.config.save()
         elif what == "new_connection":
             self.connection_window.show("new")
+        elif what == "show_processes":
+            self.emma.add_process_list_page()

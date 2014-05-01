@@ -65,8 +65,9 @@ class TabBlobView(gtk.VBox):
             print "column not found!"
             return
         crs = column.get_cell_renderers()
-        return q.on_query_change_data(crs[0], path, new_value, col_num,
-                                              force_update=self.encoding != q.encoding)
+        return q.on_query_change_data(crs[0],
+                                      path, new_value, col_num,
+                                      force_update=self.encoding != q.encoding)
 
     def on_blob_wrap_check_clicked(self, button):
         if button.get_active():

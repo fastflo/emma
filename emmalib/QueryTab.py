@@ -29,6 +29,7 @@ from gtk import glade
 from stat import *
 
 import dialogs
+import widgets
 from QueryTabRememberOrder import QueryTabRememberOrder
 from QueryTabRemoveOrder import QueryTabRemoveOrder
 from QueryTabSetRequltFont import QueryTabSetResultFont
@@ -41,14 +42,17 @@ from query_regular_expression import *
 from Constants import *
 
 
-class QueryTab:
-    def __init__(self, nb, emma):
+class QueryTab(widgets.BaseTab):
+    def __init__(self, emma):
+        super(QueryTab, self).__init__()
         self.xml = gtk.glade.XML(os.path.join(emma.glade_path, 'querytab.glade'), "first_query")
         self.xml.signal_autoconnect(self)
 
+        self.tab_label.set_text('Query')
+        self.tab_label_icon.set_from_file(os.path.join(icons_path, 'page_code.png'))
+
         self.page_index = None
 
-        self.nb = nb
         self.emma = emma
 
         self.save_result = self.xml.get_widget('save_result')
@@ -68,7 +72,7 @@ class QueryTab:
 
         self.query_text_sw = self.xml.get_widget('query_text_sw')
         self.apply_record = self.xml.get_widget('apply_record_tool')
-        self.page = self.xml.get_widget('first_query')
+        self.ui = self.xml.get_widget('first_query')
         self.toolbar = self.xml.get_widget('inner_query_toolbar')
         self.toolbar.set_style(gtk.TOOLBAR_ICONS)
 
@@ -76,6 +80,8 @@ class QueryTab:
         self.treeview = QueryTabTreeView(emma)
         self.scrolledwindow6.add(self.treeview)
         self.treeview.show()
+
+        self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
 
         self.treeview.connect('cursor_changed', self.on_query_view_cursor_changed)
         self.treeview.connect('key_press_event', self.on_query_view_key_press_event)
@@ -87,6 +93,8 @@ class QueryTab:
 
         self.sort_timer_running = False
         self.sort_timer_execute = 0
+
+        self.close_tab_callback(self.on_query_tab_label_close_button_clicked)
 
         # replace textview with gtksourcevice
         try:
@@ -153,8 +161,7 @@ class QueryTab:
             #     method = getattr(sb, "set_%s" % pn)
             #     method(v)
         except:
-            from emmalib.dialogs import alert
-            alert(traceback.format_exc())
+            dialogs.alert(traceback.format_exc())
 
         self.current_host = None
         self.current_db = None
@@ -180,14 +187,25 @@ class QueryTab:
         self.save_result_csv_action = QueryTabSaveResultCsv(self, emma)
         self.manage_row_action = QueryTabManageRow(self, emma)
 
-    def __getstate__(self):
-        b = self.textview.get_buffer()
-        d = {
-            "name": self.nb.get_tab_label_text(self.page),
-            "query": b.get_text(b.get_start_iter(), b.get_end_iter())
-        }
-        print "query will pickle:", d
-        return d
+        #
+        #
+        #
+
+        self.emma.key_map.connect('key-release', self.key_release)
+        self.init_from_config()
+
+    def init_from_config(self):
+        self.set_query_encoding(self.emma.config.get("db_encoding"))
+        self.set_query_font(self.emma.config.get("query_text_font"))
+        self.set_result_font(self.emma.config.get("query_result_font"))
+        if self.emma.config.get_bool("query_text_wrap"):
+            self.set_wrap_mode(gtk.WRAP_WORD)
+        else:
+            self.set_wrap_mode(gtk.WRAP_NONE)
+        self.set_current_host(self.emma.current_host)
+
+    def key_release(self, key_map, event):
+        pass
 
     def on_query_view_cursor_changed(self, tv):
         self.emma.blob_view.encoding = self.encoding
@@ -315,17 +333,6 @@ class QueryTab:
             print "last auto name %r not in %r!" % (self.last_auto_name, current_name)
         return
 
-    def get_label(self):
-        tab_widget = self.nb.get_tab_label(self.page)
-        if not tab_widget:
-            print "no tab widget"
-            return
-        labels = filter(lambda w: type(w) == gtk.Label, tab_widget.get_children())
-        if not labels:
-            print "no label found!"
-            return
-        return labels[0]
-
     def user_rename(self, new_name):
         # tab_widget = self.nb.get_tab_label(self.page)
         label = self.get_label()
@@ -421,10 +428,13 @@ class QueryTab:
         self.user_rename(new_name)
 
     def on_closequery_button_clicked(self, button):
-        self.emma.close_query(button)
+        self.emma.close_query_tab()
+
+    def on_query_tab_label_close_button_clicked(self, button, event):
+        self.emma.close_query_tab()
 
     def on_newquery_button_clicked(self, button):
-        self.emma.add_query_tab(QueryTab(self.emma.main_notebook, self.emma))
+        self.emma.add_query_tab()
 
     def on_query_font_clicked(self, button):
         d = self.emma.assign_once("query text font", gtk.FontSelectionDialog, "select query font")
@@ -441,7 +451,7 @@ class QueryTab:
     def on_load_query_clicked(self, button):
         d = self.emma.assign_once(
             "load dialog",
-            gtk.FileChooserDialog, "load query", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_OPEN,
+            gtk.FileChooserDialog, "Load query", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_OPEN,
             (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
 
         d.set_default_response(gtk.RESPONSE_ACCEPT)
@@ -454,10 +464,10 @@ class QueryTab:
         try:
             sbuf = os.stat(filename)
         except:
-            dialogs.show_message("load query", "%s does not exists!" % filename)
+            dialogs.show_message("Load query", "%s does not exists!" % filename)
             return
         if not S_ISREG(sbuf.st_mode):
-            dialogs.show_message("load query", "%s exists, but is not a file!" % filename)
+            dialogs.show_message("Load query", "%s exists, but is not a file!" % filename)
             return
 
         size = sbuf.st_size
@@ -476,14 +486,14 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             query_text = fp.read()
             fp.close()
         except:
-            dialogs.show_message("save query", "error writing query to file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message("Load Query", "Error reading query from file %s: %s" % (filename, sys.exc_value))
             return
         self.textview.get_buffer().set_text(query_text)
 
     def on_save_query_clicked(self, button):
         d = self.emma.assign_once(
             "save dialog",
-            gtk.FileChooserDialog, "save query", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE,
+            gtk.FileChooserDialog, "Save query", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE,
             (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
 
         d.set_default_response(gtk.RESPONSE_ACCEPT)
@@ -497,8 +507,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 dialogs.show_message("save query", "%s already exists and is not a file!" % filename)
                 return
             if not dialogs.confirm(
-                    "overwrite file?",
-                    "%s already exists! do you want to overwrite it?" % filename, self.emma.mainwindow):
+                    "Overwrite file?",
+                    "%s already exists! Do you want to overwrite it?" % filename, self.emma.mainwindow):
                 return
         b = self.textview.get_buffer()
         query_text = b.get_text(b.get_start_iter(), b.get_end_iter())
@@ -507,14 +517,14 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             fp.write(query_text)
             fp.close()
         except:
-            dialogs.show_message("save query", "error writing query to file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message("Save Query", "Error writing query to file %s: %s" % (filename, sys.exc_value))
 
     def on_execution_timeout(self, button):
         value = button.get_value()
         if value < 0.1:
             self.execution_timer_running = False
             return False
-        if not self.emma.on_execute_query_clicked():
+        if not self.on_execute_query_clicked():
             # stop on error
             button.set_value(0)
             value = 0
@@ -814,7 +824,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
 
     def on_query_column_sort(self, column, col_num):
         query = self.last_source
-        current_order = self.emma.get_order_from_query(query)
+        current_order = self.get_order_from_query(query)
         col = column.get_title().replace("__", "_")
         new_order = []
         for c, o in current_order:
@@ -878,7 +888,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.sort_timer_running = True
             gobject.timeout_add(
                 100 + int(self.emma.config.get("result_view_column_sort_timeout")),
-                self.emma.on_sort_timer
+                self.on_sort_timer
             )
         self.sort_timer_execute = time.time() + int(self.emma.config.get("result_view_column_sort_timeout")) / 1000.
 
@@ -1026,7 +1036,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             row_iter = self.model.get_iter(path)
 
         # get unique where_clause
-        self._kv_list = []
+        self.kv_list = []
         self.last_th = th
         for field, field_pos in zip(th.field_order, range(len(th.field_order))):
             props = th.fields[field]
@@ -1051,7 +1061,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                         if primary:
                             primary += " and "
                         primary += "`%s`='%s'" % (field, value)
-                        self._kv_list.append((field, value))
+                        self.kv_list.append((field, value))
             if uni_okay >= 0 and props[3] == "UNI":
                 if possible_unique:
                     possible_unique += ", "
@@ -1071,7 +1081,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                         if unique:
                             unique += " and "
                         unique += "`%s`='%s'" % (field, value)
-                        self._kv_list.append((field, value))
+                        self.kv_list.append((field, value))
 
         if uni_okay < 1 and pri_okay < 1:
             possible_key = "(i can't see any key-fields in this table...)"

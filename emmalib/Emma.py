@@ -40,6 +40,10 @@ class Emma:
         self.mainwindow.connect('destroy', lambda *args: gtk.main_quit())
         self.xml.signal_autoconnect(self)
 
+        self.key_map = KeyMap(self)
+        self.mainwindow.connect('key_release_event', self.key_map.on_mainwindow_key_release_event)
+        self.mainwindow.connect('key_press_event', self.key_map.on_mainwindow_key_press_event)
+
         try:
             icon = gtk.gdk.pixbuf_new_from_file(os.path.join(icons_path, "emma.png"))
             self.mainwindow.set_icon(icon)
@@ -76,10 +80,6 @@ class Emma:
         self.tableslist = widgets.TabTablesList(self)
         #self.main_notebook.prepend_page(self.tableslist, gtk.Label('Tables List'))
 
-        # tables list
-        self.processlist = widgets.TabProcessList(self)
-        #self.main_notebook.prepend_page(self.processlist, gtk.Label('Process List'))
-
         # Local Search Window
         self.local_search_window = self.xml.get_widget("localsearch_window")
         self.local_search_entry = self.xml.get_widget("local_search_entry")
@@ -110,11 +110,7 @@ class Emma:
         self.connections_tv_container.add(self.connections_tv)
         self.connections_tv.show()
 
-        self.add_query_tab(QueryTab(self.main_notebook, self))
-
-        self.key_map = KeyMap(self)
-        self.mainwindow.connect('key_release_event', self.key_map.on_mainwindow_key_release_event)
-        self.mainwindow.connect('key_press_event', self.key_map.on_mainwindow_key_press_event)
+        self.add_query_tab()
 
         self.first_template = None
         # keys = self.config.config.keys()
@@ -247,41 +243,15 @@ class Emma:
             self.plugin_pathes.append(path)
         self.load_plugins()
 
-    def add_query_tab(self, qt):
+    def add_query_tab(self):
+        qt = QueryTab(self)
         self.query_count += 1
         self.current_query = qt
         self.queries.append(qt)
-        qt.set_query_encoding(self.config.get("db_encoding"))
-        qt.set_query_font(self.config.get("query_text_font"))
-        qt.set_result_font(self.config.get("query_result_font"))
-        if self.config.get_bool("query_text_wrap"):
-            qt.set_wrap_mode(gtk.WRAP_WORD)
-        else:
-            qt.set_wrap_mode(gtk.WRAP_NONE)
-        qt.set_current_host(self.current_host)
-
-        tab_label_hbox = gtk.HBox()
-        tab_label_label = gtk.Label('Query')
-        tab_label_label.show()
-        tab_label_ebox = gtk.EventBox()
-        img = gtk.Image()
-        img.set_from_stock(gtk.STOCK_CLOSE, 1)
-        img.show()
-        tab_label_ebox.add(img)
-        tab_label_ebox.show()
-        tab_label_ebox.connect('button_release_event', self.on_closequery_label_button_clicked)
-
-        tab_label_hbox.pack_start(tab_label_label)
-        tab_label_hbox.pack_end(tab_label_ebox)
-        tab_label_hbox.show()
-
-        new_page_index = self.main_notebook.append_page(qt.xml.get_widget('first_query'), tab_label_hbox)
+        new_page_index = self.main_notebook.append_page(qt.get_ui(), qt.get_label_ui())
         qt.page_index = new_page_index
         self.main_notebook.set_current_page(new_page_index)
         self.current_query.textview.grab_focus()
-
-    def on_closequery_label_button_clicked(self, button, event):
-        self.close_query(None)
 
     def on_connection_ping(self):
         _iter = self.connections_tv.connections_model.get_iter_root()
@@ -430,17 +400,20 @@ class Emma:
             except:
                 print "query_change_listener %r had exception" % f
 
-    def close_query(self, button):
+    def close_query_tab(self):
         if len(self.queries) == 1:
             return
-        self.current_query.destroy()
+        page = self.main_notebook.get_current_page()
+        for q in self.queries:
+            if q.page_index == page:
+                self.current_query.destroy()
+                i = self.queries.index(self.current_query)
+                del self.queries[i]
+                self.current_query = None
 
-        i = self.queries.index(self.current_query)
-        del self.queries[i]
-        self.current_query = None
-
-        self.main_notebook.remove_page(self.main_notebook.get_current_page())
-        gc.collect()
+                self.main_notebook.remove_page(self.main_notebook.get_current_page())
+                gc.collect()
+                return
 
     def on_fc_reset_clicked(self, button):
         for i in range(self.fc_count):
@@ -922,5 +895,10 @@ class Emma:
             return self.connections_tv.connections_model.get_value(_iter, 0)
         return None
 
+    def add_process_list_page(self):
+        process_list = widgets.TabProcessList(self)
+        process_list.close_tab_callback(self.on_process_list_close_tab)
+        self.main_notebook.append_page(process_list.get_ui(), process_list.get_label_ui())
 
-
+    def on_process_list_close_tab(self, button, event):
+        self.main_notebook.remove_page(self.main_notebook.get_current_page())

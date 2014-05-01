@@ -82,7 +82,7 @@ class QueryTabManageRow:
                 print (table, where, field, value, row_iter, fields)
                 keys = []
                 values = []
-                for key, value in self.emma._kv_list:
+                for key, value in self.query.kv_list:
                     keys.append(key)
                     if type(value) == str:
                         values.append("'%s'" % value)
