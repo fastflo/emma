@@ -6,9 +6,11 @@ from BaseTab import BaseTab
 class TabTablesList(BaseTab):
     def __init__(self, emma):
         super(TabTablesList, self).__init__()
+
         self.tab_label.set_text('Tables List')
         self.ui = gtk.ScrolledWindow()
         self.ui.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+
         self.emma = emma
         self.model = None
         self.tables_db = None
@@ -64,3 +66,6 @@ class TabTablesList(BaseTab):
         for name in keys:
             table = db.tables[name]
             self.model.append(table.props)
+
+    def get_ui(self):
+        return self.ui

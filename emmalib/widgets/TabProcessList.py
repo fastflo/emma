@@ -115,5 +115,7 @@ class TabProcessList(BaseTab):
             return False
         return True
 
+    def get_ui(self):
+        return self.ui
 
 

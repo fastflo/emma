@@ -72,14 +72,6 @@ class Emma:
         self.blob_view = widgets.TabBlobView(self)
         self.message_notebook.append_page(self.blob_view, gtk.Label('Blob View'))
 
-        # table view
-        self.table_view = widgets.TabTable(self)
-        #self.main_notebook.prepend_page(self.table_view, gtk.Label('Table'))
-
-        # process list
-        self.tableslist = widgets.TabTablesList(self)
-        #self.main_notebook.prepend_page(self.tableslist, gtk.Label('Tables List'))
-
         # Local Search Window
         self.local_search_window = self.xml.get_widget("localsearch_window")
         self.local_search_entry = self.xml.get_widget("local_search_entry")

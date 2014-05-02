@@ -1222,3 +1222,5 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             return None, len(query)
         return match.start(0), match.end(0)
 
+    def get_ui(self):
+        return self.ui

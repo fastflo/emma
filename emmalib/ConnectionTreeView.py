@@ -95,7 +95,6 @@ class ConnectionsTreeView(gtk.TreeView):
             self.current_host = o.host
             new_tables = o.refresh()
             self.redraw_db(o, _iter, new_tables, True)
-            self.emma.tableslist.redraw()
             o.host.select_database(o)
             self.emma.current_query.set_current_db(o)
 
