@@ -24,7 +24,7 @@ class MainWindow(gtk.Window):
         hpaned1 = gtk.HPaned()
         hpaned1.pack1(self.connections_tv_container, False, True)
         hpaned1.pack2(self.main_notebook, True, True)
-        hpaned1.set_position(150)
+        hpaned1.set_position(200)
         hpaned1.show()
         vbox1.pack_start(hpaned1, True, True)
 
