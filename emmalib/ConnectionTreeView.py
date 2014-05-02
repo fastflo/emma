@@ -392,6 +392,8 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.current_query.on_execute_query_clicked(
                 None,
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
+        elif what == "list_tables":
+            self.emma.main_notebook.add_tables_list_tab()
 
     def on_host_popup(self, popup, item):
         path, column = self.get_cursor()

@@ -1,18 +1,22 @@
 import gtk
 import gobject
+from BaseTab import BaseTab
 
 
-class TabTablesList(gtk.ScrolledWindow):
+class TabTablesList(BaseTab):
     def __init__(self, emma):
         super(TabTablesList, self).__init__()
-        self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.tab_label.set_text('Tables List')
+        self.ui = gtk.ScrolledWindow()
+        self.ui.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.emma = emma
         self.model = None
         self.tables_db = None
         self.tables_count = 0
         self.tv = gtk.TreeView()
-        self.add(self.tv)
-        self.show_all()
+        self.ui.add(self.tv)
+        self.ui.show_all()
+        self.redraw()
 
     def redraw(self):
         if not self.emma.current_query:

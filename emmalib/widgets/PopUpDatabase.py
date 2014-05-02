@@ -26,6 +26,15 @@ class PopUpDatabase(gtk.Menu):
 
         self.append(gtk.SeparatorMenuItem())
 
+        item = gtk.ImageMenuItem(gtk.STOCK_JUSTIFY_FILL)
+        item.set_name('list_tables')
+        item.set_label('List tables')
+        item.set_always_show_image(True)
+        item.connect('activate', self.activated)
+        self.append(item)
+
+        self.append(gtk.SeparatorMenuItem())
+
         item = gtk.ImageMenuItem(gtk.STOCK_NEW)
         item.set_name('new_table')
         item.set_label('New Table')

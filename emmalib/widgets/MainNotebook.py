@@ -59,7 +59,7 @@ class MainNotebook(gtk.Notebook):
     #
 
     def add_process_list_tab(self):
-        process_list = widgets.TabProcessList(self)
+        process_list = widgets.TabProcessList(self.emma)
         new_page_num = self.append_page(process_list.get_ui(), process_list.get_label_ui())
         process_list.page_index = new_page_num
         process_list.get_tab_close_button().connect('clicked', self.close_process_list_tab, process_list)
@@ -68,3 +68,15 @@ class MainNotebook(gtk.Notebook):
     def close_process_list_tab(self, button, tab_class):
         page_num = self.page_num(tab_class.get_ui())
         self.remove_page(page_num)
+
+    def add_tables_list_tab(self):
+        tables_list = widgets.TabTablesList(self.emma)
+        new_page_num = self.append_page(tables_list.get_ui(), tables_list.get_label_ui())
+        tables_list.page_index = new_page_num
+        tables_list.get_tab_close_button().connect('clicked', self.close_process_list_tab, tables_list)
+        self.set_current_page(new_page_num)
+
+    def close_tables_list_tab(self, button, tab_class):
+        page_num = self.page_num(tab_class.get_ui())
+        self.remove_page(page_num)
+
