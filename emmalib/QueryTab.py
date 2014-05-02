@@ -38,6 +38,7 @@ from QueryTabSaveResultSql import QueryTabSaveResultSql
 from QueryTabSaveResultCsv import QueryTabSaveResultCsv
 from QueryTabManageRow import QueryTabManageRow
 from QueryTabTreeView import QueryTabTreeView
+from QueryTabResultPopup import QueryTabResultPopup
 from query_regular_expression import *
 from Constants import *
 
@@ -85,7 +86,7 @@ class QueryTab(widgets.BaseTab):
 
         self.treeview.connect('cursor_changed', self.on_query_view_cursor_changed)
         self.treeview.connect('key_press_event', self.on_query_view_key_press_event)
-        self.treeview.connect('button_release_event', self.on_query_view_button_release_event)
+        self.treeview.connect('button_press_event', self.on_query_view_button_press_event)
 
         self.execution_timer_running = False
         self.execution_timer_interval = 0
@@ -245,27 +246,40 @@ class QueryTab(widgets.BaseTab):
             self.manage_row_action.on_add_record_tool_clicked(None)
             return True
 
-    def on_query_view_button_release_event(self, tv, event):
-        if not event.button == 3:
+    def on_query_view_button_press_event(self, tv, event):
+        selection = tv.get_selection()
+
+        if event.button != 3:
             return False
-        res = tv.get_path_at_pos(int(event.x), int(event.y))
-        menu = self.emma.xml.get_widget("result_popup")
-        if res:
-            sensitive = True
+
+        is_single_row = selection.count_selected_rows() == 1
+
+        menu = QueryTabResultPopup(self, is_single_row)
+
+        #res = tv.get_path_at_pos(int(event.x), int(event.y))
+        # if res:
+        #     sensitive = True
+        # else:
+        #     sensitive = False
+        # for c in menu.get_children():
+        #     for s in ["edit", "set ", "delete"]:
+        #         if c.name.find(s) != -1:
+        #             c.set_sensitive(sensitive and self.emma.current_query.editable)
+        #             break
+        #     else:
+        #         if c.name not in ["add_record"]:
+        #             c.set_sensitive(sensitive)
+        #         else:
+        #             c.set_sensitive(self.add_record.get_property("sensitive"))
+
+        menu.popup(None, None, None, 0, 0)  # strange!
+        #
+        #   If selection is single row - let change row focus
+        #
+        if is_single_row:
+            return False
         else:
-            sensitive = False
-        for c in menu.get_children():
-            for s in ["edit", "set ", "delete"]:
-                if c.name.find(s) != -1:
-                    c.set_sensitive(sensitive and self.emma.current_query.editable)
-                    break
-            else:
-                if c.name not in ["add_record"]:
-                    c.set_sensitive(sensitive)
-                else:
-                    c.set_sensitive(self.add_record.get_property("sensitive"))
-        menu.popup(None, None, None, 0, event.time)  # strange!
-        return True
+            return True
 
     def on_query_bottom_eventbox_button_press_event(self, ebox, event):
         self.emma.xml.get_widget("query_encoding_menu").popup(None, None, None, event.button, event.time)
@@ -1007,6 +1021,12 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         tries = 0
         new_tables = []
         self.last_th = None
+        if not self.current_host:
+            print "Host not selected"
+            return None, None, None, None, None
+        if not self.current_host.current_db:
+            print "Database not selected"
+            return None, None, None, None, None
         while 1:
             try:
                 th = self.current_host.current_db.tables[table]
