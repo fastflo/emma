@@ -36,9 +36,9 @@ class KeyMap(gobject.GObject):
             return False
 
         if event.keyval == keysyms.t and self.if_ctrl():
-            self.emma.add_query_tab()
+            self.emma.main_notebook.add_query_tab()
         if event.keyval == keysyms.w and self.if_ctrl():
-            self.emma.close_query_tab()
+            self.emma.main_notebook.close_query_tab()
 
         if event.keyval == keysyms.o and self.if_ctrl():
             self.emma.current_query.on_load_query_clicked(None)

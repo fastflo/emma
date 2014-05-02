@@ -17,7 +17,7 @@ class QueryTabManageRow:
         button_apl.connect('clicked', self.on_apply_record_tool_clicked)
 
     def on_add_record_tool_clicked(self, button):
-        q = self.emma.current_query
+        q = self.query
         if not q.add_record.get_property("sensitive"):
             return
 
@@ -33,7 +33,7 @@ class QueryTabManageRow:
         q.apply_record.set_sensitive(True)
 
     def on_delete_record_tool_clicked(self, button):
-        q = self.emma.current_query
+        q = self.query
         path, column = q.treeview.get_cursor()
         if not path:
             return

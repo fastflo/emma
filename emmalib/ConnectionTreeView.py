@@ -104,19 +104,19 @@ class ConnectionsTreeView(gtk.TreeView):
             host.select_database(o.db)
             table = o
             self.emma.current_query.set_current_db(table.db)
-            ait = self.emma.config.get("autorefresh_interval_table")
-            if not table.fields or (time.time() - table.last_field_read) > ait:
-                table.refresh()
-                self.redraw_table(o, _iter)
-
-            try:
-                if self.emma.first_template:
-                    nb.set_current_page(4)
-                    self.emma.on_template(None, self.emma.first_template)
-                elif nb.get_current_page() < 3:
-                    nb.set_current_page(3)
-            except AttributeError:
-                print 'Debug mode: no access to full emma object'
+            # ait = self.emma.config.get("autorefresh_interval_table")
+            # if not table.fields or (time.time() - table.last_field_read) > ait:
+            #     table.refresh()
+            #     self.redraw_table(o, _iter)
+            #
+            # try:
+            #     if self.emma.first_template:
+            #         nb.set_current_page(4)
+            #         self.emma.on_template(None, self.emma.first_template)
+            #     elif nb.get_current_page() < 3:
+            #         nb.set_current_page(3)
+            # except AttributeError:
+            #     print 'Debug mode: no access to full emma object'
 
         else:
             print "No Handler for tree-depth", depth
@@ -431,4 +431,4 @@ class ConnectionsTreeView(gtk.TreeView):
         elif what == "new_connection":
             self.connection_window.show("new")
         elif what == "show_processes":
-            self.emma.add_process_list_page()
+            self.emma.main_notebook.add_process_list_tab()

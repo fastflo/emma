@@ -11,7 +11,7 @@ class QueryTabRememberOrder:
         button.connect('clicked', self.on_remember_order_clicked)
 
     def on_remember_order_clicked(self, button):
-        query = self.emma.current_query.last_source
+        query = self.query.last_source
         if not query:
             return None, None, None, None, None
         current_order = self.query.get_order_from_query(query)

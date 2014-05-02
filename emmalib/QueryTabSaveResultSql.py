@@ -16,8 +16,6 @@ class QueryTabSaveResultSql:
         self.button.set_sensitive(False)
 
     def on_save_result_sql_clicked(self, button):
-        if not self.emma.current_query:
-            return
         title = "save results as sql insert script"
         d = self.emma.assign_once(
             "save results dialog",
@@ -38,7 +36,7 @@ class QueryTabSaveResultSql:
                     "overwrite file?",
                     "%s already exists! do you want to overwrite it?" % filename, self.emma.mainwindow):
                 return
-        q = self.emma.current_query
+        q = self.query
         _iter = q.model.get_iter_first()
         indices = range(q.model.get_n_columns())
 

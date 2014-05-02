@@ -23,7 +23,6 @@ class Emma:
         self.emma_path = emma_path
         self.sql = sql
         self.created_once = {}
-        self.query_changed_listener = []
         self.queries = []
         self.stored_orders = {}
         self.query_count = 0
@@ -110,7 +109,7 @@ class Emma:
         self.mainwindow.connections_tv_container.add(self.connections_tv)
         self.connections_tv.show()
 
-        self.add_query_tab()
+        self.main_notebook.add_query_tab()
 
         self.first_template = None
         # keys = self.config.config.keys()
@@ -239,16 +238,6 @@ class Emma:
             self.plugin_pathes.append(path)
         self.load_plugins()
 
-    def add_query_tab(self):
-        qt = QueryTab(self)
-        self.query_count += 1
-        self.current_query = qt
-        self.queries.append(qt)
-        new_page_index = self.main_notebook.append_page(qt.get_ui(), qt.get_label_ui())
-        qt.page_index = new_page_index
-        self.main_notebook.set_current_page(new_page_index)
-        self.current_query.textview.grab_focus()
-
     def on_connection_ping(self):
         _iter = self.connections_tv.connections_model.get_iter_root()
         while _iter:
@@ -299,12 +288,10 @@ class Emma:
     #     print "found fields:", fields
     #     return fields
 
-    def on_reload_self_activate(self, item):
-        pass
-
     def on_message_notebook_switch_page(self, nb, pointer, page):
-        if self.current_query:
-            self.current_query.on_query_view_cursor_changed(self.current_query.treeview)
+        pass
+        # if self.current_query:
+        #     self.current_query.on_query_view_cursor_changed(self.current_query.treeview)
 
     def on_execute_query_from_disk_activate(self, button, filename=None):
         if not self.current_host:
@@ -389,28 +376,6 @@ class Emma:
     # def __setstate__(self, state):
     #     self.state = state
 
-    def query_changed(self, q):
-        for f in self.query_changed_listener:
-            try:
-                f(q)
-            except:
-                print "query_change_listener %r had exception" % f
-
-    def close_query_tab(self):
-        if len(self.queries) == 1:
-            return
-        page = self.main_notebook.get_current_page()
-        for q in self.queries:
-            if q.page_index == page:
-                self.current_query.destroy()
-                i = self.queries.index(self.current_query)
-                del self.queries[i]
-                self.current_query = None
-
-                self.main_notebook.remove_page(self.main_notebook.get_current_page())
-                gc.collect()
-                return
-
     def on_fc_reset_clicked(self, button):
         for i in range(self.fc_count):
             self.fc_entry[i].set_text("")
@@ -422,23 +387,6 @@ class Emma:
                 self.fc_op_combobox[i].set_active(-1)
             if i:
                 self.fc_logic_combobox[i - 1].set_active(0)
-
-    def main_notebook_on_change_page(self, np, pointer, page):
-        for q in self.queries:
-            if q.page_index == page:
-                self.current_query = q
-                q.on_query_db_eventbox_button_press_event(None, None)
-                self.query_changed(q)
-                return
-
-        # if page == 2:
-        #     self.tableslist.redraw()
-        #     return
-        # path, column = self.connections_tv.get_cursor()
-        # if not path:
-        #     return
-        # if len(path) == 3 and page == 3:
-        #     self.table_view.update(path)
 
     def get_current_table(self):
         path, column = self.connections_tv.get_cursor()
@@ -703,10 +651,3 @@ class Emma:
             return self.connections_tv.connections_model.get_value(_iter, 0)
         return None
 
-    def add_process_list_page(self):
-        process_list = widgets.TabProcessList(self)
-        process_list.close_tab_callback(self.on_process_list_close_tab)
-        self.main_notebook.append_page(process_list.get_ui(), process_list.get_label_ui())
-
-    def on_process_list_close_tab(self, button, event):
-        self.main_notebook.remove_page(self.main_notebook.get_current_page())

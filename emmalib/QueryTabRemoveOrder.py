@@ -9,7 +9,7 @@ class QueryTabRemoveOrder:
         button.connect('clicked', self.on_remove_order_clicked)
 
     def on_remove_order_clicked(self, button):
-        query = self.emma.current_query.last_source
+        query = self.query.last_source
         try:
             r = self.emma.query_order_re
         except:
@@ -19,7 +19,7 @@ class QueryTabRemoveOrder:
             return
         before, order, after = match.groups()
         new_query = re.sub("(?i)order[ \r\n\t]+by[ \r\n\t]+", "", before + after)
-        self.emma.current_query.set(new_query)
+        self.query.set(new_query)
         self.emma.sort_timer_running = False
         self.emma.on_execute_query_clicked()
 

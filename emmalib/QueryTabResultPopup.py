@@ -73,6 +73,7 @@ class QueryTabResultPopup(gtk.Menu):
     def activated(self, item):
         q = self.query
         path, column = q.treeview.get_cursor()
+        print path, column
         _iter = q.model.get_iter(path)
 
         if item.name == "copy_field_value":
@@ -93,6 +94,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if value:
                     value += self.query.emma.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(_iter, col_num)
+                print v
                 if not v is None:
                     value += v
             self.query.emma.clipboard.set_text(value)

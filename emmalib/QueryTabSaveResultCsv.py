@@ -14,9 +14,6 @@ class QueryTabSaveResultCsv:
         button.connect('clicked', self.on_save_result_clicked)
 
     def on_save_result_clicked(self, button):
-        if not self.emma.current_query:
-            return
-
         d = self.emma.assign_once(
             "save results dialog",
             gtk.FileChooserDialog, "save results", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE,
@@ -36,7 +33,7 @@ class QueryTabSaveResultCsv:
                     "overwrite file?",
                     "%s already exists! do you want to overwrite it?" % filename, self.emma.mainwindow):
                 return
-        q = self.emma.current_query
+        q = self.query
         _iter = q.model.get_iter_first()
         indices = range(q.model.get_n_columns())
         field_delim = self.emma.config.get("save_result_as_csv_delim")

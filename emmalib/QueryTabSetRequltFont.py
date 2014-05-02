@@ -17,7 +17,7 @@ class QueryTabSetResultFont:
         if not answer == gtk.RESPONSE_OK:
             return
         font_name = d.get_font_name()
-        self.emma.current_query.set_result_font(font_name)
+        self.query.set_result_font(font_name)
         self.emma.config.config["query_result_font"] = font_name
         self.emma.config.save()
 

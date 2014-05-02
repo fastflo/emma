@@ -13,10 +13,10 @@ class QueryTabLocalSearch:
         button.connect('clicked', self.on_local_search_button_clicked)
 
     def on_local_search_button_clicked(self, button, again=False):
-        if not self.emma.current_query.local_search.get_property("sensitive"):
+        if not self.query.local_search.get_property("sensitive"):
             return
 
-        query_view = self.emma.current_query.treeview
+        query_view = self.query.treeview
         self.emma.local_search_start_at_first_row.set_active(False)
         if not again or not self.emma.local_search_entry.get_text():
             self.emma.local_search_entry.grab_focus()
@@ -27,7 +27,7 @@ class QueryTabLocalSearch:
         regex = self.emma.local_search_entry.get_text()
         if self.emma.local_search_case_sensitive.get_active():
             regex = "(?i)" + regex
-        tm = self.emma.current_query.model
+        tm = self.query.model
         fields = tm.get_n_columns()
         _start = tm.get_iter_root()
         start_column_index = -1

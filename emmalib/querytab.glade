@@ -1,477 +1,475 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <glade-interface>
-    <!-- interface-requires gtk+ 2.24 -->
-    <!-- interface-naming-policy toplevel-contextual -->
-    <widget class="GtkVPaned" id="first_query">
+  <!-- interface-requires gtk+ 2.24 -->
+  <!-- interface-naming-policy toplevel-contextual -->
+  <widget class="GtkVPaned" id="first_query">
+    <property name="visible">True</property>
+    <property name="can_focus">True</property>
+    <property name="position">130</property>
+    <child>
+      <widget class="GtkVBox" id="vbox2">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="position">130</property>
+        <property name="can_focus">False</property>
         <child>
-            <widget class="GtkVBox" id="vbox2">
+          <widget class="GtkToolbar" id="query_toolbar">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <widget class="GtkToolButton" id="execute_query">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">Execute Query (F9, Ctrl+Enter)</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Execute</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-media-play</property>
+                <signal name="clicked" handler="on_execute_query_clicked"/>
+                <accelerator key="F9" signal="clicked"/>
+                <accelerator key="Return" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolItem" id="toolitem4">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
                 <child>
-                          <widget class="GtkToolbar" id="query_toolbar">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <child>
-                              <widget class="GtkToolButton" id="execute_query">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">Execute Query (F9, Ctrl+Enter)</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="label" translatable="yes">Execute</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-execute</property>
-                                <signal name="clicked" handler="on_execute_query_clicked"/>
-                                <accelerator key="Return" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                                <accelerator key="F9" signal="clicked"/>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkToolItem" id="toolitem4">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="use_action_appearance">False</property>
-                                <child>
-                                  <widget class="GtkSpinButton" id="reexecution_spin">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="tooltip" translatable="yes">Automatic Reexecution</property>
-                                    <property name="primary_icon_activatable">False</property>
-                                    <property name="secondary_icon_activatable">False</property>
-                                    <property name="primary_icon_sensitive">True</property>
-                                    <property name="secondary_icon_sensitive">True</property>
-                                    <property name="adjustment">0 0 99 0.5 10 0</property>
-                                    <property name="climb_rate">0.5</property>
-                                    <property name="digits">1</property>
-                                    <signal name="changed" handler="on_reexecution_spin_changed"/>
-                                  </widget>
-                                </child>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkToolButton" id="save_query">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">Save Query To File (Ctrl+S)</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="label" translatable="yes">Save</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-save</property>
-                                <signal name="clicked" handler="on_save_query_clicked"/>
-                                <accelerator key="S" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkToolButton" id="load_query">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">Load Query From File (Ctrl+O)</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="label" translatable="yes">Load</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-open</property>
-                                <signal name="clicked" handler="on_load_query_clicked"/>
-                                <accelerator key="O" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkSeparatorToolItem" id="separatortoolitem4">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkToolButton" id="query_font">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">Set Query Font</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="label" translatable="yes">Query Font</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-select-font</property>
-                                <signal name="clicked" handler="on_query_font_clicked"/>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkSeparatorToolItem" id="separatortoolitem5">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkToolButton" id="newquery_button">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">New Query Tab (Ctrl+T)</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="label" translatable="yes">New Query</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-new</property>
-                                <signal name="clicked" handler="on_newquery_button_clicked"/>
-                                <accelerator key="T" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkToolButton" id="closequery_button">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">Close Query Tab (Ctrl+W)</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="label" translatable="yes">Close</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-close</property>
-                                <signal name="clicked" handler="on_closequery_button_clicked"/>
-                                <accelerator key="W" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkToolButton" id="rename_query_tab">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">Rename Query Tab</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="label" translatable="yes">Rename</property>
-                                <property name="stock_id">gtk-bold</property>
-                                <signal name="clicked" handler="on_rename_query_tab_clicked"/>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkSeparatorToolItem" id="separatortoolitem3">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                              </packing>
-                            </child>
-                          </widget>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                <child>
-                    <widget class="GtkScrolledWindow" id="query_text_sw">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">automatic</property>
-                        <property name="vscrollbar_policy">automatic</property>
-                        <property name="shadow_type">in</property>
-                        <child>
-                            <widget class="GtkTextView" id="query_text">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                            </widget>
-                        </child>
-                    </widget>
-                    <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                    </packing>
+                  <widget class="GtkSpinButton" id="reexecution_spin">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="tooltip" translatable="yes">Automatic Reexecution</property>
+                    <property name="primary_icon_activatable">False</property>
+                    <property name="secondary_icon_activatable">False</property>
+                    <property name="primary_icon_sensitive">True</property>
+                    <property name="secondary_icon_sensitive">True</property>
+                    <property name="adjustment">0 0 99 0.5 10 0</property>
+                    <property name="climb_rate">0.5</property>
+                    <property name="digits">1</property>
+                    <signal name="changed" handler="on_reexecution_spin_changed"/>
+                  </widget>
                 </child>
-            </widget>
-            <packing>
-                <property name="resize">False</property>
-                <property name="shrink">True</property>
-            </packing>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="save_query">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">Save Query To File (Ctrl+S)</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Save</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-save</property>
+                <signal name="clicked" handler="on_save_query_clicked"/>
+                <accelerator key="S" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="load_query">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">Load Query From File (Ctrl+O)</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Load</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-open</property>
+                <signal name="clicked" handler="on_load_query_clicked"/>
+                <accelerator key="O" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkSeparatorToolItem" id="separatortoolitem4">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="query_font">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">Set Query Font</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Query Font</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-select-font</property>
+                <signal name="clicked" handler="on_query_font_clicked"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkSeparatorToolItem" id="separatortoolitem5">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="newquery_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">New Query Tab (Ctrl+T)</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">New Query</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-new</property>
+                <signal name="clicked" handler="on_newquery_button_clicked"/>
+                <accelerator key="T" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="closequery_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">Close Query Tab (Ctrl+W)</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Close</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-close</property>
+                <signal name="clicked" handler="on_closequery_button_clicked"/>
+                <accelerator key="W" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="rename_query_tab">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">Rename Query Tab</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Rename</property>
+                <property name="stock_id">gtk-bold</property>
+                <signal name="clicked" handler="on_rename_query_tab_clicked"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkSeparatorToolItem" id="separatortoolitem3">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
-            <widget class="GtkHBox" id="hbox7">
+          <widget class="GtkScrolledWindow" id="query_text_sw">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hscrollbar_policy">automatic</property>
+            <property name="vscrollbar_policy">automatic</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <widget class="GtkTextView" id="query_text">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </widget>
+      <packing>
+        <property name="resize">False</property>
+        <property name="shrink">True</property>
+      </packing>
+    </child>
+    <child>
+      <widget class="GtkHBox" id="hbox7">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <widget class="GtkToolbar" id="inner_query_toolbar">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <property name="toolbar_style">icons</property>
+            <property name="tooltips">False</property>
+            <child>
+              <widget class="GtkToolButton" id="add_record_tool">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">add new record</property>
+                <property name="use_action_appearance">False</property>
+                <property name="stock_id">gtk-add</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="delete_record_tool">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">delete record (ctrl+del)</property>
+                <property name="use_action_appearance">False</property>
+                <property name="stock_id">gtk-delete</property>
+                <accelerator key="Delete" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="apply_record_tool">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">store appended row</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-apply</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="save_result">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">save result as csv</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">save result as csv</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-save-as</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="save_result_sql">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <child>
-                    <widget class="GtkToolbar" id="inner_query_toolbar">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="orientation">vertical</property>
-                        <property name="toolbar_style">icons</property>
-                        <property name="tooltips">False</property>
-                        <child>
-                            <widget class="GtkToolButton" id="add_record_tool">
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">add new record</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="stock_id">gtk-add</property>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkToolButton" id="delete_record_tool">
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">delete record (ctrl+del)</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="stock_id">gtk-delete</property>
-                                <accelerator key="Delete" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkToolButton" id="apply_record_tool">
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">store appended row</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-apply</property>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkToolButton" id="save_result">
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">save result as csv</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="label" translatable="yes">save result as csv</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-save-as</property>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkToolButton" id="save_result_sql">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">save result as sql insert script</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-save-as</property>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkToolButton" id="local_search_button">
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">search for regular expression in this result
+                <property name="tooltip" translatable="yes">save result as sql insert script</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-save-as</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="local_search_button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">search for regular expression in this result
                                     (Ctrl+f / F3)
                                 </property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="stock_id">gtk-find</property>
-                                <accelerator key="F" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkToolButton" id="query_result_font">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">set font of result view</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-select-font</property>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkToolButton" id="remove_order">
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">remove order clause</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-cancel</property>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkToolButton" id="remember_order">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="tooltip" translatable="yes">remember order for this table!</property>
-                                <property name="use_action_appearance">False</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-dialog-warning</property>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
-                            </packing>
-                        </child>
-                    </widget>
-                    <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">0</property>
-                    </packing>
-                </child>
+                <property name="use_action_appearance">False</property>
+                <property name="stock_id">gtk-find</property>
+                <accelerator key="F" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="query_result_font">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">set font of result view</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-select-font</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="remove_order">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">remove order clause</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-cancel</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="remember_order">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">remember order for this table!</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-dialog-warning</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkVBox" id="vbox3">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <widget class="GtkLabel" id="query_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="yalign">1</property>
+                <property name="justify">center</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkScrolledWindow" id="scrolledwindow6">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hscrollbar_policy">automatic</property>
+                <property name="vscrollbar_policy">automatic</property>
+              </widget>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="padding">1</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkHBox" id="hbox18">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
-                    <widget class="GtkVBox" id="vbox3">
+                  <widget class="GtkEventBox" id="query_bottom_eventbox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <signal name="button_press_event" handler="on_query_bottom_eventbox_button_press_event"/>
+                    <child>
+                      <widget class="GtkLabel" id="query_bottom_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <child>
-                            <widget class="GtkLabel" id="query_label">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="xalign">0</property>
-                                <property name="yalign">1</property>
-                                <property name="justify">center</property>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">0</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkScrolledWindow" id="scrolledwindow6">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="hscrollbar_policy">automatic</property>
-                                <property name="vscrollbar_policy">automatic</property>
-                            </widget>
-                            <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="padding">1</property>
-                                <property name="position">1</property>
-                            </packing>
-                        </child>
-                        <child>
-                            <widget class="GtkHBox" id="hbox18">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <child>
-                                    <widget class="GtkEventBox" id="query_bottom_eventbox">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <signal name="button_press_event"
-                                                handler="on_query_bottom_eventbox_button_press_event"/>
-                                        <child>
-                                            <widget class="GtkLabel" id="query_bottom_label">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="xalign">0</property>
-                                                <property name="xpad">5</property>
-                                                <property name="ypad">1</property>
-                                                <property name="single_line_mode">True</property>
-                                            </widget>
-                                        </child>
-                                    </widget>
-                                    <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">False</property>
-                                        <property name="position">0</property>
-                                    </packing>
-                                </child>
-                                <child>
-                                    <widget class="GtkEventBox" id="query_db_eventbox">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="tooltip" translatable="yes">click here to jump to the selected
+                        <property name="xalign">0</property>
+                        <property name="xpad">5</property>
+                        <property name="ypad">1</property>
+                        <property name="single_line_mode">True</property>
+                      </widget>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkEventBox" id="query_db_eventbox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip" translatable="yes">click here to jump to the selected
                                             host/database
                                         </property>
-                                        <signal name="button_press_event"
-                                                handler="on_query_db_eventbox_button_press_event"/>
-                                        <child>
-                                            <widget class="GtkLabel" id="query_db_label">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="xalign">0</property>
-                                                <property name="xpad">5</property>
-                                                <property name="ypad">1</property>
-                                            </widget>
-                                        </child>
-                                    </widget>
-                                    <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">False</property>
-                                        <property name="position">1</property>
-                                    </packing>
-                                </child>
-                            </widget>
-                            <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="padding">1</property>
-                                <property name="position">2</property>
-                            </packing>
-                        </child>
-                    </widget>
-                    <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                    </packing>
+                    <signal name="button_press_event" handler="on_query_db_eventbox_button_press_event"/>
+                    <child>
+                      <widget class="GtkLabel" id="query_db_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">0</property>
+                        <property name="xpad">5</property>
+                        <property name="ypad">1</property>
+                      </widget>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
                 </child>
-            </widget>
-            <packing>
-                <property name="resize">True</property>
-                <property name="shrink">True</property>
-            </packing>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="padding">1</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
         </child>
-    </widget>
+      </widget>
+      <packing>
+        <property name="resize">True</property>
+        <property name="shrink">True</property>
+      </packing>
+    </child>
+  </widget>
 </glade-interface>

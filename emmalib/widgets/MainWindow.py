@@ -9,7 +9,7 @@ class MainWindow(gtk.Window):
 
         self.emma = emma
 
-        self.main_notebook = gtk.Notebook()
+        self.main_notebook = widgets.MainNotebook(emma)
         self.main_notebook.show()
         self.message_notebook = gtk.Notebook()
         self.message_notebook.show()
@@ -20,7 +20,7 @@ class MainWindow(gtk.Window):
         vpaned1 = gtk.VPaned()
 
         vbox1 = gtk.VBox()
-        vbox1.pack_start(widgets.MainMenu(self.emma), False, False)
+        vbox1.pack_start(widgets.MainMenu(emma), False, False)
         hpaned1 = gtk.HPaned()
         hpaned1.pack1(self.connections_tv_container, False, True)
         hpaned1.pack2(self.main_notebook, True, True)

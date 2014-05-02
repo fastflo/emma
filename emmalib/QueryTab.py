@@ -52,8 +52,6 @@ class QueryTab(widgets.BaseTab):
         self.tab_label.set_text('Query')
         self.tab_label_icon.set_from_file(os.path.join(icons_path, 'page_code.png'))
 
-        self.page_index = None
-
         self.emma = emma
 
         self.save_result = self.xml.get_widget('save_result')
@@ -94,8 +92,6 @@ class QueryTab(widgets.BaseTab):
 
         self.sort_timer_running = False
         self.sort_timer_execute = 0
-
-        self.close_tab_callback(self.on_query_tab_label_close_button_clicked)
 
         # replace textview with gtksourcevice
         try:
@@ -249,28 +245,14 @@ class QueryTab(widgets.BaseTab):
     def on_query_view_button_press_event(self, tv, event):
         selection = tv.get_selection()
 
-        if event.button != 3:
+        print selection.get_selected_rows()
+
+        if event.button != 3 or selection.count_selected_rows() == 0:
             return False
 
         is_single_row = selection.count_selected_rows() == 1
 
         menu = QueryTabResultPopup(self, is_single_row)
-
-        #res = tv.get_path_at_pos(int(event.x), int(event.y))
-        # if res:
-        #     sensitive = True
-        # else:
-        #     sensitive = False
-        # for c in menu.get_children():
-        #     for s in ["edit", "set ", "delete"]:
-        #         if c.name.find(s) != -1:
-        #             c.set_sensitive(sensitive and self.emma.current_query.editable)
-        #             break
-        #     else:
-        #         if c.name not in ["add_record"]:
-        #             c.set_sensitive(sensitive)
-        #         else:
-        #             c.set_sensitive(self.add_record.get_property("sensitive"))
 
         menu.popup(None, None, None, 0, 0)  # strange!
         #
@@ -442,13 +424,14 @@ class QueryTab(widgets.BaseTab):
         self.user_rename(new_name)
 
     def on_closequery_button_clicked(self, button):
-        self.emma.close_query_tab()
+        self.emma.main_notebook.close_query_tab()
 
-    def on_query_tab_label_close_button_clicked(self, button, event):
-        self.emma.close_query_tab()
+    def on_query_tab_label_close_button_clicked(self, button, page_index):
+        print button, page_index
+        self.emma.main_notebook.close_query_tab(page_index)
 
     def on_newquery_button_clicked(self, button):
-        self.emma.add_query_tab()
+        self.emma.main_notebook.add_query_tab()
 
     def on_query_font_clicked(self, button):
         d = self.emma.assign_once("query text font", gtk.FontSelectionDialog, "select query font")
