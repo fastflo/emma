@@ -77,7 +77,7 @@ class ConnectionsTreeView(gtk.TreeView):
         _iter = self.connections_model.get_iter(path)
         o = self.connections_model.get_value(_iter, 0)
 
-        nb = self.emma.xml.get_widget("main_notebook")
+        nb = self.emma.main_notebook
 
         if depth == 1:
             self.current_host = host = o
@@ -136,7 +136,7 @@ class ConnectionsTreeView(gtk.TreeView):
 
     def on_connections_tv_cursor_changed(self, tv):
         path, column = tv.get_cursor()
-        nb = self.emma.xml.get_widget("main_notebook")
+        nb = self.emma.main_notebook
         if path is None:
             print "get_cursor() returned none. don't know which datebase is selected."
             return
@@ -346,12 +346,10 @@ class ConnectionsTreeView(gtk.TreeView):
         elif what == "check_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
-            self.emma.xml.get_widget("main_notebook").set_current_page(4)
             self.emma.current_query.on_execute_query_clicked(None, "check table `%s`" % table.name)
         elif what == "repair_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
-            self.emma.xml.get_widget("main_notebook").set_current_page(4)
             self.emma.current_query.on_execute_query_clicked(None, "repair table `%s`" % table.name)
 
     def on_db_popup(self, popup, item):
@@ -385,14 +383,12 @@ class ConnectionsTreeView(gtk.TreeView):
         elif what == "check_tables":
             self.current_host = db.host
             self.current_host.select_database(db)
-            self.emma.xml.get_widget("main_notebook").set_current_page(4)
             self.emma.current_query.on_execute_query_clicked(
                 None,
                 "check table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
         elif what == "repair_tables":
             self.current_host = db.host
             self.current_host.select_database(db)
-            self.emma.xml.get_widget("main_notebook").set_current_page(4)
             self.emma.current_query.on_execute_query_clicked(
                 None,
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))

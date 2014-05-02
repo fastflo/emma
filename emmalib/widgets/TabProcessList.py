@@ -55,7 +55,7 @@ class TabProcessList(BaseTab):
 
         if self.current_processlist_host != self.emma.current_host:
             self.current_processlist_host = self.emma.current_host
-            # self.xml.get_widget("version_label").set_text(
+            #self.xml.get_widget("version_label").set_text(
             #     "  server version: %s" % self.current_host.handle.get_server_info())
 
             for col in self.treeview.get_columns():
