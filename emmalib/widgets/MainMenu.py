@@ -94,21 +94,26 @@ class MainMenu(gtk.MenuBar):
         self.emit('item-selected', item)
         pass
 
-    def on_reload_plugins_activate(self, *args):
+    def on_reload_plugins_activate(self, item):
+        self.emit('item-selected', item)
         self.emma.unload_plugins()
         self.emma.load_plugins()
 
     def on_reread_config_activate(self, item):
+        self.emit('item-selected', item)
         self.emma.config.load()
 
     def on_about_activate(self, item):
+        self.emit('item-selected', item)
         self.emma.about_dialog.run()
         self.emma.about_dialog.hide()
 
     def on_changelog_activate(self, item):
+        self.emit('item-selected', item)
         self.emma.changelog_dialog.show()
 
     def on_quit_activate(self, item):
+        self.emit('item-selected', item)
         gtk.main_quit()
 
 
