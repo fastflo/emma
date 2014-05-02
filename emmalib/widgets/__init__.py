@@ -18,3 +18,5 @@ from TabTable import TabTable
 from TabTablesList import TabTablesList
 
 from MainMenu import MainMenu
+
+from MainWindow import MainWindow

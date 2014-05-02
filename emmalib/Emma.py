@@ -36,9 +36,10 @@ class Emma:
 
         print "glade file: %r" % self.glade_file
         self.xml = gtk.glade.XML(self.glade_file)
-        self.mainwindow = self.xml.get_widget("mainwindow")
-        self.mainwindow.connect('destroy', lambda *args: gtk.main_quit())
         self.xml.signal_autoconnect(self)
+
+        self.mainwindow = widgets.MainWindow(self)
+        self.mainwindow.connect('destroy', lambda *args: gtk.main_quit())
 
         self.key_map = KeyMap(self)
         self.mainwindow.connect('key_release_event', self.key_map.on_mainwindow_key_release_event)
@@ -58,8 +59,8 @@ class Emma:
         self.execute_query_from_disk_dialog = False
 
         # init all notebooks
-        self.message_notebook = self.xml.get_widget("message_notebook")
-        self.main_notebook = self.xml.get_widget("main_notebook")
+        self.message_notebook = self.mainwindow.message_notebook
+        self.main_notebook = self.mainwindow.main_notebook
 
         # init Message log
         self.msg_log = widgets.TabMsgLog(self)
@@ -105,9 +106,8 @@ class Emma:
         self.config = Config(self)
         self.config.load()
 
-        self.connections_tv_container = self.xml.get_widget("connections_tv_container")
         self.connections_tv = ConnectionsTreeView(self)
-        self.connections_tv_container.add(self.connections_tv)
+        self.mainwindow.connections_tv_container.add(self.connections_tv)
         self.connections_tv.show()
 
         self.add_query_tab()
@@ -182,10 +182,6 @@ class Emma:
         if widget is None:
             raise AttributeError(name)
         return widget
-
-    def on_reload_plugins_activate(self, *args):
-        self.unload_plugins()
-        self.load_plugins()
 
     def init_plugin(self, plugin):
         try:
@@ -329,66 +325,66 @@ class Emma:
             self.created_once[name] = obj
             return obj
 
-    def on_save_workspace_activate(self, button):
-        d = self.assign_once(
-            "save workspace dialog",
-            gtk.FileChooserDialog, "save workspace", self.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
-
-        d.set_default_response(gtk.RESPONSE_ACCEPT)
-        answer = d.run()
-        d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT:
-            return
-        filename = d.get_filename()
-        if os.path.exists(filename):
-            if not os.path.isfile(filename):
-                dialogs.show_message("save workspace", "%s already exists and is not a file!" % filename)
-                return
-            if not dialogs.confirm(
-                    "overwrite file?",
-                    "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
-                return
-        try:
-            fp = file(filename, "wb")
-            pickle.dump(self, fp)
-            fp.close()
-        except:
-            dialogs.show_message(
-                "save workspace",
-                "error writing workspace to file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
-
-    def on_restore_workspace_activate(self, button):
-        global new_instance
-        d = self.assign_once(
-            "restore workspace dialog",
-            gtk.FileChooserDialog, "restore workspace", self.mainwindow, gtk.FILE_CHOOSER_ACTION_OPEN,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
-
-        d.set_default_response(gtk.RESPONSE_ACCEPT)
-        answer = d.run()
-        d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT:
-            return
-        filename = d.get_filename()
-        if not os.path.exists(filename):
-            dialogs.show_message("restore workspace", "%s does not exists!" % filename)
-            return
-        if not os.path.isfile(filename):
-            dialogs.show_message("restore workspace", "%s exists, but is not a file!" % filename)
-            return
-
-        try:
-            fp = file(filename, "rb")
-            print "i am unpickling:", self
-            new_instance = pickle.load(fp)
-            print "got new instance:", new_instance
-            fp.close()
-        except:
-            dialogs.show_message(
-                "restore workspace",
-                "error restoring workspace from file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
-        self.mainwindow.destroy()
+    # def on_save_workspace_activate(self, button):
+    #     d = self.assign_once(
+    #         "save workspace dialog",
+    #         gtk.FileChooserDialog, "save workspace", self.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE,
+    #         (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
+    #
+    #     d.set_default_response(gtk.RESPONSE_ACCEPT)
+    #     answer = d.run()
+    #     d.hide()
+    #     if not answer == gtk.RESPONSE_ACCEPT:
+    #         return
+    #     filename = d.get_filename()
+    #     if os.path.exists(filename):
+    #         if not os.path.isfile(filename):
+    #             dialogs.show_message("save workspace", "%s already exists and is not a file!" % filename)
+    #             return
+    #         if not dialogs.confirm(
+    #                 "overwrite file?",
+    #                 "%s already exists! do you want to overwrite it?" % filename, self.mainwindow):
+    #             return
+    #     try:
+    #         fp = file(filename, "wb")
+    #         pickle.dump(self, fp)
+    #         fp.close()
+    #     except:
+    #         dialogs.show_message(
+    #             "save workspace",
+    #             "error writing workspace to file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
+    #
+    # def on_restore_workspace_activate(self, button):
+    #     global new_instance
+    #     d = self.assign_once(
+    #         "restore workspace dialog",
+    #         gtk.FileChooserDialog, "restore workspace", self.mainwindow, gtk.FILE_CHOOSER_ACTION_OPEN,
+    #         (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
+    #
+    #     d.set_default_response(gtk.RESPONSE_ACCEPT)
+    #     answer = d.run()
+    #     d.hide()
+    #     if not answer == gtk.RESPONSE_ACCEPT:
+    #         return
+    #     filename = d.get_filename()
+    #     if not os.path.exists(filename):
+    #         dialogs.show_message("restore workspace", "%s does not exists!" % filename)
+    #         return
+    #     if not os.path.isfile(filename):
+    #         dialogs.show_message("restore workspace", "%s exists, but is not a file!" % filename)
+    #         return
+    #
+    #     try:
+    #         fp = file(filename, "rb")
+    #         print "i am unpickling:", self
+    #         new_instance = pickle.load(fp)
+    #         print "got new instance:", new_instance
+    #         fp.close()
+    #     except:
+    #         dialogs.show_message(
+    #             "restore workspace",
+    #             "error restoring workspace from file %s: %s/%s" % (filename, sys.exc_type, sys.exc_value))
+    #     self.mainwindow.destroy()
 
     # def __setstate__(self, state):
     #     self.state = state
@@ -426,16 +422,6 @@ class Emma:
                 self.fc_op_combobox[i].set_active(-1)
             if i:
                 self.fc_logic_combobox[i - 1].set_active(0)
-
-    def on_quit_activate(self, item):
-        gtk.main_quit()
-
-    def on_about_activate(self, item):
-        self.about_dialog.run()
-        self.about_dialog.hide()
-
-    def on_changelog_activate(self, item):
-        self.changelog_dialog.show()
 
     def main_notebook_on_change_page(self, np, pointer, page):
         for q in self.queries:
@@ -876,9 +862,6 @@ class Emma:
             cell.set_property("background", self.config.get("null_color"))
             cell.set_property("text", "")
             cell.set_property("editable", True)
-
-    def on_reread_config_activate(self, item):
-        self.config.load()
 
     def on_query_encoding_changed(self, menuitem, data):
         self.current_query.set_query_encoding(data[0])
