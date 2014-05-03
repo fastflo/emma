@@ -57,8 +57,8 @@ class MainNotebook(gtk.Notebook):
     #   Process List
     #
 
-    def add_process_list_tab(self):
-        process_list = widgets.TabProcessList(self.emma)
+    def add_process_list_tab(self, host):
+        process_list = widgets.TabProcessList(self.emma, host)
         new_page_num = self.append_page(process_list.get_ui(), process_list.get_label_ui())
         process_list.get_tab_close_button().connect('clicked', self.close_process_list_tab, process_list)
         self.set_current_page(new_page_num)

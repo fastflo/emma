@@ -107,5 +107,3 @@ class TabTable(gtk.HPaned):
                 l.show()
             r += 1
         self.left_vbox.check_resize()
-        self.emma.tableslist.tables_count = 0
-        self.emma.tableslist.redraw()

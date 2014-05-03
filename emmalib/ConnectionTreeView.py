@@ -341,7 +341,6 @@ class ConnectionsTreeView(gtk.TreeView):
             if db.query("drop table `%s`" % table.name):
                 new_tables = db.refresh()
                 self.redraw_db(db, self.emma.get_db_iter(db), new_tables)
-                self.emma.tableslist.redraw()
         elif what == "check_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
@@ -360,7 +359,6 @@ class ConnectionsTreeView(gtk.TreeView):
         if what == "refresh_database":
             new_tables = db.refresh()
             self.redraw_db(db, _iter, new_tables)
-            self.emma.tableslist.redraw()
         elif what == "drop_database":
             if not dialogs.confirm("drop database",
                                    "do you really want to drop the <b>%s</b> database on <b>%s</b>?" % (
@@ -378,7 +376,6 @@ class ConnectionsTreeView(gtk.TreeView):
             if db.query("create table `%s` (`%s_id` int primary key auto_increment)" % (name, name)):
                 new_tables = db.refresh()
                 self.redraw_db(db, self.emma.get_db_iter(db), new_tables)
-                self.emma.tableslist.redraw()
         elif what == "check_tables":
             self.current_host = db.host
             self.current_host.select_database(db)
@@ -432,4 +429,4 @@ class ConnectionsTreeView(gtk.TreeView):
         elif what == "new_connection":
             self.connection_window.show("new")
         elif what == "show_processes":
-            self.emma.main_notebook.add_process_list_tab()
+            self.emma.main_notebook.add_process_list_tab(host)
