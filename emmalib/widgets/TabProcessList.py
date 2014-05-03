@@ -29,8 +29,6 @@ class TabProcessList(BaseTab):
 
         self.model = None
         self.current_processlist_host = None
-
-        self.current_processlist_host = None
         self.processlist_timer_running = False
         self.processlist_timer_interval = 0
 

@@ -21,19 +21,25 @@ class MainWindow(gtk.Window):
 
         vbox1 = gtk.VBox()
         vbox1.pack_start(widgets.MainMenu(emma), False, False)
+
         hpaned1 = gtk.HPaned()
         hpaned1.pack1(self.connections_tv_container, False, True)
         hpaned1.pack2(self.main_notebook, True, True)
         hpaned1.set_position(200)
         hpaned1.show()
-        vbox1.pack_start(hpaned1, True, True)
 
-        vpaned1.pack1(vbox1, False, True)
+        vpaned1.pack1(hpaned1, False, True)
         vpaned1.pack2(self.message_notebook, False, True)
         vpaned1.set_position(600)
         vpaned1.show()
 
-        self.add(vpaned1)
+        vbox1.pack_start(vpaned1, True, True)
+
+        self.status_bar = gtk.Statusbar()
+
+        vbox1.pack_end(self.status_bar, False, False)
+
+        self.add(vbox1)
 
         self.set_position(gtk.WIN_POS_CENTER)
         self.resize(1024, 768)

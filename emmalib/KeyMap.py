@@ -51,9 +51,9 @@ class KeyMap(gobject.GObject):
         #   Panel switches
         #
         if event.keyval == keysyms.m and self.if_ctrl():
-            self.emma.message_notebook.set_visible(not self.emma.message_notebook.get_visible())
+            self.emma.mainwindow.message_notebook.set_visible(not self.emma.mainwindow.message_notebook.get_visible())
         if event.keyval == keysyms.h and self.if_ctrl():
-            self.emma.connections_tv_container.set_visible(not self.emma.connections_tv_container.get_visible())
+            self.emma.mainwindow.connections_tv_container.set_visible(not self.emma.mainwindow.connections_tv_container.get_visible())
 
         if event.keyval == keysyms.Control_L:
             self.left_control_key_is_pressed = False

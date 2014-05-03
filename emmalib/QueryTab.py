@@ -83,6 +83,7 @@ class QueryTab(widgets.BaseTab):
         self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
 
         self.treeview.connect('cursor_changed', self.on_query_view_cursor_changed)
+        # todo: move to keymap
         self.treeview.connect('key_press_event', self.on_query_view_key_press_event)
         self.treeview.connect('button_press_event', self.on_query_view_button_press_event)
 
@@ -229,11 +230,15 @@ class QueryTab(widgets.BaseTab):
                 return
             self.manage_row_action.on_apply_record_tool_clicked(None)
 
+    # todo: move to keymap
     def on_query_view_key_press_event(self, tv, event):
         path, column = self.treeview.get_cursor()
         if event.keyval == keysyms.F2:
             self.treeview.set_cursor(path, column, True)
             return True
+
+        if not self.model:
+            return False
 
         _iter = self.model.get_iter(path)
         if event.keyval == keysyms.Down and not self.model.iter_next(_iter):
