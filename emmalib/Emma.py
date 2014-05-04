@@ -151,16 +151,6 @@ class Emma:
         #         toolbar.insert(button, -1)
         #         button.show()
 
-        # menu = self.xml.get_widget("query_encoding_menu")
-        # for child in menu.get_children():
-        #     menu.remove(child)
-
-        # for coding, index_desc in enumerate(self.config.codings):
-        #     item = gtk.MenuItem(coding, False)
-        #     item.connect("activate", self.on_query_encoding_changed, (coding, index_desc(0)))
-        #     menu.append(item)
-        #     item.show()
-
         if int(self.config.get("ping_connection_interval")) > 0:
             gobject.timeout_add(
                 int(self.config.get("ping_connection_interval")) * 1000,
@@ -627,9 +617,6 @@ class Emma:
             cell.set_property("background", self.config.get("null_color"))
             cell.set_property("text", "")
             cell.set_property("editable", True)
-
-    def on_query_encoding_changed(self, menuitem, data):
-        self.current_query.set_query_encoding(data[0])
 
     def process_events(self):
         while gtk.events_pending():

@@ -39,6 +39,7 @@ from QueryTabSaveResultCsv import QueryTabSaveResultCsv
 from QueryTabManageRow import QueryTabManageRow
 from QueryTabTreeView import QueryTabTreeView
 from QueryTabResultPopup import QueryTabResultPopup
+from QueryTabPopupEncoding import QueryTabPopupEncoding
 from query_regular_expression import *
 from Constants import *
 
@@ -96,6 +97,8 @@ class QueryTab(widgets.BaseTab):
 
         self.sort_timer_running = False
         self.sort_timer_execute = 0
+
+        self.query_encoding_menu = None
 
         # replace textview with gtksourcevice
         try:
@@ -272,7 +275,9 @@ class QueryTab(widgets.BaseTab):
             return True
 
     def on_query_bottom_eventbox_button_press_event(self, ebox, event):
-        self.emma.xml.get_widget("query_encoding_menu").popup(None, None, None, event.button, event.time)
+        if not self.query_encoding_menu:
+            self.query_encoding_menu = QueryTabPopupEncoding(self)
+        self.query_encoding_menu.popup(None, None, None, event.button, event.time)
 
     def on_query_db_eventbox_button_press_event(self, ebox, event):
         q = self

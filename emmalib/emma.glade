@@ -327,17 +327,4 @@
       </widget>
     </child>
   </widget>
-  <widget class="GtkMenu" id="query_encoding_menu">
-    <property name="can_focus">False</property>
-    <child>
-      <widget class="GtkMenuItem" id="latin1">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="label" translatable="yes">latin1</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="select_query_encoding"/>
-      </widget>
-    </child>
-  </widget>
 </glade-interface>
