@@ -29,6 +29,7 @@ class BaseTab(object):
         style.xthickness = 0
         style.ythickness = 0
         self.tab_label_close_button.modify_style(style)
+        self.tab_label_close_button.set_tooltip_text('Close (Ctrl+W)')
         self.tab_label_close_button.show()
         self.tab_label_close_button.add(self.tab_label_close_img)
 

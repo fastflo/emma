@@ -8,7 +8,9 @@ from Constants import *
 
 class ConnectionWindow:
     def __init__(self, emma=None):
-
+        """
+        @param emma: Emma
+        """
         self.host = None
         self.emma = emma
         self.cw_mode = None

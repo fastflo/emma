@@ -4,6 +4,10 @@ import dialogs
 class QueryTabManageRow:
 
     def __init__(self, query, emma):
+        """
+        @param query: QueryTab
+        @param emma: Emma
+        """
         self.emma = emma
         self.query = query
 

@@ -15,6 +15,9 @@ from Constants import *
 
 class ExecuteQueryFromDisk:
     def __init__(self, emma):
+        """
+        @param emma: Emma
+        """
         self.emma = emma
         #
         # PATHS

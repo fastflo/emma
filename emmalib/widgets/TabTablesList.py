@@ -5,6 +5,9 @@ from BaseTab import BaseTab
 
 class TabTablesList(BaseTab):
     def __init__(self, emma):
+        """
+        @param emma: Emma
+        """
         super(TabTablesList, self).__init__()
 
         self.tab_label.set_text('Tables List')

@@ -7,6 +7,9 @@ from PopUpTabMsgLog import PopUpTabMsgLog
 
 class TabMsgLog(gtk.ScrolledWindow):
     def __init__(self, emma):
+        """
+        @param emma: Emma
+        """
         super(TabMsgLog, self).__init__()
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.emma = emma

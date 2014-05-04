@@ -9,6 +9,10 @@ import dialogs
 class QueryTabSaveResultSql:
 
     def __init__(self, query, emma):
+        """
+        @param query: QueryTab
+        @param emma: Emma
+        """
         self.emma = emma
         self.query = query
         self.button = self.query.xml.get_widget('save_result_sql')

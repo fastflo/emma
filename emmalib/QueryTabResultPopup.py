@@ -3,6 +3,10 @@ import gtk
 
 class QueryTabResultPopup(gtk.Menu):
     def __init__(self, query, is_single_row):
+        """
+        @param query: QueryTab
+        @param is_single_row: Bool
+        """
         super(QueryTabResultPopup, self).__init__()
 
         self.query = query

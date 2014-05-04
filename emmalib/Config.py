@@ -6,6 +6,10 @@ import dialogs
 
 class Config:
     def __init__(self, emma=None):
+        """
+        @type self: Config
+        @param emma: Emma
+        """
         self.emma = emma
         self.unpickled = False
         self.have_sqlite = False

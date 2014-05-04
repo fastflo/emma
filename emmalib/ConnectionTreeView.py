@@ -12,7 +12,9 @@ from Constants import *
 
 class ConnectionsTreeView(gtk.TreeView):
     def __init__(self, emma=None):
-
+        """
+        @param emma: Emma
+        """
         self.emma = emma
 
         self.current_host = None

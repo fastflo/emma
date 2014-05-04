@@ -7,6 +7,9 @@ from PopUpTabSqlLog import PopUpTabSqlLog
 
 class TabSqlLog(gtk.ScrolledWindow):
     def __init__(self, emma):
+        """
+        @param emma: Emma
+        """
         super(TabSqlLog, self).__init__()
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.emma = emma

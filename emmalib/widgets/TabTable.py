@@ -3,6 +3,9 @@ import gtk
 
 class TabTable(gtk.HPaned):
     def __init__(self, emma):
+        """
+        @param emma: Emma
+        """
         super(TabTable, self).__init__()
 
         self.emma = emma

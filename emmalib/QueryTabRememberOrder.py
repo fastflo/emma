@@ -5,6 +5,10 @@ import dialogs
 
 class QueryTabRememberOrder:
     def __init__(self, query, emma):
+        """
+        @param query: QueryTab
+        @param emma: Emma
+        """
         self.emma = emma
         self.query = query
         button = self.query.xml.get_widget('remember_order')

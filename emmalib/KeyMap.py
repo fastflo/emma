@@ -11,6 +11,9 @@ class KeyMap(gobject.GObject):
     }
 
     def __init__(self, emma):
+        """
+        @param emma: Emma
+        """
         super(KeyMap, self).__init__()
         self.emma = emma
         self.left_control_key_is_pressed = False
@@ -38,7 +41,7 @@ class KeyMap(gobject.GObject):
         if event.keyval == keysyms.t and self.if_ctrl():
             self.emma.main_notebook.add_query_tab()
         if event.keyval == keysyms.w and self.if_ctrl():
-            self.emma.main_notebook.close_query_tab()
+            self.emma.main_notebook.close_current_tab()
 
         if event.keyval == keysyms.o and self.if_ctrl():
             self.emma.current_query.on_load_query_clicked(None)
@@ -51,9 +54,11 @@ class KeyMap(gobject.GObject):
         #   Panel switches
         #
         if event.keyval == keysyms.m and self.if_ctrl():
-            self.emma.mainwindow.message_notebook.set_visible(not self.emma.mainwindow.message_notebook.get_visible())
+            self.emma.mainwindow.message_notebook.set_visible(
+                not self.emma.mainwindow.message_notebook.get_visible())
         if event.keyval == keysyms.h and self.if_ctrl():
-            self.emma.mainwindow.connections_tv_container.set_visible(not self.emma.mainwindow.connections_tv_container.get_visible())
+            self.emma.mainwindow.connections_tv_container.set_visible(
+                not self.emma.mainwindow.connections_tv_container.get_visible())
 
         if event.keyval == keysyms.Control_L:
             self.left_control_key_is_pressed = False

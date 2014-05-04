@@ -45,6 +45,9 @@ from Constants import *
 
 class QueryTab(widgets.BaseTab):
     def __init__(self, emma):
+        """
+        @param emma: Emma
+        """
         super(QueryTab, self).__init__()
         self.xml = gtk.glade.XML(os.path.join(emma.glade_path, 'querytab.glade'), "first_query")
         self.xml.signal_autoconnect(self)

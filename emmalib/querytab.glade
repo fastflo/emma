@@ -24,8 +24,8 @@
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-media-play</property>
                 <signal name="clicked" handler="on_execute_query_clicked"/>
-                <accelerator key="F9" signal="clicked"/>
                 <accelerator key="Return" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                <accelerator key="F9" signal="clicked"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
@@ -143,23 +143,6 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkToolButton" id="closequery_button">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip" translatable="yes">Close Query Tab (Ctrl+W)</property>
-                <property name="use_action_appearance">False</property>
-                <property name="label" translatable="yes">Close</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-close</property>
-                <signal name="clicked" handler="on_closequery_button_clicked"/>
-                <accelerator key="W" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
               <widget class="GtkToolButton" id="rename_query_tab">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -181,6 +164,23 @@
               </widget>
               <packing>
                 <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkToolButton" id="closequery_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip" translatable="yes">Close Query Tab (Ctrl+W)</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Close</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-close</property>
+                <signal name="clicked" handler="on_closequery_button_clicked"/>
+                <accelerator key="W" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
           </widget>

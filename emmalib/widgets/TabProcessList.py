@@ -8,6 +8,9 @@ from emmalib import dialogs
 
 class TabProcessList(BaseTab):
     def __init__(self, emma, host):
+        """
+        @param emma: Emma
+        """
         super(TabProcessList, self).__init__()
 
         self.ui = gtk.VBox(False, 0)
@@ -111,5 +114,3 @@ class TabProcessList(BaseTab):
 
     def get_ui(self):
         return self.ui
-
-

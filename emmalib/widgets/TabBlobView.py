@@ -7,6 +7,9 @@ import dialogs
 
 class TabBlobView(gtk.VBox):
     def __init__(self, emma):
+        """
+        @param emma: Emma
+        """
         super(TabBlobView, self).__init__()
 
         self.emma = emma

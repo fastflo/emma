@@ -9,6 +9,9 @@ class MainMenu(gtk.MenuBar):
     }
 
     def __init__(self, emma):
+        """
+        @param emma: Emma
+        """
         super(MainMenu, self).__init__()
 
         self.emma = emma

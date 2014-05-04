@@ -7,6 +7,9 @@ from emmalib.QueryTab import QueryTab
 class MainNotebook(gtk.Notebook):
 
     def __init__(self, emma):
+        """
+        @param emma: Emma
+        """
         super(MainNotebook, self).__init__()
         self.emma = emma
         self.tabs = []
@@ -43,8 +46,10 @@ class MainNotebook(gtk.Notebook):
         self.tabs.append(q)
 
     def close_query_tab(self, button, tab_class):
+        if not tab_class:
+            return False
         if len(self.emma.queries) == 1:
-            return
+            return False
         for q in self.emma.queries:
             if q == tab_class:
                 i = self.emma.queries.index(q)
@@ -57,7 +62,8 @@ class MainNotebook(gtk.Notebook):
                 page_num = self.page_num(tab_class.get_ui())
                 self.remove_page(page_num)
                 gc.collect()
-                return
+                return True
+        return False
 
     def add_process_list_tab(self, host):
         self.add_generic_tab(widgets.TabProcessList(self.emma, host))
@@ -73,9 +79,22 @@ class MainNotebook(gtk.Notebook):
         self.tabs.append(tab_class)
 
     def close_generic_tab(self, button, tab_class):
+        if not tab_class:
+            return
         page_num = self.page_num(tab_class.get_ui())
         self.remove_page(page_num)
         i = self.tabs.index(tab_class)
         del self.tabs[i]
         gc.collect()
 
+    def close_current_tab(self):
+        page_num = self.get_current_page()
+        if page_num < 0:
+            return
+        current_tab = self.get_nth_page(page_num)
+        for tab in self.tabs:
+            if tab.get_ui() == current_tab:
+                if type(tab) is QueryTab:
+                    self.close_query_tab(None, tab)
+                else:
+                    self.close_generic_tab(None, tab)

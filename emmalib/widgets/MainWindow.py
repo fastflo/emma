@@ -5,6 +5,9 @@ import widgets
 class MainWindow(gtk.Window):
 
     def __init__(self, emma):
+        """
+        @param emma: Emma
+        """
         super(MainWindow, self).__init__()
 
         self.emma = emma
@@ -45,4 +48,3 @@ class MainWindow(gtk.Window):
         self.resize(1024, 768)
 
         self.show_all()
-
