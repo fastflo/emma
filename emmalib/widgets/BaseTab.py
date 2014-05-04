@@ -4,6 +4,7 @@ from Constants import *
 
 class BaseTab(object):
     def __init__(self):
+        self.ui = gtk.Label('Tab UI')
         self.tab_label = gtk.Label('Tab Name')
         self.tab_label.show()
 
@@ -39,7 +40,7 @@ class BaseTab(object):
         return self.tab_label
 
     def get_ui(self):
-        return None
+        return self.ui
 
     def get_label_ui(self):
         return self.tab_label_hbox

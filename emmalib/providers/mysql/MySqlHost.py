@@ -182,7 +182,8 @@ class MySqlHost:
             self.handle = _mysql.connect(**c)
         except:  # mysql_exceptions.OperationalError:
             self.connected = False
-            self.msg_log("%s: %s" % (sys.exc_type, sys.exc_value))
+            if self.msg_log:
+                self.msg_log("%s: %s" % (sys.exc_type, sys.exc_value))
             return
         self.connected = True
         self.version = self.handle.get_server_info()
@@ -220,7 +221,8 @@ class MySqlHost:
             return True
         except:
             self.connected = False
-            self.msg_log(sys.exc_value[1])
+            if self.msg_log:
+                self.msg_log(sys.exc_value[1])
             return False
 
     def close(self):
@@ -236,10 +238,12 @@ class MySqlHost:
 
     def query(self, query, check_use=True, append_to_log=True, encoding=None):
         if not self.handle:
-            self.msg_log("not connected! can't execute %s, %s, %s" % (query, str(self.handle), str(self)))
+            if self.msg_log:
+                self.msg_log("Not connected! Can't execute %s, %s, %s" % (query, str(self.handle), str(self)))
             return
         if append_to_log:
-            self.sql_log(query)
+            if self.sql_log:
+                self.sql_log(query)
         try:
             self.query_time = 0
             start = time.time()
@@ -260,7 +264,8 @@ class MySqlHost:
                 "You have an error in your SQL syntax.  " +
                 "Check the manual that corresponds to your MySQL server version for the right syntax to use near ",
                 "MySQL syntax error at ")
-            self.msg_log(s)
+            if self.msg_log:
+                self.msg_log(s)
             if sys.exc_value[0] == 2013:
                 # lost connection
                 self.close()
@@ -331,7 +336,7 @@ class MySqlHost:
             rv = "`%s`" % field.replace("`", r"``")
         else:
             rv = field
-        print "escape field %r to %r" % (field, rv)
+        #print "escape field %r to %r" % (field, rv)
         return rv
 
     def escape_table(self, table):

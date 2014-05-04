@@ -1,50 +1,71 @@
 import gtk
+import gobject
+from BaseTab import BaseTab
 
 
-class TabTable(gtk.HPaned):
-    def __init__(self, emma):
+class TabTable(BaseTab):
+    def __init__(self, emma, table):
         """
         @param emma: Emma
         """
         super(TabTable, self).__init__()
 
+        self.ui = gtk.Notebook()
+        self.tab_label.set_text('Table: %s' % table.name)
+
         self.emma = emma
+        self.table = table
 
         self.table_description_size = (0, 0)
         self.table_property_labels = []
         self.table_property_entries = []
 
-        # init left
-        sw_left = gtk.ScrolledWindow()
-        viewport = gtk.Viewport()
-        self.left_vbox = gtk.VBox()
+        # fields
+        sw_fields = gtk.ScrolledWindow()
+        sw_fields.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.tv_fields_model = gtk.ListStore(
+            gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
+        )
+        self.tv_fields = gtk.TreeView()
+        self.tv_fields.set_model(self.tv_fields_model)
+        sw_fields.add(self.tv_fields)
+
+        # Indexes
+        sw_indexes = gtk.ScrolledWindow()
+        sw_indexes.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.tv_indexes_model = gtk.ListStore(
+            gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
+        )
+        self.tv_indexes = gtk.TreeView()
+        self.tv_indexes.set_model(self.tv_indexes_model)
+        sw_indexes.add(self.tv_indexes)
+
+        # init Table properties
         self.table_properties = gtk.Table()
-        self.table_description = gtk.Table()
-        self.left_vbox.pack_start(self.table_properties)
-        self.left_vbox.pack_start(gtk.HSeparator())
-        self.left_vbox.pack_end(self.table_description)
-        viewport.add(self.left_vbox)
-        sw_left.add(viewport)
 
-        # init right
-        sw_right = gtk.ScrolledWindow()
+        # init Create script view
+        sql_create_tab = gtk.ScrolledWindow()
         self.table_textview = gtk.TextView()
-        sw_right.add(self.table_textview)
+        sql_create_tab.add(self.table_textview)
 
-        self.add1(sw_left)
-        self.add2(sw_right)
+        self.ui.append_page(sw_fields, gtk.Label('Fields'))
+        self.ui.append_page(sw_indexes, gtk.Label('Indexes'))
+        self.ui.append_page(self.table_properties, gtk.Label('Properties'))
+        self.ui.append_page(sql_create_tab, gtk.Label('SQL: Create'))
 
-        self.set_position(300)
+        self.update()
 
-        self.show_all()
+        self.ui.show_all()
 
-    def update(self, path=None):
-        if not path:
-            path, column = self.emma.connections_tv.get_cursor()
-            if len(path) != 3:
-                return
-        _iter = self.emma.connections_tv.connections_model.get_iter(path)
-        th = self.emma.connections_tv.connections_model.get_value(_iter, 0)
+    def update(self):
+        th = self.table
 
         table = self.table_properties
         prop_count = len(th.props)
@@ -83,30 +104,29 @@ class TabTable(gtk.HPaned):
                 e.set_text(p)
                 r += 1
 
-        tv = self.table_textview
-        tv.get_buffer().set_text(th.get_create_table())
+        self.table_textview.get_buffer().set_text(th.get_create_table())
+        self.build_fields()
+        self.build_indexes()
 
-        t = self.table_description
-        for c in t.get_children():
-            self.table_description.remove(c)
-        self.table_description.resize(len(th.describe_headers), len(th.fields) + 1)
-        c = 0
-        for h in th.describe_headers:
-            l = gtk.Label(h)
-            t.attach(l, c, c + 1, 0, 1, gtk.FILL, 0)
-            l.show()
-            c += 1
-        r = 1
-        for fn in th.field_order:
-            v = th.fields[fn]
-            for c in range(len(th.describe_headers)):
-                s = v[c]
-                if s is None:
-                    s = ""
-                l = gtk.Label(s)
-                t.attach(l, c, c + 1, r, r + 1, gtk.FILL, 0)
-                l.set_alignment(0, 0.5)
-                l.set_selectable(True)
-                l.show()
-            r += 1
-        self.left_vbox.check_resize()
+    def build_fields(self):
+        ix = 0
+        for h in self.table.describe_headers:
+            self.tv_fields.append_column(gtk.TreeViewColumn(h, gtk.CellRendererText(), text=ix))
+            ix += 1
+        for fn in self.table.field_order:
+            v = self.table.fields[fn]
+            self.tv_fields_model.append(v)
+
+    def build_indexes(self):
+        self.tv_indexes.append_column(gtk.TreeViewColumn("Name", gtk.CellRendererText(), text=0))
+        self.tv_indexes.append_column(gtk.TreeViewColumn("Column", gtk.CellRendererText(), text=1))
+        self.tv_indexes.append_column(gtk.TreeViewColumn("Unique", gtk.CellRendererText(), text=2))
+        for ix in self.table.indexes:
+            print ix
+            self.tv_indexes_model.append(
+                (
+                    ix.name,
+                    ix.column,
+                    ix.is_unique,
+                )
+            )

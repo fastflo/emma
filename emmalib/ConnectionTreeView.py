@@ -105,6 +105,7 @@ class ConnectionsTreeView(gtk.TreeView):
             host.select_database(o.db)
             table = o
             self.emma.current_query.set_current_db(table.db)
+            self.emma.main_notebook.add_generic_tab(widgets.TabTable(self.emma, table))
             # ait = self.emma.config.get("autorefresh_interval_table")
             # if not table.fields or (time.time() - table.last_field_read) > ait:
             #     table.refresh()
@@ -143,8 +144,7 @@ class ConnectionsTreeView(gtk.TreeView):
             return
 
         if len(path) == 3 and nb.get_current_page() == 3:
-            print "update table view..."
-            self.emma.table_view.update(path)
+            pass
 
         if self.emma.current_query:
             q = self.emma.current_query
@@ -321,7 +321,6 @@ class ConnectionsTreeView(gtk.TreeView):
         if what == "refresh_table":
             table.refresh()
             self.redraw_table(table, _iter)
-            self.emma.table_view.update()
         elif what == "truncate_table":
             if not dialogs.confirm("truncate table",
                                    "do you really want to truncate the <b>%s</b> "
@@ -332,7 +331,6 @@ class ConnectionsTreeView(gtk.TreeView):
             if table.db.query("truncate `%s`" % table.name):
                 table.refresh()
                 self.redraw_table(table, _iter)
-                self.emma.table_view.update()
         elif what == "drop_table":
             if not dialogs.confirm("drop table",
                                    "do you really want to DROP the <b>%s</b> table in database "

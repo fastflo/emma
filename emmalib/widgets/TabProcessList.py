@@ -111,6 +111,3 @@ class TabProcessList(BaseTab):
             self.on_processlist_refresh_value_change(button)
             return False
         return True
-
-    def get_ui(self):
-        return self.ui

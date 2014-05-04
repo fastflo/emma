@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 import time
-
+from MySqlIndex import MySqlIndex
 
 class MySqlTable:
     def __init__(self, db, props, props_description):
@@ -30,6 +30,7 @@ class MySqlTable:
         self.name = props[0]
         self.fields = {}
         self.field_order = []
+        self.indexes = []
         self.expanded = False
         self.last_field_read = 0
         self.create_table = ""
@@ -60,15 +61,21 @@ class MySqlTable:
 
     def refresh(self, refresh_props=True):
         self.db.host.select_database(self.db)
-
         if refresh_props:
-            self.host.query("show table status like '%s'" % self.name)
-            result = self.handle.store_result()
-            rows = result.fetch_row(0)
-            self.props = rows[0]
-            self.props_dict = dict(zip(map(lambda v: v[0], result.describe()), rows[0]))
-            self.name = self.props[0]
+            self.refresh_properties()
 
+        self.refres_fields()
+        self.refresh_indexes()
+
+    def refresh_properties(self):
+        self.host.query("show table status like '%s'" % self.name)
+        result = self.handle.store_result()
+        rows = result.fetch_row(0)
+        self.props = rows[0]
+        self.props_dict = dict(zip(map(lambda v: v[0], result.describe()), rows[0]))
+        self.name = self.props[0]
+
+    def refres_fields(self):
         self.host.query("describe %s" % self.host.escape_table(self.name))
         result = self.handle.store_result()
         self.describe_headers = []
@@ -81,7 +88,17 @@ class MySqlTable:
                 self.field_order.append(row[0])
                 self.fields[row[0]] = row
         self.last_field_read = time.time()
-        return
+
+    def refresh_indexes(self):
+        self.host.query('SHOW INDEX FROM %s' % self.host.escape_table(self.name))
+        result = self.handle.store_result()
+        if result is not None:
+            fields = []
+            for h in result.describe():
+                fields.append(h[0])
+            print fields
+            for row in result.fetch_row(0):
+                self.indexes.append(MySqlIndex(dict(zip(fields, row))))
 
     def __str__(self):
         output = ""
