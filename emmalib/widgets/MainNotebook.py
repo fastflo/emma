@@ -10,6 +10,7 @@ class MainNotebook(gtk.Notebook):
         super(MainNotebook, self).__init__()
         self.emma = emma
         self.connect('switch_page', self.main_notebook_on_change_page)
+        self.set_scrollable(True)
 
     #
     #   Set emma.current_query properly
@@ -34,6 +35,7 @@ class MainNotebook(gtk.Notebook):
         self.emma.current_query = q
         self.emma.queries.append(q)
         new_page_index = self.append_page(q.get_ui(), q.get_label_ui())
+        self.set_tab_reorderable(q.get_ui(), True)
         q.get_tab_close_button().connect('clicked', self.close_query_tab, q)
         self.set_current_page(new_page_index)
         self.emma.current_query.textview.grab_focus()
@@ -60,6 +62,7 @@ class MainNotebook(gtk.Notebook):
     def add_process_list_tab(self, host):
         process_list = widgets.TabProcessList(self.emma, host)
         new_page_num = self.append_page(process_list.get_ui(), process_list.get_label_ui())
+        self.set_tab_reorderable(process_list.get_ui(), True)
         process_list.get_tab_close_button().connect('clicked', self.close_process_list_tab, process_list)
         self.set_current_page(new_page_num)
 
@@ -70,11 +73,11 @@ class MainNotebook(gtk.Notebook):
     def add_tables_list_tab(self):
         tables_list = widgets.TabTablesList(self.emma)
         new_page_num = self.append_page(tables_list.get_ui(), tables_list.get_label_ui())
+        self.set_tab_reorderable(tables_list.get_ui(), True)
         tables_list.get_tab_close_button().connect('clicked', self.close_tables_list_tab, tables_list)
         self.set_current_page(new_page_num)
 
     def close_tables_list_tab(self, button, tab_class):
         page_num = self.page_num(tab_class.get_ui())
         self.remove_page(page_num)
-        del tab_class
 

@@ -36,7 +36,8 @@ class TabProcessList(BaseTab):
         self.popup.connect('item-selected', self.on_kill_process)
 
         self.ui.show_all()
-        pass
+
+        self.refresh()
 
     def refresh(self, *args):
         if not self.host:

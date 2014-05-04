@@ -30,9 +30,6 @@ class TabTablesList(BaseTab):
         db = self.emma.current_host.current_db
         if not db:
             return
-        if not "tv" in self.__dict__:
-            self.model = None
-            self.tables_db = None
 
         if not self.tables_db == db:
             self.tables_db = db
