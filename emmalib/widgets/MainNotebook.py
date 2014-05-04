@@ -9,6 +9,7 @@ class MainNotebook(gtk.Notebook):
     def __init__(self, emma):
         super(MainNotebook, self).__init__()
         self.emma = emma
+        self.tabs = []
         self.connect('switch_page', self.main_notebook_on_change_page)
         self.set_scrollable(True)
 
@@ -39,6 +40,7 @@ class MainNotebook(gtk.Notebook):
         q.get_tab_close_button().connect('clicked', self.close_query_tab, q)
         self.set_current_page(new_page_index)
         self.emma.current_query.textview.grab_focus()
+        self.tabs.append(q)
 
     def close_query_tab(self, button, tab_class):
         if len(self.emma.queries) == 1:
@@ -47,6 +49,8 @@ class MainNotebook(gtk.Notebook):
             if q == tab_class:
                 i = self.emma.queries.index(q)
                 del self.emma.queries[i]
+                i = self.tabs.index(q)
+                del self.tabs[i]
                 q.destroy()
                 del q
 
@@ -55,29 +59,23 @@ class MainNotebook(gtk.Notebook):
                 gc.collect()
                 return
 
-    #
-    #   Process List
-    #
-
     def add_process_list_tab(self, host):
-        process_list = widgets.TabProcessList(self.emma, host)
-        new_page_num = self.append_page(process_list.get_ui(), process_list.get_label_ui())
-        self.set_tab_reorderable(process_list.get_ui(), True)
-        process_list.get_tab_close_button().connect('clicked', self.close_process_list_tab, process_list)
-        self.set_current_page(new_page_num)
-
-    def close_process_list_tab(self, button, tab_class):
-        page_num = self.page_num(tab_class.get_ui())
-        self.remove_page(page_num)
+        self.add_generic_tab(widgets.TabProcessList(self.emma, host))
 
     def add_tables_list_tab(self):
-        tables_list = widgets.TabTablesList(self.emma)
-        new_page_num = self.append_page(tables_list.get_ui(), tables_list.get_label_ui())
-        self.set_tab_reorderable(tables_list.get_ui(), True)
-        tables_list.get_tab_close_button().connect('clicked', self.close_tables_list_tab, tables_list)
-        self.set_current_page(new_page_num)
+        self.add_generic_tab(widgets.TabTablesList(self.emma))
 
-    def close_tables_list_tab(self, button, tab_class):
+    def add_generic_tab(self, tab_class):
+        new_page_num = self.append_page(tab_class.get_ui(), tab_class.get_label_ui())
+        self.set_tab_reorderable(tab_class.get_ui(), True)
+        tab_class.get_tab_close_button().connect('clicked', self.close_generic_tab, tab_class)
+        self.set_current_page(new_page_num)
+        self.tabs.append(tab_class)
+
+    def close_generic_tab(self, button, tab_class):
         page_num = self.page_num(tab_class.get_ui())
         self.remove_page(page_num)
+        i = self.tabs.index(tab_class)
+        del self.tabs[i]
+        gc.collect()
 
