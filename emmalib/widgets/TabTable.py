@@ -1,3 +1,5 @@
+# coding=utf8
+
 import gtk
 import gobject
 from BaseTab import BaseTab
@@ -55,14 +57,101 @@ class TabTable(BaseTab):
         self.table_textview = gtk.TextView()
         sql_create_tab.add(self.table_textview)
 
+        # Data
+        sw_data = gtk.ScrolledWindow()
+        sw_data.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.tv_data_model = None
+        self.tv_data = gtk.TreeView()
+        self.tv_data.set_model(self.tv_indexes_model)
+        sw_data.add(self.tv_data)
+        self.data_loaded = False
+
         self.ui.append_page(sw_fields, gtk.Label('Fields'))
         self.ui.append_page(sw_indexes, gtk.Label('Indexes'))
+        self.ui.append_page(sw_data, gtk.Label('Data'))
         self.ui.append_page(self.table_properties, gtk.Label('Properties'))
         self.ui.append_page(sql_create_tab, gtk.Label('SQL: Create'))
 
         self.update()
 
+        self.ui.connect('switch-page', self.on_notebook_switch_page)
+
         self.ui.show_all()
+
+    def on_notebook_switch_page(self, nb, pointer, page_num):
+        if page_num == 2 and not self.data_loaded:
+            self.load_data()
+
+    def load_data(self):
+        self.data_loaded = True
+        self.table.db.host.query('SET NAMES utf8', append_to_log=False)
+        status = self.table.db.host.query('SELECT * FROM %s' % self.table.name, append_to_log=False, encoding='utf8')
+
+        if not status:
+            return
+
+        field_count = self.table.db.host.handle.field_count()
+        result = self.table.db.host.handle.store_result()
+        result_info = result.describe()
+        num_rows = result.num_rows()
+
+        columns = [gobject.TYPE_STRING] * field_count
+        self.tv_data_model = gtk.ListStore(*columns)
+        self.tv_data.set_model(self.tv_data_model)
+
+        for i in range(field_count):
+            title = result_info[i][0].replace("_", "__").replace("[\r\n\t ]+", " ")
+            text_renderer = gtk.CellRendererText()
+            if True:  # editable
+                text_renderer.set_property("editable", True)
+                #text_renderer.connect("edited", self.on_query_change_data, i)
+            l = self.tv_data.insert_column_with_data_func(
+                -1, title, text_renderer, self.emma.render_mysql_string, i)
+
+            col = self.tv_data.get_column(l - 1)
+
+            if self.emma.config.get_bool("result_view_column_resizable"):
+                col.set_resizable(True)
+            else:
+                col.set_resizable(False)
+                col.set_min_width(int(self.emma.config.get("result_view_column_width_min")))
+                col.set_max_width(int(self.emma.config.get("result_view_column_width_max")))
+
+            if False:  # sortable
+                col.set_clickable(True)
+                # col.connect("clicked", self.on_query_column_sort, i)
+                # set sort indicator
+                # field_name = self.result_info[i][0].lower()
+                # try:
+                #     sort_col = sort_fields[field_name]
+                #     col.set_sort_indicator(True)
+                #     if sort_col:
+                #         col.set_sort_order(gtk.SORT_ASCENDING)
+                #     else:
+                #         col.set_sort_order(gtk.SORT_DESCENDING)
+                # except:
+                #     col.set_sort_indicator(False)
+            else:
+                col.set_clickable(False)
+                col.set_sort_indicator(False)
+
+            cnt = 0
+            for row in result.fetch_row(0):
+                print row
+                def to_string(f):
+                    if type(f) == str:
+                        f = unicode(f, errors="replace")
+                        # f = u'Чисто конкретно + '+f
+                        pass
+                    elif f is None:
+                        f = '<null>'
+                    else:
+                        f = str(f)
+                    return f
+                self.tv_data_model.append(map(to_string, row))
+                cnt += 1
+                if not cnt % 100 == 0:
+                    continue
 
     def update(self):
         th = self.table
@@ -130,3 +219,9 @@ class TabTable(BaseTab):
                     ix.is_unique,
                 )
             )
+
+    def cleanup_tv_data(self):
+        for col in self.tv_data.get_columns():
+            self.tv_data.remove_column(col)
+        if self.tv_data_model:
+            self.tv_data_model.clear()
