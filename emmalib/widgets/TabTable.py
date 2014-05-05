@@ -97,7 +97,10 @@ class TabTable(BaseTab):
 
         columns = [gobject.TYPE_STRING] * field_count
         self.tv_data_model = gtk.ListStore(*columns)
+
         self.tv_data.set_model(self.tv_data_model)
+
+        self.tv_data.set_rules_hint(True)
 
         for i in range(field_count):
             title = result_info[i][0].replace("_", "__").replace("[\r\n\t ]+", " ")
@@ -105,10 +108,12 @@ class TabTable(BaseTab):
             if True:  # editable
                 text_renderer.set_property("editable", True)
                 #text_renderer.connect("edited", self.on_query_change_data, i)
+
             l = self.tv_data.insert_column_with_data_func(
                 -1, title, text_renderer, self.emma.render_mysql_string, i)
 
             col = self.tv_data.get_column(l - 1)
+            col.set_sort_column_id(l-1)
 
             if self.emma.config.get_bool("result_view_column_resizable"):
                 col.set_resizable(True)
@@ -117,41 +122,28 @@ class TabTable(BaseTab):
                 col.set_min_width(int(self.emma.config.get("result_view_column_width_min")))
                 col.set_max_width(int(self.emma.config.get("result_view_column_width_max")))
 
-            if False:  # sortable
+            if True:  # sortable
                 col.set_clickable(True)
-                # col.connect("clicked", self.on_query_column_sort, i)
-                # set sort indicator
-                # field_name = self.result_info[i][0].lower()
-                # try:
-                #     sort_col = sort_fields[field_name]
-                #     col.set_sort_indicator(True)
-                #     if sort_col:
-                #         col.set_sort_order(gtk.SORT_ASCENDING)
-                #     else:
-                #         col.set_sort_order(gtk.SORT_DESCENDING)
-                # except:
-                #     col.set_sort_indicator(False)
+                col.set_sort_indicator(True)
             else:
                 col.set_clickable(False)
                 col.set_sort_indicator(False)
 
-            cnt = 0
-            for row in result.fetch_row(0):
-                print row
-                def to_string(f):
-                    if type(f) == str:
-                        f = unicode(f, errors="replace")
-                        # f = u'Чисто конкретно + '+f
-                        pass
-                    elif f is None:
-                        f = '<null>'
-                    else:
-                        f = str(f)
-                    return f
-                self.tv_data_model.append(map(to_string, row))
-                cnt += 1
-                if not cnt % 100 == 0:
-                    continue
+        cnt = 0
+        for row in result.fetch_row(0):
+            def to_string(f):
+                if type(f) == str:
+                    f = unicode(f, errors="replace")
+                    pass
+                elif f is None:
+                    pass
+                else:
+                    f = str(f)
+                return f
+            self.tv_data_model.append(map(to_string, row))
+            cnt += 1
+            if not cnt % 100 == 0:
+                continue
 
     def update(self):
         th = self.table
