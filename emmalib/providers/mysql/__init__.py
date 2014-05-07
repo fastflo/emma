@@ -9,4 +9,5 @@ except:
 
 from MySqlDb import MySqlDb
 from MySqlHost import MySqlHost
+from MySqlIndex import MySqlIndex
 from MySqlTable import MySqlTable

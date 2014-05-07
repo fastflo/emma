@@ -79,7 +79,7 @@ class SQLiteHost():
         if not self.handle:
             if self.msg_log:
                 self.msg_log("not connected! can't execute %s, %s, %s" % (query, str(self.handle), str(self)))
-            return
+            return False
         if append_to_log:
             if self.sql_log:
                 self.sql_log(query)
@@ -88,7 +88,7 @@ class SQLiteHost():
             start = time.time()
             if encoding:
                 query = query.encode(encoding, "ignore")
-            print "executing query (encoding: %s): %r" % (encoding, query)
+            #print "executing query (encoding: %s): %r" % (encoding, query)
             self.handle.execute(query)
             self.query_time = time.time() - start
         except:
@@ -100,6 +100,10 @@ class SQLiteHost():
             return False
 
         return True
+
+    def query_dict(self, query, check_use=False, append_to_log=True, encoding=None):
+        if self.query(query, check_use, append_to_log, encoding):
+            return result2hash(self.handle)
 
     def use_db(self, name, do_query=True):
         pass
@@ -124,3 +128,20 @@ class SQLiteHost():
 
     def escape_table(self, table):
         return table
+
+
+def result2hash(h, cols=False):
+    res = h.store_result()
+    ret = {"rows": []}
+    if cols:
+        ret['cols'] = []
+    if res is not None:
+        _cols = []
+        for h in h.c.description:
+            _cols.append(h[0])
+        for row in res.fetch_row(0):
+            ret['rows'].append(dict(zip(_cols, row)))
+        if cols:
+            ret['cols'] = _cols
+    return ret
+
