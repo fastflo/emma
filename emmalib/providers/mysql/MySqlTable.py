@@ -65,7 +65,7 @@ class MySqlTable:
         if refresh_props:
             self.refresh_properties()
 
-        self.refres_fields()
+        self.refresh_fields()
         self.refresh_indexes()
 
     def refresh_properties(self):
@@ -76,7 +76,7 @@ class MySqlTable:
         self.props_dict = dict(zip(map(lambda v: v[0], result.describe()), rows[0]))
         self.name = self.props[0]
 
-    def refres_fields(self):
+    def refresh_fields(self):
         self.host.query("describe %s" % self.host.escape_table(self.name))
         result = self.handle.store_result()
         self.describe_headers = []

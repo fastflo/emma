@@ -4,7 +4,7 @@ from emmalib.providers.sqlite.SQLiteTable import SQLiteTable
 
 class SQLiteDb(MySqlDb):
     def __init__(self, host, name=None):
-        MySqlDb.__init__(self, host)
+        #MySqlDb.__init__(self, host)
         self.handle = host.handle
         self.host = host
         self.charset = self.host.charset

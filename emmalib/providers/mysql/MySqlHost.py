@@ -249,7 +249,8 @@ class MySqlHost:
             start = time.time()
             if encoding:
                 query = query.encode(encoding, "ignore")
-            print "executing query (encoding: %s): %r" % (encoding, query)
+            #print "executing query (encoding: %s): %r" % (encoding, query)
+            self.handle.query('SET NAMES utf8')
             self.handle.query(query)
             self.query_time = time.time() - start
         except:

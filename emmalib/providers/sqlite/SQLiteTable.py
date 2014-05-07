@@ -3,7 +3,7 @@ from emmalib.providers.mysql.MySqlTable import *
 
 class SQLiteTable(MySqlTable):
     def __init__(self, db, props, props_description):
-        MySqlTable.__init__(self, db, props, props_description)
+        #MySqlTable.__init__(self, db, props, props_description)
         self.handle = db.handle
         self.host = db.host
         self.db = db
@@ -11,10 +11,13 @@ class SQLiteTable(MySqlTable):
         self.name = props[0]
         self.fields = {}
         self.field_order = []
+        self.indexes = []
         self.expanded = False
         self.last_field_read = 0
         self.create_table = ""
         self.describe_headers = []
+        self.is_table = True
+        self.is_view = False
 
     def __getstate__(self):
         d = dict(self.__dict__)
@@ -34,12 +37,21 @@ class SQLiteTable(MySqlTable):
         self.field_order = []
         result = result.fetch_row(0)
         self.create_table = result[0][0]
+        self.refresh_fields()
 
-        self.host.query("SELECT * FROM %s limit 1" % self.name)
+    def refresh_fields(self):
 
-        for field in self.host.handle.c.description:
-            self.field_order.append(field[0])
-            self.fields[field[0]] = field
+        self.host.query("PRAGMA table_info(`%s`)" % self.name)
+
+        for h in self.host.handle.c.description:
+            self.describe_headers.append(h[0])
+
+        result = self.handle.store_result()
+
+        for field in result.fetch_row(0):
+            print field
+            self.field_order.append(field[1])
+            self.fields[field[1]] = field
 
         self.last_field_read = time.time()
         return

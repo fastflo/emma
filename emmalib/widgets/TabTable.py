@@ -84,7 +84,6 @@ class TabTable(BaseTab):
 
     def load_data(self):
         self.data_loaded = True
-        self.table.db.host.query('SET NAMES utf8', append_to_log=False)
         status = self.table.db.host.query('SELECT * FROM %s' % self.table.name, append_to_log=False, encoding='utf8')
 
         if not status:

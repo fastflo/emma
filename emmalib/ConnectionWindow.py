@@ -143,9 +143,9 @@ class ConnectionWindow:
                 self.host.database = self.tb_database.get_text()
         else:
             if self.cw_mode == "new":
-                pass
-            else:
                 self.emma.connections_tv.add_sqlite(self.fcb_datafile.get_filename())
+            else:
+                pass
 
         self.window.hide()
 

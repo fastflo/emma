@@ -27,7 +27,7 @@ from emmalib.providers.sqlite.SQLiteHandle import SQLiteHandle
 
 class SQLiteHost(MySqlHost):
     def __init__(self, sql_log, msg_log, filename, *args):
-        MySqlHost.__init__(self, *args)
+        #MySqlHost.__init__(self, *args)
         self.sql_log, self.msg_log, self.filename = sql_log, msg_log, filename
         self.name = self.filename
         self.host = "localhost"
@@ -62,7 +62,8 @@ class SQLiteHost(MySqlHost):
             self.handle = SQLiteHandle(self, sqlite3.connect(self.filename))
         except:
             self.connected = False
-            self.msg_log("%s: %s" % (sys.exc_type, sys.exc_value))
+            if self.msg_log:
+                self.msg_log("%s: %s" % (sys.exc_type, sys.exc_value))
             return
         self.current_db = SQLiteDb(self, "dummydb")
         self.databases = {"dummydb": self.current_db}
@@ -84,10 +85,12 @@ class SQLiteHost(MySqlHost):
 
     def query(self, query, check_use=True, append_to_log=True, encoding=None):
         if not self.handle:
-            self.msg_log("not connected! can't execute %s, %s, %s" % (query, str(self.handle), str(self)))
+            if self.msg_log:
+                self.msg_log("not connected! can't execute %s, %s, %s" % (query, str(self.handle), str(self)))
             return
         if append_to_log:
-            self.sql_log(query)
+            if self.sql_log:
+                self.sql_log(query)
         try:
             self.query_time = 0
             start = time.time()
@@ -100,7 +103,8 @@ class SQLiteHost(MySqlHost):
             print "error executing query:\n%s" % traceback.format_exc()
             s = str(sys.exc_value)
             self.last_error = s
-            self.msg_log(s)
+            if self.msg_log:
+                self.msg_log(s)
             return False
 
         return True
