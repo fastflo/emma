@@ -46,20 +46,6 @@ class MySqlTable:
         else:
             self.is_view = True
 
-    def __getstate__(self):
-        d = dict(self.__dict__)
-        for i in ["handle"]:
-            del d[i]
-            #print "table will pickle:", d
-        return d
-
-    def __getitem__(self, what):
-        try:
-            return self.props_dict[what]
-        except:
-            pass
-        print "property", what, "not found in table props:", self.props_dict
-
     def refresh(self, refresh_props=True):
         self.db.host.select_database(self.db)
         if refresh_props:
@@ -97,7 +83,6 @@ class MySqlTable:
             fields = []
             for h in result.describe():
                 fields.append(h[0])
-            print fields
             for row in result.fetch_row(0):
                 self.indexes.append(MySqlIndex(dict(zip(fields, row))))
 
@@ -118,3 +103,6 @@ class MySqlTable:
             result = result.fetch_row(0)
             self.create_table = result[0][1]
         return self.create_table
+
+    def get_tree_row(self, field_name):
+        return (self.fields[field_name][0],self.fields[field_name][1]),

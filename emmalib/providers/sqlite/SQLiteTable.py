@@ -1,7 +1,8 @@
-from emmalib.providers.mysql.MySqlTable import *
+import time
+from SQLiteIndex import SQLiteIndex
 
 
-class SQLiteTable(MySqlTable):
+class SQLiteTable():
     def __init__(self, db, props, props_description):
         #MySqlTable.__init__(self, db, props, props_description)
         self.handle = db.handle
@@ -19,17 +20,6 @@ class SQLiteTable(MySqlTable):
         self.is_table = True
         self.is_view = False
 
-    def __getstate__(self):
-        d = dict(self.__dict__)
-        for i in ["handle"]:
-            del d[i]
-        #print "table will pickle:", d
-        return d
-
-    def __getitem__(self, what):
-        print "todo: props dict %r" % what
-        return None
-
     def refresh(self, refresh_props=True):
         self.host.query("SELECT sql FROM sqlite_master WHERE type='table' and name='%s'" % self.name)
         result = self.handle.store_result()
@@ -38,23 +28,28 @@ class SQLiteTable(MySqlTable):
         result = result.fetch_row(0)
         self.create_table = result[0][0]
         self.refresh_fields()
+        self.refresh_indexes()
 
     def refresh_fields(self):
-
-        self.host.query("PRAGMA table_info(`%s`)" % self.name)
-
+        self.host.query("PRAGMA table_info(`%s`)" % self.name, False, False)
         for h in self.host.handle.c.description:
             self.describe_headers.append(h[0])
-
         result = self.handle.store_result()
-
         for field in result.fetch_row(0):
-            print field
             self.field_order.append(field[1])
             self.fields[field[1]] = field
-
         self.last_field_read = time.time()
         return
+
+    def refresh_indexes(self):
+        self.host.query("PRAGMA index_list(`%s`)" % self.name, False, False)
+        result = self.handle.store_result()
+        if result is not None:
+            fields = []
+            for h in self.host.handle.c.description:
+                fields.append(h[0])
+            for row in result.fetch_row(0):
+                self.indexes.append(SQLiteIndex(dict(zip(fields, row))))
 
     def __str__(self):
         output = ""
@@ -72,3 +67,6 @@ class SQLiteTable(MySqlTable):
         result = result.fetch_row(0)
         self.create_table = result[0][0]
         return self.create_table
+
+    def get_tree_row(self, field_name):
+        return (self.fields[field_name][1],self.fields[field_name][2]),

@@ -1,10 +1,8 @@
-from emmalib.providers.mysql.MySqlDb import MySqlDb
 from emmalib.providers.sqlite.SQLiteTable import SQLiteTable
 
 
-class SQLiteDb(MySqlDb):
+class SQLiteDb():
     def __init__(self, host, name=None):
-        #MySqlDb.__init__(self, host)
         self.handle = host.handle
         self.host = host
         self.charset = self.host.charset

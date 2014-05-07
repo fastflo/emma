@@ -25,9 +25,8 @@ from emmalib.providers.sqlite.SQLiteDb import SQLiteDb
 from emmalib.providers.sqlite.SQLiteHandle import SQLiteHandle
 
 
-class SQLiteHost(MySqlHost):
+class SQLiteHost():
     def __init__(self, sql_log, msg_log, filename, *args):
-        #MySqlHost.__init__(self, *args)
         self.sql_log, self.msg_log, self.filename = sql_log, msg_log, filename
         self.name = self.filename
         self.host = "localhost"
