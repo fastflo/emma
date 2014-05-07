@@ -11,13 +11,6 @@ class SQLiteDb():
         self.status_headers = []
         self.tables = {}
 
-    def __getstate__(self):
-        d = dict(self.__dict__)
-        for i in ["handle"]:
-            del d[i]
-        #print "db will pickle:", d
-        return d
-
     def refresh(self):
         if not self.host.query("SELECT name, sql FROM sqlite_master WHERE type='table' ORDER BY name"):
             return
@@ -26,7 +19,6 @@ class SQLiteDb():
         old = dict(zip(self.tables.keys(), range(len(self.tables))))
         for row in result.fetch_row(0):
             if not row[0] in old:
-                #print "new table", row[0]
                 self.tables[row[0]] = SQLiteTable(self, row, '')
                 new_tables.append(row[0])
             else:

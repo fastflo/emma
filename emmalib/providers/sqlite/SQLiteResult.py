@@ -1,7 +1,10 @@
 class SQLiteResult(object):
     def __init__(self, result, d):
         self.result = result
-        self.description = tuple(d)
+        if d:
+            self.description = tuple(d)
+        else:
+            self.description = ()
 
     def fetch_row(self, arg):
         return self.result

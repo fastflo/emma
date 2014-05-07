@@ -27,7 +27,10 @@ class SQLiteHandle(object):
 
     def store_result(self):
         self.stored_result = True
-        self.result = SQLiteResult(self.c.fetchall(), self.c.description)
+        if self.c.description is not None:
+            self.result = SQLiteResult(self.c.fetchall(), self.c.description)
+        else:
+            self.result = None
         return self.result
 
     def close(self):

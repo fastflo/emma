@@ -42,13 +42,6 @@ class SQLiteHost():
         self.last_error = ""
         self.query_time = 0
 
-    def __getstate__(self):
-        d = dict(self.__dict__)
-        for i in ["sql_log", "msg_log", "handle", "processlist", "update_ui", "update_ui_args"]:
-            del d[i]
-        #print "host will pickle:", d
-        return d
-
     def get_connection_string(self):
         return "::sqlite::"
 
@@ -124,11 +117,9 @@ class SQLiteHost():
         raise Exception("todo")  # return self.handle.insert_id()
 
     def escape(self, s):
-        print "todo: sqlite escape!"
         return repr(s)[1:-1]
 
     def escape_field(self, field):
-        print "todo: sqlite escape_field!"
         return field
 
     def escape_table(self, table):
