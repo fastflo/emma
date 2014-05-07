@@ -335,9 +335,10 @@ class QueryTab(widgets.BaseTab):
             return
         current_name = label.get_text()
         if self.last_auto_name in current_name:
-            print "setting new %r from old %r" % (new_auto_name, current_name)
-            label.set_text(current_name.replace(self.last_auto_name, new_auto_name))
-            self.last_auto_name = new_auto_name
+            if current_name != new_auto_name:
+                print "setting new %r from old %r" % (new_auto_name, current_name)
+                label.set_text(current_name.replace(self.last_auto_name, new_auto_name))
+                self.last_auto_name = new_auto_name
         else:
             print "last auto name %r not in %r!" % (self.last_auto_name, current_name)
         return
