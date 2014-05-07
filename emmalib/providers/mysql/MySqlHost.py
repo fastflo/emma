@@ -128,7 +128,7 @@ class MySqlHost:
                 print "unpickling databases!", self.handle
                 for name, db in self.databases.iteritems():
                     db.__init__(self)
-                self._use_db(db_name, True)
+                self.use_db(db_name, True)
         else:
             self.sql_log, self.msg_log, self.name, self.host, self.port, self.user, self.password, \
                 self.database, self.connect_timeout = args
@@ -202,7 +202,7 @@ class MySqlHost:
         #pprint.pprint(self.variables)
         self.refresh()
         if self.database:
-            self._use_db(self.database)
+            self.use_db(self.database)
 
     def is_at_least_version(self, requested):
         requested = map(int, requested.split("."))
@@ -277,12 +277,12 @@ class MySqlHost:
         if match:
             dbname = query[match.end(2):].strip("`; \t\r\n")
             print "use db: '%s'" % dbname
-            self._use_db(dbname, False)
+            self.use_db(dbname, False)
             # reexecute to reset field_count and so on...
             self.handle.query(query)
         return True
 
-    def _use_db(self, name, do_query=True):
+    def use_db(self, name, do_query=True):
         if self.current_db and name == self.current_db.name:
             return
         if do_query:
@@ -294,7 +294,7 @@ class MySqlHost:
                 name, "".join(traceback.format_stack()))
 
     def select_database(self, db):
-        self._use_db(db.name)
+        self.use_db(db.name)
 
     def refresh(self):
         self.query("show databases")

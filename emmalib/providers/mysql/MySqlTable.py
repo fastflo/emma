@@ -20,6 +20,7 @@
 import time
 from MySqlIndex import MySqlIndex
 
+
 class MySqlTable:
     def __init__(self, db, props, props_description):
         self.handle = db.handle

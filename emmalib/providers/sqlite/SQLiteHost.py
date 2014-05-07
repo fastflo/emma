@@ -105,7 +105,7 @@ class SQLiteHost(MySqlHost):
 
         return True
 
-    def _use_db(self, name, do_query=True):
+    def use_db(self, name, do_query=True):
         pass
 
     def select_database(self, db):
