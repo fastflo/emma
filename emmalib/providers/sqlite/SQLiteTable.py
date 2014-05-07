@@ -4,7 +4,6 @@ from SQLiteIndex import SQLiteIndex
 
 class SQLiteTable():
     def __init__(self, db, props):
-        print props
         self.handle = db.handle
         self.host = db.host
         self.db = db

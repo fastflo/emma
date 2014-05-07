@@ -36,13 +36,6 @@ class MySqlDb:
                 table.handle = self.handle
                 #self.id = id
 
-    def __getstate__(self):
-        d = dict(self.__dict__)
-        for i in ["handle"]:
-            del d[i]
-            #print "db will pickle:", d
-        return d
-
     def refresh(self):
         self.host.select_database(self)
         if self.host.is_at_least_version("4.1.1"):
