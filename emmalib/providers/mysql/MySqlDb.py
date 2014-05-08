@@ -2,6 +2,7 @@
 # emma
 #
 # Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
+#               2014 Nickolay Karnaukhov (mr.electronick@gmail.com)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

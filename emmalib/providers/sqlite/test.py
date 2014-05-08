@@ -1,3 +1,23 @@
+# -*- coding: utf-8 -*-
+# emma
+#
+# Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
+#               2014 Nickolay Karnaukhov (mr.electronick@gmail.com)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+# GNU Library General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
+
 from SQLiteHost import SQLiteHost
 
 host = SQLiteHost(None, None, '/home/nick/test.sqlite')
@@ -7,23 +27,16 @@ host.databases['dummydb'].refresh()
 print host.databases['dummydb'].tables
 
 table = host.databases['dummydb'].tables['aaa']
-# print "---------------------------"
-# print "Table:"
-# for p in table.__dict__:
-#     print p
-
 table.refresh()
 
-# print "---------------------------"
-# print "Table fields order:"
-# for fo in table.field_order:
-#     print fo, ':'
+print "---------------------------"
+print "Table:"
+print table.__dict__
 
-# print "---------------------------"
-# print "Table fields:"
-# for f in table.fields:
-#     print f, ':'
-#     print table.fields[f]
+print "---------------------------"
+print "Table fields:"
+for f in table.fields:
+    print f.__dict__
 
 print "---------------------------"
 print "Table indexes:"

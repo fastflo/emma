@@ -17,10 +17,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
+import os
+import time
 import sqlite3
-
-from emmalib.providers.mysql.MySqlHost import *
-from emmalib.providers.mysql.MySqlTable import *
 from emmalib.providers.sqlite.SQLiteDb import SQLiteDb
 from emmalib.providers.sqlite.SQLiteHandle import SQLiteHandle
 

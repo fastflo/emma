@@ -2,6 +2,7 @@
 # emma
 #
 # Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
+#               2014 Nickolay Karnaukhov (mr.electronick@gmail.com)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import time
+from MySqlField import MySqlField
 from MySqlIndex import MySqlIndex
 
 
@@ -26,21 +27,20 @@ class MySqlTable:
         self.handle = db.handle
         self.host = db.host
         self.db = db
-        self.props = props
-        self.props_dict = dict(zip(props_description, props))
         self.name = props[0]
-        self.fields = {}
-        self.field_order = []
+        self.fields = []
         self.indexes = []
         self.expanded = False
-        self.last_field_read = 0
         self.create_table = ""
-        self.describe_headers = []
-        self.props_description = props_description
         self.engine = props[1]
         self.comment = props[17]
         self.is_table = False
         self.is_view = False
+        self.props = props
+
+        self.props_dict = dict(zip(props_description, props))
+        self.props_description = props_description
+
         if self.engine:
             self.is_table = True
         else:
@@ -63,28 +63,16 @@ class MySqlTable:
         self.name = self.props[0]
 
     def refresh_fields(self):
-        self.host.query("describe %s" % self.host.escape_table(self.name))
-        result = self.handle.store_result()
-        self.describe_headers = []
-        self.fields = {}
-        self.field_order = []
-        if result is not None:
-            for h in result.describe():
-                self.describe_headers.append(h[0])
-            for row in result.fetch_row(0):
-                self.field_order.append(row[0])
-                self.fields[row[0]] = row
-        self.last_field_read = time.time()
+        self.fields = []
+        res = self.host.query_dict("describe %s" % self.host.escape_table(self.name))
+        for row in res['rows']:
+            self.fields.append(MySqlField(row))
 
     def refresh_indexes(self):
-        self.host.query('SHOW INDEX FROM %s' % self.host.escape_table(self.name))
-        result = self.handle.store_result()
-        if result is not None:
-            fields = []
-            for h in result.describe():
-                fields.append(h[0])
-            for row in result.fetch_row(0):
-                self.indexes.append(MySqlIndex(dict(zip(fields, row))))
+        self.indexes = []
+        res = self.host.query_dict('SHOW INDEX FROM %s' % self.host.escape_table(self.name))
+        for row in res['rows']:
+            self.indexes.append(MySqlIndex(row))
 
     def __str__(self):
         output = ""

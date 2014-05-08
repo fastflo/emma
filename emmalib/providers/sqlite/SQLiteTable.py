@@ -1,45 +1,60 @@
-import time
+# -*- coding: utf-8 -*-
+# emma
+#
+# Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
+#               2014 Nickolay Karnaukhov (mr.electronick@gmail.com)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+# GNU Library General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
+
 from SQLiteIndex import SQLiteIndex
+from SQLiteField import SQLiteField
 
 
-class SQLiteTable():
+class SQLiteTable:
     def __init__(self, db, props):
         self.handle = db.handle
         self.host = db.host
         self.db = db
-        self.props = props
         self.name = props[1]
-        self.fields = {}
-        self.field_order = []
+        self.fields = []
         self.indexes = []
         self.expanded = False
-        self.last_field_read = 0
         self.create_table = props[4]
-        self.describe_headers = []
+        self.engine = ''
+        self.comment = ''
         self.is_table = props[0] == 'table'
         self.is_view = props[0] == 'view'
+        self.props = props
 
-    def refresh(self, refresh_props=True):
+    def refresh(self):
         self.refresh_fields()
         self.refresh_indexes()
 
     def refresh_fields(self):
-        self.fields = {}
-        self.field_order = []
-        self.host.query("PRAGMA table_info(`%s`)" % self.name, False, False)
-        for h in self.host.handle.c.description:
-            self.describe_headers.append(h[0])
-        result = self.handle.store_result()
-        for field in result.fetch_row(0):
-            self.field_order.append(field[1])
-            self.fields[field[1]] = field
-        self.last_field_read = time.time()
-        return
+        self.fields = []
+        res = self.host.query_dict("PRAGMA table_info(`%s`)" % self.name, append_to_log=False)
+        for row in res['rows']:
+            self.fields.append(SQLiteField(row))
 
     def refresh_indexes(self):
         self.indexes = []
         res = self.host.query_dict("PRAGMA index_list(`%s`)" % self.name, append_to_log=False)
         for row in res['rows']:
+            ires = self.host.query_dict("PRAGMA index_info(`%s`)" % row['name'], append_to_log=False)
+            irow = ires['rows'][0]
+            row['column_name'] = irow['name']
             self.indexes.append(SQLiteIndex(row))
 
     def __str__(self):
@@ -52,4 +67,4 @@ class SQLiteTable():
         return self.create_table
 
     def get_tree_row(self, field_name):
-        return (self.fields[field_name][1],self.fields[field_name][2]),
+        return (self.fields[field_name].name,self.fields[field_name].type),

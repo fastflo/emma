@@ -30,10 +30,9 @@ class TabTable(BaseTab):
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
-            gobject.TYPE_STRING,
-            gobject.TYPE_STRING,
         )
         self.tv_fields = gtk.TreeView()
+        self.tv_fields.set_rules_hint(True)
         self.tv_fields.set_model(self.tv_fields_model)
         sw_fields.add(self.tv_fields)
 
@@ -46,6 +45,7 @@ class TabTable(BaseTab):
             gobject.TYPE_STRING,
         )
         self.tv_indexes = gtk.TreeView()
+        self.tv_indexes.set_rules_hint(True)
         self.tv_indexes.set_model(self.tv_indexes_model)
         sw_indexes.add(self.tv_indexes)
 
@@ -62,6 +62,7 @@ class TabTable(BaseTab):
         sw_data.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.tv_data_model = None
         self.tv_data = gtk.TreeView()
+        self.tv_data.set_rules_hint(True)
         self.tv_data.set_model(self.tv_indexes_model)
         sw_data.add(self.tv_data)
         self.data_loaded = False
@@ -98,8 +99,6 @@ class TabTable(BaseTab):
         self.tv_data_model = gtk.ListStore(*columns)
 
         self.tv_data.set_model(self.tv_data_model)
-
-        self.tv_data.set_rules_hint(True)
 
         for i in range(field_count):
             title = result_info[i][0].replace("_", "__").replace("[\r\n\t ]+", " ")
@@ -189,20 +188,25 @@ class TabTable(BaseTab):
         self.build_indexes()
 
     def build_fields(self):
-        ix = 0
-        for h in self.table.describe_headers:
-            self.tv_fields.append_column(gtk.TreeViewColumn(h, gtk.CellRendererText(), text=ix))
-            ix += 1
-        for fn in self.table.field_order:
-            v = self.table.fields[fn]
-            self.tv_fields_model.append(v)
+        self.tv_fields.append_column(gtk.TreeViewColumn("Name", gtk.CellRendererText(), text=0))
+        self.tv_fields.append_column(gtk.TreeViewColumn("Type", gtk.CellRendererText(), text=1))
+        self.tv_fields.append_column(gtk.TreeViewColumn("Null", gtk.CellRendererText(), text=2))
+        self.tv_fields.append_column(gtk.TreeViewColumn("Default", gtk.CellRendererText(), text=3))
+        for f in self.table.fields:
+            self.tv_fields_model.append(
+                (
+                    f.name,
+                    f.type,
+                    f.is_null,
+                    f.default,
+                )
+            )
 
     def build_indexes(self):
         self.tv_indexes.append_column(gtk.TreeViewColumn("Name", gtk.CellRendererText(), text=0))
         self.tv_indexes.append_column(gtk.TreeViewColumn("Column", gtk.CellRendererText(), text=1))
         self.tv_indexes.append_column(gtk.TreeViewColumn("Unique", gtk.CellRendererText(), text=2))
         for ix in self.table.indexes:
-            print ix
             self.tv_indexes_model.append(
                 (
                     ix.name,

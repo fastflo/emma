@@ -241,8 +241,8 @@ class ConnectionsTreeView(gtk.TreeView):
         i = self.connections_model.iter_children(_iter)
         while i and self.connections_model.iter_is_valid(i):
             self.connections_model.remove(i)
-        for field in table.field_order:
-            self.connections_model.append(_iter, table.get_tree_row(field))
+        for field in table.fields:
+            self.connections_model.append(_iter, ((field.name, field.type),))
 
     def render_connections_pixbuf(self, column, cell, model, itr):
         d = model.iter_depth(itr)
