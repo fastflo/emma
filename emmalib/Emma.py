@@ -37,10 +37,11 @@ class Emma:
         self.xml = gtk.glade.XML(self.glade_file)
         self.xml.signal_autoconnect(self)
 
+        self.key_map = KeyMap(self)
+
         self.mainwindow = widgets.MainWindow(self)
         self.mainwindow.connect('destroy', lambda *args: gtk.main_quit())
 
-        self.key_map = KeyMap(self)
         self.mainwindow.connect('key_release_event', self.key_map.on_mainwindow_key_release_event)
         self.mainwindow.connect('key_press_event', self.key_map.on_mainwindow_key_press_event)
 

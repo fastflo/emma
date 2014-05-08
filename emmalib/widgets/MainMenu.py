@@ -8,7 +8,7 @@ class MainMenu(gtk.MenuBar):
         'item-selected': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_OBJECT,))
     }
 
-    def __init__(self, emma):
+    def __init__(self, emma, mainwindow):
         """
         @param emma: Emma
         """
@@ -16,6 +16,9 @@ class MainMenu(gtk.MenuBar):
 
         self.emma = emma
 
+        #
+        #   FILE
+        #
         self.file_menu = gtk.MenuItem('_File')
 
         file_menu_submenu = gtk.Menu()
@@ -62,6 +65,37 @@ class MainMenu(gtk.MenuBar):
         self.file_menu.show()
         self.append(self.file_menu)
 
+        #
+        #   VIEW
+        #
+
+        self.view_menu = gtk.MenuItem('_View')
+        view_menu_submenu = gtk.Menu()
+
+        self.show_connections_tree = gtk.CheckMenuItem('Show Connections')
+        key, mod = gtk.accelerator_parse("<Control>H")
+        self.show_connections_tree.add_accelerator("activate", mainwindow.accel_group, key, mod, gtk.ACCEL_VISIBLE)
+        self.show_connections_tree.connect("activate", self.emma.key_map.toggle_connections_tv, mainwindow)
+        self.show_connections_tree.set_active(True)
+        self.show_connections_tree.show()
+        view_menu_submenu.append(self.show_connections_tree)
+
+        self.show_message_notebook = gtk.CheckMenuItem('Show Messages Bar')
+        key, mod = gtk.accelerator_parse("<Control>M")
+        self.show_message_notebook.add_accelerator("activate", mainwindow.accel_group, key, mod, gtk.ACCEL_VISIBLE)
+        self.show_message_notebook.connect("activate", self.emma.key_map.toggle_message_notebook, mainwindow)
+        self.show_message_notebook.set_active(True)
+        self.show_message_notebook.show()
+        view_menu_submenu.append(self.show_message_notebook)
+
+        view_menu_submenu.show()
+        self.view_menu.set_submenu(view_menu_submenu)
+        self.append(self.view_menu)
+
+        #
+        #   HELP
+        #
+        self.help_menu = gtk.MenuItem('_Help')
         help_menu_submenu = gtk.Menu()
 
         self.changelog = gtk.MenuItem('Changelog')
@@ -74,7 +108,6 @@ class MainMenu(gtk.MenuBar):
 
         help_menu_submenu.show()
 
-        self.help_menu = gtk.MenuItem('_Help')
         self.help_menu.set_right_justified(True)
         self.help_menu.set_submenu(help_menu_submenu)
         self.help_menu.show()

@@ -53,12 +53,10 @@ class KeyMap(gobject.GObject):
         #
         #   Panel switches
         #
-        if event.keyval == keysyms.m and self.if_ctrl():
-            self.emma.mainwindow.message_notebook.set_visible(
-                not self.emma.mainwindow.message_notebook.get_visible())
-        if event.keyval == keysyms.h and self.if_ctrl():
-            self.emma.mainwindow.connections_tv_container.set_visible(
-                not self.emma.mainwindow.connections_tv_container.get_visible())
+        # if event.keyval == keysyms.m and self.if_ctrl():
+        #     self.toggle_message_notebook(None, _window)
+        # if event.keyval == keysyms.h and self.if_ctrl():
+        #     self.toggle_connections_tv(None, _window)
 
         if event.keyval == keysyms.Control_L:
             self.left_control_key_is_pressed = False
@@ -68,3 +66,11 @@ class KeyMap(gobject.GObject):
 
     def if_ctrl(self):
         return self.left_control_key_is_pressed or self.right_control_key_is_pressed
+
+    def toggle_connections_tv(self, item, window):
+        window.connections_tv_container.set_visible(
+            not window.connections_tv_container.get_visible())
+
+    def toggle_message_notebook(self, item, window):
+        window.message_notebook.set_visible(
+            not window.message_notebook.get_visible())
