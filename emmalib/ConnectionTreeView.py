@@ -231,7 +231,7 @@ class ConnectionsTreeView(gtk.TreeView):
             return
         for name in new_tables:
             table = db.tables[name]
-            table.refresh(False)
+            table.refresh()
             self.redraw_table(table, iterators[name])
             self.emma.process_events()
 
