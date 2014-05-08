@@ -366,8 +366,6 @@ class MySqlHost:
 def result2hash(h, cols=False):
     res = h.store_result()
     ret = {"rows": []}
-    if cols:
-        ret['cols'] = []
     if res is not None:
         _cols = []
         for h in res.describe():

@@ -94,10 +94,21 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.current_query.set_current_host(self.current_host)
 
         elif depth == 2:
+
+            def rfrs(arg):
+                ctv, obj = arg
+                new_tables = obj.refresh()
+                ctv.redraw_db(obj, _iter, new_tables, True)
+                ctv.emma.mainwindow.window.set_cursor(None)
+
             self.current_host = o.host
-            new_tables = o.refresh()
-            self.redraw_db(o, _iter, new_tables, True)
             o.host.select_database(o)
+
+            watch = gtk.gdk.Cursor(gtk.gdk.WATCH)
+            self.emma.mainwindow.window.set_cursor(watch)
+            gobject.idle_add(rfrs, (self, o))
+
+            #rfrs(self, o)
             self.emma.current_query.set_current_db(o)
 
         elif depth == 3:
