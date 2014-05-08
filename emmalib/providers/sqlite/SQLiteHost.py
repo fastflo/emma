@@ -17,17 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
+import os
+import time
 import sqlite3
-
-from emmalib.providers.mysql.MySqlHost import *
-from emmalib.providers.mysql.MySqlTable import *
 from emmalib.providers.sqlite.SQLiteDb import SQLiteDb
 from emmalib.providers.sqlite.SQLiteHandle import SQLiteHandle
 
 
-class SQLiteHost(MySqlHost):
+class SQLiteHost():
     def __init__(self, sql_log, msg_log, filename, *args):
-        MySqlHost.__init__(self, *args)
         self.sql_log, self.msg_log, self.filename = sql_log, msg_log, filename
         self.name = self.filename
         self.host = "localhost"
@@ -43,13 +41,6 @@ class SQLiteHost(MySqlHost):
         self.last_error = ""
         self.query_time = 0
 
-    def __getstate__(self):
-        d = dict(self.__dict__)
-        for i in ["sql_log", "msg_log", "handle", "processlist", "update_ui", "update_ui_args"]:
-            del d[i]
-        #print "host will pickle:", d
-        return d
-
     def get_connection_string(self):
         return "::sqlite::"
 
@@ -62,7 +53,8 @@ class SQLiteHost(MySqlHost):
             self.handle = SQLiteHandle(self, sqlite3.connect(self.filename))
         except:
             self.connected = False
-            self.msg_log("%s: %s" % (sys.exc_type, sys.exc_value))
+            if self.msg_log:
+                self.msg_log("%s: %s" % (sys.exc_type, sys.exc_value))
             return
         self.current_db = SQLiteDb(self, "dummydb")
         self.databases = {"dummydb": self.current_db}
@@ -84,28 +76,35 @@ class SQLiteHost(MySqlHost):
 
     def query(self, query, check_use=True, append_to_log=True, encoding=None):
         if not self.handle:
-            self.msg_log("not connected! can't execute %s, %s, %s" % (query, str(self.handle), str(self)))
-            return
+            if self.msg_log:
+                self.msg_log("not connected! can't execute %s, %s, %s" % (query, str(self.handle), str(self)))
+            return False
         if append_to_log:
-            self.sql_log(query)
+            if self.sql_log:
+                self.sql_log(query)
         try:
             self.query_time = 0
             start = time.time()
             if encoding:
                 query = query.encode(encoding, "ignore")
-            print "executing query (encoding: %s): %r" % (encoding, query)
+            #print "executing query (encoding: %s): %r" % (encoding, query)
             self.handle.execute(query)
             self.query_time = time.time() - start
         except:
             print "error executing query:\n%s" % traceback.format_exc()
             s = str(sys.exc_value)
             self.last_error = s
-            self.msg_log(s)
+            if self.msg_log:
+                self.msg_log(s)
             return False
 
         return True
 
-    def _use_db(self, name, do_query=True):
+    def query_dict(self, query, check_use=False, append_to_log=True, encoding=None):
+        if self.query(query, check_use, append_to_log, encoding):
+            return result2hash(self.handle)
+
+    def use_db(self, name, do_query=True):
         pass
 
     def select_database(self, db):
@@ -121,12 +120,27 @@ class SQLiteHost(MySqlHost):
         raise Exception("todo")  # return self.handle.insert_id()
 
     def escape(self, s):
-        print "todo: sqlite escape!"
         return repr(s)[1:-1]
 
     def escape_field(self, field):
-        print "todo: sqlite escape_field!"
         return field
 
     def escape_table(self, table):
         return table
+
+
+def result2hash(h, cols=False):
+    res = h.store_result()
+    ret = {"rows": []}
+    if cols:
+        ret['cols'] = []
+    if res is not None:
+        _cols = []
+        for h in h.c.description:
+            _cols.append(h[0])
+        for row in res.fetch_row(0):
+            ret['rows'].append(dict(zip(_cols, row)))
+        if cols:
+            ret['cols'] = _cols
+    return ret
+

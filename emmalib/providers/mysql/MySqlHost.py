@@ -2,6 +2,7 @@
 # emma
 #
 # Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
+#               2014 Nickolay Karnaukhov (mr.electronick@gmail.com)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,9 +18,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import sys
 import os
 import re
+import sys
+import time
 import traceback
 import _mysql
 
@@ -128,7 +130,7 @@ class MySqlHost:
                 print "unpickling databases!", self.handle
                 for name, db in self.databases.iteritems():
                     db.__init__(self)
-                self._use_db(db_name, True)
+                self.use_db(db_name, True)
         else:
             self.sql_log, self.msg_log, self.name, self.host, self.port, self.user, self.password, \
                 self.database, self.connect_timeout = args
@@ -202,7 +204,7 @@ class MySqlHost:
         #pprint.pprint(self.variables)
         self.refresh()
         if self.database:
-            self._use_db(self.database)
+            self.use_db(self.database)
 
     def is_at_least_version(self, requested):
         requested = map(int, requested.split("."))
@@ -249,7 +251,8 @@ class MySqlHost:
             start = time.time()
             if encoding:
                 query = query.encode(encoding, "ignore")
-            print "executing query (encoding: %s): %r" % (encoding, query)
+            #print "executing query (encoding: %s): %r" % (encoding, query)
+            self.handle.query('SET NAMES utf8')
             self.handle.query(query)
             self.query_time = time.time() - start
         except:
@@ -277,12 +280,16 @@ class MySqlHost:
         if match:
             dbname = query[match.end(2):].strip("`; \t\r\n")
             print "use db: '%s'" % dbname
-            self._use_db(dbname, False)
+            self.use_db(dbname, False)
             # reexecute to reset field_count and so on...
             self.handle.query(query)
         return True
 
-    def _use_db(self, name, do_query=True):
+    def query_dict(self, query, check_use=False, append_to_log=True, encoding=None):
+        if self.query(query, check_use, append_to_log, encoding):
+            return result2hash(self.handle)
+
+    def use_db(self, name, do_query=True):
         if self.current_db and name == self.current_db.name:
             return
         if do_query:
@@ -294,7 +301,7 @@ class MySqlHost:
                 name, "".join(traceback.format_stack()))
 
     def select_database(self, db):
-        self._use_db(db.name)
+        self.use_db(db.name)
 
     def refresh(self):
         self.query("show databases")
@@ -354,3 +361,20 @@ class MySqlHost:
         if len(table) > 64:
             raise Exception("table name too long: %r / %d" % (table, len(table)))
         return self.escape_field(table)
+
+
+def result2hash(h, cols=False):
+    res = h.store_result()
+    ret = {"rows": []}
+    if cols:
+        ret['cols'] = []
+    if res is not None:
+        _cols = []
+        for h in res.describe():
+            _cols.append(h[0])
+        for row in res.fetch_row(0):
+            ret['rows'].append(dict(zip(_cols, row)))
+        if cols:
+            ret['cols'] = _cols
+    return ret
+

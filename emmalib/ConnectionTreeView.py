@@ -241,8 +241,8 @@ class ConnectionsTreeView(gtk.TreeView):
         i = self.connections_model.iter_children(_iter)
         while i and self.connections_model.iter_is_valid(i):
             self.connections_model.remove(i)
-        for field in table.field_order:
-            self.connections_model.append(_iter, (table.fields[field],))
+        for field in table.fields:
+            self.connections_model.append(_iter, ((field.name, field.type),))
 
     def render_connections_pixbuf(self, column, cell, model, itr):
         d = model.iter_depth(itr)
@@ -272,6 +272,9 @@ class ConnectionsTreeView(gtk.TreeView):
             cell.set_property("weight-set", True)
             cell.set_property("weight", 400)
             return
+        #
+        #   HOST level
+        #
         if d == 0:
             if o.connected:
                 databases_count = o.databases.__len__()
@@ -282,12 +285,25 @@ class ConnectionsTreeView(gtk.TreeView):
                 cell.set_property("text", "%s" % o.name)
                 cell.set_property("weight-set", True)
                 cell.set_property("weight", 400)
-        elif d == 3:
-            cell.set_property("text", "%s %s" % (o[0], o[1]))
+        #
+        #   DATABASE level
+        #
+        elif d == 1:
+            cell.set_property("text", "%s" % o.name)
             cell.set_property("weight-set", True)
             cell.set_property("weight", 400)
-        else:
-            cell.set_property("text", o.name)
+        #
+        #   TABLE level
+        #
+        elif d == 2:
+            cell.set_property("text", "%s" % o.name)
+            cell.set_property("weight-set", True)
+            cell.set_property("weight", 400)
+        #
+        #   FIELD level
+        #
+        elif d == 3:
+            cell.set_property("text", "%s %s" % (o[0], o[1]))
             cell.set_property("weight-set", True)
             cell.set_property("weight", 400)
 

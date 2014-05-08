@@ -18,20 +18,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
-from MySqlHost import MySqlHost
+from SQLiteHost import SQLiteHost
 
-host = MySqlHost(None, None, 'Localhost', 'localhost', 3306, 'root', 'root', '', 0)
+host = SQLiteHost(None, None, '/home/nick/test.sqlite')
 host.connect()
-host.use_db('bohprod')
 
-host.databases['bohprod'].refresh()
-host.databases['bohprod'].tables['boh_users'].refresh()
+host.databases['dummydb'].refresh()
+print host.databases['dummydb'].tables
 
-table = host.databases['bohprod'].tables['boh_users']
+table = host.databases['dummydb'].tables['aaa']
+table.refresh()
+
 print "---------------------------"
 print "Table:"
-for p in table.__dict__:
-    print p
+print table.__dict__
 
 print "---------------------------"
 print "Table fields:"

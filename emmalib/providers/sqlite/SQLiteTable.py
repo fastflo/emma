@@ -1,48 +1,61 @@
-from emmalib.providers.mysql.MySqlTable import *
+# -*- coding: utf-8 -*-
+# emma
+#
+# Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
+#               2014 Nickolay Karnaukhov (mr.electronick@gmail.com)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+# GNU Library General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
+
+from SQLiteIndex import SQLiteIndex
+from SQLiteField import SQLiteField
 
 
-class SQLiteTable(MySqlTable):
-    def __init__(self, db, props, props_description):
-        MySqlTable.__init__(self, db, props, props_description)
+class SQLiteTable:
+    def __init__(self, db, props):
         self.handle = db.handle
         self.host = db.host
         self.db = db
-        self.props = props
-        self.name = props[0]
-        self.fields = {}
-        self.field_order = []
+        self.name = props[1]
+        self.fields = []
+        self.indexes = []
         self.expanded = False
-        self.last_field_read = 0
-        self.create_table = ""
-        self.describe_headers = []
+        self.create_table = props[4]
+        self.engine = ''
+        self.comment = ''
+        self.is_table = props[0] == 'table'
+        self.is_view = props[0] == 'view'
+        self.props = props
 
-    def __getstate__(self):
-        d = dict(self.__dict__)
-        for i in ["handle"]:
-            del d[i]
-        #print "table will pickle:", d
-        return d
+    def refresh(self):
+        self.refresh_fields()
+        self.refresh_indexes()
 
-    def __getitem__(self, what):
-        print "todo: props dict %r" % what
-        return None
+    def refresh_fields(self):
+        self.fields = []
+        res = self.host.query_dict("PRAGMA table_info(`%s`)" % self.name, append_to_log=False)
+        for row in res['rows']:
+            self.fields.append(SQLiteField(row))
 
-    def refresh(self, refresh_props=True):
-        self.host.query("SELECT sql FROM sqlite_master WHERE type='table' and name='%s'" % self.name)
-        result = self.handle.store_result()
-        self.fields = {}
-        self.field_order = []
-        result = result.fetch_row(0)
-        self.create_table = result[0][0]
-
-        self.host.query("SELECT * FROM %s limit 1" % self.name)
-
-        for field in self.host.handle.c.description:
-            self.field_order.append(field[0])
-            self.fields[field[0]] = field
-
-        self.last_field_read = time.time()
-        return
+    def refresh_indexes(self):
+        self.indexes = []
+        res = self.host.query_dict("PRAGMA index_list(`%s`)" % self.name, append_to_log=False)
+        for row in res['rows']:
+            ires = self.host.query_dict("PRAGMA index_info(`%s`)" % row['name'], append_to_log=False)
+            irow = ires['rows'][0]
+            row['column_name'] = irow['name']
+            self.indexes.append(SQLiteIndex(row))
 
     def __str__(self):
         output = ""
@@ -51,12 +64,7 @@ class SQLiteTable(MySqlTable):
         return output
 
     def get_create_table(self):
-        if not self.host.query("SELECT sql FROM sqlite_master WHERE type='table' and name='%s'" % self.name):
-            return
-        result = self.handle.store_result()
-        if not result:
-            print "can't get create table for %s at %s and %s" % (self.name, self, self.handle)
-            return ""
-        result = result.fetch_row(0)
-        self.create_table = result[0][0]
         return self.create_table
+
+    def get_tree_row(self, field_name):
+        return (self.fields[field_name].name,self.fields[field_name].type),
