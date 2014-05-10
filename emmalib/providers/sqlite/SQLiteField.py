@@ -7,3 +7,6 @@ class SQLiteField:
         else:
             self.is_null = False
         self.type = row['type']
+
+    def get_py_type(self):
+        return str

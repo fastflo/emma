@@ -24,7 +24,8 @@ import sys
 import time
 import traceback
 import _mysql
-
+import gobject
+from MySQLdb import converters
 from MySqlDb import *
 
 
@@ -363,16 +364,83 @@ class MySqlHost:
         return self.escape_field(table)
 
 
-def result2hash(h, cols=False):
+def result2hash(h, cols=True):
     res = h.store_result()
     ret = {"rows": []}
     if res is not None:
         _cols = []
+        _types = []
         for h in res.describe():
             _cols.append(h[0])
+            _types.append(mysql2py(h[1]))
         for row in res.fetch_row(0):
             ret['rows'].append(dict(zip(_cols, row)))
         if cols:
             ret['cols'] = _cols
+            ret['types'] = _types
     return ret
 
+
+def mysql2gobject(typecode):
+    d = {
+        16: gobject.TYPE_INT,
+        252: gobject.TYPE_STRING,
+        1: gobject.TYPE_STRING,
+        10: gobject.TYPE_STRING,
+        12: gobject.TYPE_STRING,
+        0: gobject.TYPE_FLOAT,
+        5: gobject.TYPE_FLOAT,
+        247: gobject.TYPE_STRING,
+        4: gobject.TYPE_FLOAT,
+        255: gobject.TYPE_STRING,
+        9: gobject.TYPE_LONG,
+        3: gobject.TYPE_LONG,
+        251: gobject.TYPE_STRING,
+        8: gobject.TYPE_LONG,
+        250: gobject.TYPE_STRING,
+        14: gobject.TYPE_STRING,
+        246: gobject.TYPE_FLOAT,
+        6: gobject.TYPE_STRING,
+        248: gobject.TYPE_STRING,
+        2: gobject.TYPE_INT,
+        254: gobject.TYPE_STRING,
+        11: gobject.TYPE_STRING,
+        7: gobject.TYPE_STRING,
+        249: gobject.TYPE_STRING,
+        253: gobject.TYPE_STRING,
+        15: gobject.TYPE_STRING,
+        13: gobject.TYPE_STRING
+    }
+    return d[typecode]
+
+def mysql2py(typecode):
+    d = {
+        16: int,
+        252: str,
+        1: str,
+        10: str,
+        12: str,
+        0: float,
+        5: float,
+        247: str,
+        4: float,
+        255: str,
+        9: long,
+        3: long,
+        251: str,
+        8: long,
+        250: str,
+        14: str,
+        246: float,
+        6: str,
+        248: str,
+        2: int,
+        254: str,
+        11: str,
+        7: str,
+        249: str,
+        253: str,
+        15: str,
+        13: str
+    }
+    return d[typecode]

@@ -65,12 +65,16 @@ class MySqlTable:
     def refresh_fields(self):
         self.fields = []
         res = self.host.query_dict("describe %s" % self.host.escape_table(self.name))
+        if not res:
+            return
         for row in res['rows']:
             self.fields.append(MySqlField(row))
 
     def refresh_indexes(self):
         self.indexes = []
         res = self.host.query_dict('SHOW INDEX FROM %s' % self.host.escape_table(self.name))
+        if not res:
+            return
         for row in res['rows']:
             self.indexes.append(MySqlIndex(row))
 

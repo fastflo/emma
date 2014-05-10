@@ -18,8 +18,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
 import os
+import sys
 import time
 import sqlite3
+import traceback
 from emmalib.providers.sqlite.SQLiteDb import SQLiteDb
 from emmalib.providers.sqlite.SQLiteHandle import SQLiteHandle
 
@@ -40,6 +42,7 @@ class SQLiteHost():
         self.update_ui = None
         self.last_error = ""
         self.query_time = 0
+        self.update_ui_args = None
 
     def get_connection_string(self):
         return "::sqlite::"
@@ -136,11 +139,14 @@ def result2hash(h, cols=False):
         ret['cols'] = []
     if res is not None:
         _cols = []
+        _types = []
         for h in h.c.description:
             _cols.append(h[0])
+            _types.append(str)
         for row in res.fetch_row(0):
             ret['rows'].append(dict(zip(_cols, row)))
         if cols:
             ret['cols'] = _cols
+            ret['types'] = _types
     return ret
 

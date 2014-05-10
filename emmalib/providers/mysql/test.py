@@ -18,27 +18,75 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
-from MySqlHost import MySqlHost
 
-host = MySqlHost(None, None, 'Localhost', 'localhost', 3306, 'root', 'root', '', 0)
-host.connect()
-host.use_db('bohprod')
+s = 'Русский текст'
 
-host.databases['bohprod'].refresh()
-host.databases['bohprod'].tables['boh_users'].refresh()
+try:
+    s.decode('ASCII')
+    print "ascii", s
+except:
+    try:
+        s.decode('UTF8')
+        print "utf", s
+    except:
+        print 'binary'
 
-table = host.databases['bohprod'].tables['boh_users']
-print "---------------------------"
-print "Table:"
-for p in table.__dict__:
-    print p
 
-print "---------------------------"
-print "Table fields:"
-for f in table.fields:
-    print f.__dict__
 
-print "---------------------------"
-print "Table indexes:"
-for i in table.indexes:
-    print i.__dict__
+
+# import MySQLdb
+#
+# conn = MySQLdb.connect(host='localhost', user='root', passwd='root')
+# print conn
+# """@type cur: MySQLdb.cursors.Cursor"""
+# cur = conn.cursor()
+# print cur.execute('USE bohprod; SHOW TABLE STATUS;')
+# res = cur.fetchall()
+# print res
+# print cur.nextset()
+# for row in cur.description:
+#     print row
+# res = cur.fetchall()
+# for row in res:
+#     print row
+# print cur.nextset()
+
+
+# _db = 'bohprod'
+# _tb = 'boh_users'
+#
+# from MySqlHost import MySqlHost
+#
+# host = MySqlHost(None, None, 'Localhost', 'localhost', 3306, 'root', 'root', '', 0)
+# host.connect()
+# host.use_db(_db)
+#
+# res = host.query_dict('SELECT * FROM boh_users')
+# for t in res['types']:
+#     print t
+# for row in res['cols']:
+#     print row
+# for row in res['rows']:
+#     print row
+
+
+# host.databases[_db].refresh()
+# host.databases[_db].tables[_tb].refresh()
+#
+# table = host.databases[_db].tables[_tb]
+# print "---------------------------"
+# print "Table:"
+# for p in table.__dict__:
+#     print p.ljust(20), table.__dict__[p]
+
+# print "---------------------------"
+# print "Table fields:"
+# for f in table.fields:
+#     print f.name.ljust(24), \
+#         f.type.ljust(16), \
+#         str(f.get_py_type()).ljust(20)
+
+# print "---------------------------"
+# print "Table indexes:"
+# for i in table.indexes:
+#     print i.__dict__

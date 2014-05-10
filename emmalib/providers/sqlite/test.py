@@ -18,27 +18,42 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
-from SQLiteHost import SQLiteHost
+import sqlite3
 
-host = SQLiteHost(None, None, '/home/nick/test.sqlite')
-host.connect()
+conn = sqlite3.connect(database='/home/nick/test_database.sqlite')
+print conn
+cur = conn.cursor()
+print cur.execute("SELECT * FROM sqlite_master ORDER BY name")
+print cur.description
+res = cur.fetchall()
+for row in res:
+    print row
 
-host.databases['dummydb'].refresh()
-print host.databases['dummydb'].tables
 
-table = host.databases['dummydb'].tables['aaa']
-table.refresh()
 
-print "---------------------------"
-print "Table:"
-print table.__dict__
 
-print "---------------------------"
-print "Table fields:"
-for f in table.fields:
-    print f.__dict__
 
-print "---------------------------"
-print "Table indexes:"
-for i in table.indexes:
-    print i.__dict__
+# from SQLiteHost import SQLiteHost
+#
+# host = SQLiteHost(None, None, '/home/nick/test.sqlite')
+# host.connect()
+#
+# host.databases['dummydb'].refresh()
+# print host.databases['dummydb'].tables
+#
+# table = host.databases['dummydb'].tables['aaa']
+# table.refresh()
+#
+# print "---------------------------"
+# print "Table:"
+# print table.__dict__
+#
+# print "---------------------------"
+# print "Table fields:"
+# for f in table.fields:
+#     print f.__dict__
+#
+# print "---------------------------"
+# print "Table indexes:"
+# for i in table.indexes:
+#     print i.__dict__

@@ -85,23 +85,25 @@ class TabTable(BaseTab):
 
     def load_data(self):
         self.data_loaded = True
-        status = self.table.db.host.query('SELECT * FROM %s' % self.table.name, append_to_log=False, encoding='utf8')
+        result = self.table.db.host.query_dict('SELECT * FROM %s' % self.table.name, append_to_log=False, encoding='utf8')
 
-        if not status:
+        if not result:
             return
 
-        field_count = self.table.db.host.handle.field_count()
-        result = self.table.db.host.handle.store_result()
-        result_info = result.describe()
-        num_rows = result.num_rows()
+        field_count = len(result['cols'])
 
-        columns = [gobject.TYPE_STRING] * field_count
+        columns = []
+        for t in result['types']:
+            columns.append(t)
+
+        print columns
+
         self.tv_data_model = gtk.ListStore(*columns)
 
         self.tv_data.set_model(self.tv_data_model)
 
         for i in range(field_count):
-            title = result_info[i][0].replace("_", "__").replace("[\r\n\t ]+", " ")
+            title = result['cols'][i].replace("_", "__").replace("[\r\n\t ]+", " ")
             text_renderer = gtk.CellRendererText()
             if True:  # editable
                 text_renderer.set_property("editable", True)
@@ -113,35 +115,46 @@ class TabTable(BaseTab):
             col = self.tv_data.get_column(l - 1)
             col.set_sort_column_id(l-1)
 
-            if self.emma.config.get_bool("result_view_column_resizable"):
-                col.set_resizable(True)
-            else:
-                col.set_resizable(False)
-                col.set_min_width(int(self.emma.config.get("result_view_column_width_min")))
-                col.set_max_width(int(self.emma.config.get("result_view_column_width_max")))
+            # if self.emma.config.get_bool("result_view_column_resizable"):
+            #     col.set_resizable(True)
+            # else:
+            #     col.set_resizable(False)
+            #     col.set_min_width(int(self.emma.config.get("result_view_column_width_min")))
+            #     col.set_max_width(int(self.emma.config.get("result_view_column_width_max")))
+            #
+            # if True:  # sortable
+            #     col.set_clickable(True)
+            #     col.set_sort_indicator(True)
+            # else:
+            #     col.set_clickable(False)
+            #     col.set_sort_indicator(False)
 
-            if True:  # sortable
-                col.set_clickable(True)
-                col.set_sort_indicator(True)
-            else:
-                col.set_clickable(False)
-                col.set_sort_indicator(False)
 
-        cnt = 0
-        for row in result.fetch_row(0):
-            def to_string(f):
-                if type(f) == str:
-                    f = unicode(f, errors="replace")
-                    pass
-                elif f is None:
-                    pass
-                else:
-                    f = str(f)
-                return f
-            self.tv_data_model.append(map(to_string, row))
-            cnt += 1
-            if not cnt % 100 == 0:
-                continue
+        for row in result['rows']:
+            model_row = []
+            for col in result['cols']:
+                v = None
+                if row[col] is not None:
+                    ci = result['cols'].index(col)
+                    if result['types'][ci] == long:
+                        v = long(row[col])
+                    elif result['types'][ci] == int:
+                        v = int(row[col])
+                    elif result['types'][ci] == str:
+                        try:
+                            row[col].decode('ascii')
+                            v = str(row[col])
+                        except:
+                            try:
+                                v = row[col].decode('utf-8')
+                                #v = unicode(row[col])
+                            except UnicodeError:
+                                v = '<BINARY>'
+                model_row.append(v)
+            try:
+                self.tv_data_model.append(model_row)
+            except:
+                print "cannot add row:", model_row
 
     def update(self):
         th = self.table
