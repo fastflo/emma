@@ -104,5 +104,7 @@ class MySqlTable:
         return self.host.query_dict("SELECT * FROM %s" % self.name, append_to_log=False)
 
     def get_table_properties_widget(self):
-        print "get_table_properties_widget"
-        return TableProperties(self)
+        if self.is_table:
+            return TableProperties(self)
+        else:
+            return False
