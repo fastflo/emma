@@ -1,6 +1,7 @@
 import gtk
 import gobject
 from BaseTab import BaseTab
+from ResultCellRenders import *
 
 
 class TabTablesList(BaseTab):
@@ -52,7 +53,7 @@ class TabTablesList(BaseTab):
                 title = field.replace("_", "__")
                 self.tv.insert_column_with_data_func(
                     -1, title, gtk.CellRendererText(),
-                    self.emma.render_mysql_string, _id)
+                    render_mysql_string, _id)
                 _id += 1
             self.tables_count = 0
 

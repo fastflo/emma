@@ -3,6 +3,7 @@
 import gtk
 import gobject
 from BaseTab import BaseTab
+from ResultCellRenders import *
 
 
 class TabTable(BaseTab):
@@ -90,8 +91,6 @@ class TabTable(BaseTab):
         if not result:
             return
 
-        field_count = len(result['cols'])
-
         columns = []
         for t in result['types']:
             columns.append(t)
@@ -102,15 +101,17 @@ class TabTable(BaseTab):
 
         self.tv_data.set_model(self.tv_data_model)
 
-        for i in range(field_count):
+        for i in range(len(result['cols'])):
             title = result['cols'][i].replace("_", "__").replace("[\r\n\t ]+", " ")
+            field_type = result['types'][i]
+
             text_renderer = gtk.CellRendererText()
             if True:  # editable
                 text_renderer.set_property("editable", True)
                 #text_renderer.connect("edited", self.on_query_change_data, i)
 
             l = self.tv_data.insert_column_with_data_func(
-                -1, title, text_renderer, self.emma.render_mysql_string, i)
+                -1, title, text_renderer, render_mysql_string, i)
 
             col = self.tv_data.get_column(l - 1)
             col.set_sort_column_id(l-1)
@@ -129,18 +130,17 @@ class TabTable(BaseTab):
             #     col.set_clickable(False)
             #     col.set_sort_indicator(False)
 
-
         for row in result['rows']:
             model_row = []
             for col in result['cols']:
                 v = None
                 if row[col] is not None:
                     ci = result['cols'].index(col)
-                    if result['types'][ci] == long:
+                    if result['types'][ci] == gobject.TYPE_LONG:
                         v = long(row[col])
-                    elif result['types'][ci] == int:
+                    elif result['types'][ci] == gobject.TYPE_INT:
                         v = int(row[col])
-                    elif result['types'][ci] == str:
+                    elif result['types'][ci] == gobject.TYPE_STRING:
                         try:
                             row[col].decode('ascii')
                             v = str(row[col])

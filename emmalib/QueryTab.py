@@ -744,7 +744,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                     text_renderer.set_property("editable", True)
                     text_renderer.connect("edited", self.on_query_change_data, i)
                 l = self.treeview.insert_column_with_data_func(
-                    -1, title, text_renderer, self.emma.render_mysql_string, i)
+                    -1, title, text_renderer, widgets.ResultCellRenders.render_mysql_string, i)
 
                 col = self.treeview.get_column(l - 1)
 

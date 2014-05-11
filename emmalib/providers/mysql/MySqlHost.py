@@ -372,7 +372,7 @@ def result2hash(h, cols=True):
         _types = []
         for h in res.describe():
             _cols.append(h[0])
-            _types.append(mysql2py(h[1]))
+            _types.append(mysql2gobject(h[1]))
         for row in res.fetch_row(0):
             ret['rows'].append(dict(zip(_cols, row)))
         if cols:
@@ -412,6 +412,7 @@ def mysql2gobject(typecode):
         13: gobject.TYPE_STRING
     }
     return d[typecode]
+
 
 def mysql2py(typecode):
     d = {

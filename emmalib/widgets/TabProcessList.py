@@ -5,6 +5,8 @@ from BaseTab import BaseTab
 from PopUpProcessList import PopUpProcessList
 from emmalib import dialogs
 
+from ResultCellRenders import *
+
 
 class TabProcessList(BaseTab):
     def __init__(self, emma, host):
@@ -67,7 +69,7 @@ class TabProcessList(BaseTab):
             title = field[0].replace("_", "__")
             self.treeview.insert_column_with_data_func(
                 -1, title, gtk.CellRendererText(),
-                self.emma.render_mysql_string, _id)
+                render_mysql_string, _id)
             _id += 1
 
         for proc in rows:
