@@ -67,4 +67,7 @@ class SQLiteTable:
         return self.create_table
 
     def get_tree_row(self, field_name):
-        return (self.fields[field_name].name,self.fields[field_name].type),
+        return (self.fields[field_name].name, self.fields[field_name].type),
+
+    def get_all_records(self):
+        return self.host.query_dict("SELECT * FROM %s" % self.name, append_to_log=False)
