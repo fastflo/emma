@@ -178,7 +178,7 @@ class TabTable(BaseTab):
             try:
                 self.tv_data_model.append(model_row)
             except:
-                print "cannot add row:", model_row
+                pass
 
     def column_insert(self, title, sort_column_index, display_column_index):
         text_renderer = gtk.CellRendererText()

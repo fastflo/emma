@@ -65,7 +65,6 @@ class TabBlobView(gtk.VBox):
             if column == q.treeview.get_column(col_num):
                 break
         else:
-            print "column not found!"
             return
         crs = column.get_cell_renderers()
         return q.on_query_change_data(crs[0],
