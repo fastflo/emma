@@ -441,7 +441,7 @@ class table_editor:
             self.table.create_table = None
             self.table.refresh()
             new_tables = self.table.db.refresh()
-            self.emma.redraw_db(self.table.db, self.emma.get_db_iter(self.table.db), new_tables)
+            self.emma.redraw_db(self.table.db, self.emma.connections_tv.get_db_iter(self.table.db), new_tables)
             self.window.hide()
             return
         self.emma.show_message("edit table", "sorry, can't change table - sql error")

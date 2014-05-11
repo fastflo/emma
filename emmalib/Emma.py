@@ -92,6 +92,9 @@ class Emma:
         self.field_conditions_initialized = False
         self.current_host = None
 
+        self.plugin_pathes = []
+        self.plugins = {}
+
         self.hosts = {}
         self.queries = []
 
@@ -271,11 +274,6 @@ class Emma:
     #     print "found fields:", fields
     #     return fields
 
-    def on_message_notebook_switch_page(self, nb, pointer, page):
-        pass
-        # if self.current_query:
-        #     self.current_query.on_query_view_cursor_changed(self.current_query.treeview)
-
     def on_execute_query_from_disk_activate(self, button, filename=None):
         if not self.current_host:
             dialogs.show_message("execute query from disk", "no host selected!")
@@ -375,32 +373,6 @@ class Emma:
         path, column = self.connections_tv.get_cursor()
         _iter = self.connections_tv.connections_model.get_iter(path)
         return path, column, _iter, self.connections_tv.connections_model.get_value(_iter, 0)
-
-    def get_db_iter(self, db):
-        return self.get_connections_object_at_depth(db, 1)
-
-    def get_host_iter(self, host):
-        return self.get_connections_object_at_depth(host, 0)
-
-    def get_connections_object_at_depth(self, obj, depth):
-        d = 0
-        model = self.connections_tv.connections_model
-        _iter = model.get_iter_first()
-        while _iter:
-            if d == depth and model.get_value(_iter, 0) == obj:
-                return _iter
-            if d < depth and model.iter_has_child(_iter):
-                _iter = model.iter_children(_iter)
-                d += 1
-                continue
-            new_iter = model.iter_next(_iter)
-            if not new_iter:
-                _iter = model.iter_parent(_iter)
-                d -= 1
-                _iter = model.iter_next(_iter)
-            else:
-                _iter = new_iter
-        return None
 
     def on_template(self, button, t):
         current_table = self.get_selected_table()

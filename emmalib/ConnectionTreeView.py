@@ -367,7 +367,7 @@ class ConnectionsTreeView(gtk.TreeView):
             db = table.db
             if db.query("drop table `%s`" % table.name):
                 new_tables = db.refresh()
-                self.redraw_db(db, self.emma.get_db_iter(db), new_tables)
+                self.redraw_db(db, self.emma.connections_tv.get_db_iter(db), new_tables)
         elif what == "check_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
@@ -394,7 +394,7 @@ class ConnectionsTreeView(gtk.TreeView):
             host = db.host
             if host.query("drop database`%s`" % db.name):
                 host.refresh()
-                self.redraw_host(host, self.emma.get_host_iter(host))
+                self.redraw_host(host, self.emma.connections_tv.get_host_iter(host))
         elif what == "new_table":
             name = dialogs.input_dialog("New table", "Please enter the name of the new table:",
                                         window=self.emma.mainwindow)
@@ -402,7 +402,7 @@ class ConnectionsTreeView(gtk.TreeView):
                 return
             if db.query("create table `%s` (`%s_id` int primary key auto_increment)" % (name, name)):
                 new_tables = db.refresh()
-                self.redraw_db(db, self.emma.get_db_iter(db), new_tables)
+                self.redraw_db(db, self.emma.connections_tv.get_db_iter(db), new_tables)
         elif what == "check_tables":
             self.current_host = db.host
             self.current_host.select_database(db)
@@ -457,3 +457,30 @@ class ConnectionsTreeView(gtk.TreeView):
             self.connection_window.show("new")
         elif what == "show_processes":
             self.emma.main_notebook.add_process_list_tab(host)
+
+    def get_connections_object_at_depth(self, obj, depth):
+        d = 0
+        model = self.connections_model
+        _iter = model.get_iter_first()
+        while _iter:
+            if d == depth and model.get_value(_iter, 0) == obj:
+                return _iter
+            if d < depth and model.iter_has_child(_iter):
+                _iter = model.iter_children(_iter)
+                d += 1
+                continue
+            new_iter = model.iter_next(_iter)
+            if not new_iter:
+                _iter = model.iter_parent(_iter)
+                d -= 1
+                _iter = model.iter_next(_iter)
+            else:
+                _iter = new_iter
+        return None
+
+    def get_db_iter(self, db):
+        return self.get_connections_object_at_depth(db, 1)
+
+    def get_host_iter(self, host):
+        return self.get_connections_object_at_depth(host, 0)
+
