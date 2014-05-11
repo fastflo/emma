@@ -64,6 +64,7 @@ class TabTable(BaseTab):
         #   DATA
         #
         self.results_view = ResultView()
+        self.results_view.enable_sorting = True
         self.ui.append_page(self.results_view, gtk.Label('Data'))
 
         #
