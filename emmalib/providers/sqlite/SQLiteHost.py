@@ -20,6 +20,7 @@
 import os
 import sys
 import time
+import gobject
 import sqlite3
 import traceback
 from emmalib.providers.sqlite.SQLiteDb import SQLiteDb
@@ -132,21 +133,14 @@ class SQLiteHost():
         return table
 
 
-def result2hash(h, cols=False):
+def result2hash(h):
     res = h.store_result()
-    ret = {"rows": []}
-    if cols:
-        ret['cols'] = []
+    ret = {"cols": [], "rows": [], "types": []}
     if res is not None:
-        _cols = []
-        _types = []
         for h in h.c.description:
-            _cols.append(h[0])
-            _types.append(str)
+            ret['cols'].append(h[0])
+            ret['types'].append(gobject.TYPE_STRING)
         for row in res.fetch_row(0):
-            ret['rows'].append(dict(zip(_cols, row)))
-        if cols:
-            ret['cols'] = _cols
-            ret['types'] = _types
+            ret['rows'].append(dict(zip(ret['cols'], row)))
     return ret
 
