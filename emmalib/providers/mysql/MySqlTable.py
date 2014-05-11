@@ -20,6 +20,7 @@
 
 from MySqlField import MySqlField
 from MySqlIndex import MySqlIndex
+from widgets import TableProperties
 
 
 class MySqlTable:
@@ -101,3 +102,7 @@ class MySqlTable:
 
     def get_all_records(self):
         return self.host.query_dict("SELECT * FROM %s" % self.name, append_to_log=False)
+
+    def get_table_properties_widget(self):
+        print "get_table_properties_widget"
+        return TableProperties(self)

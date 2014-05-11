@@ -15,6 +15,7 @@ class ResultView(gtk.ScrolledWindow):
         self.tv_data.set_model(self.tv_data_model)
         self.add(self.tv_data)
         self.data_loaded = False
+        self.enable_sorting = False
         self.show_all()
 
     def load_data(self, result):
@@ -30,16 +31,25 @@ class ResultView(gtk.ScrolledWindow):
         i = 0
         ci = 0
         for t in result['types']:
-            columns.append(t)
-            sort_index = i
-            disp_index = sort_index
-            i += 1
-            if t == gobject.TYPE_LONG or t == gobject.TYPE_INT or t == gobject.TYPE_FLOAT:
-                columns.append(gobject.TYPE_STRING)
-                disp_index = i
+            if self.enable_sorting:
+                columns.append(t)
+                sort_index = i
+                disp_index = sort_index
                 i += 1
-            sort_display_map.append((ci, sort_index, disp_index))
-            ci += 1
+                if t == gobject.TYPE_LONG or t == gobject.TYPE_INT or t == gobject.TYPE_FLOAT:
+                    columns.append(gobject.TYPE_STRING)
+                    disp_index = i
+                    i += 1
+                sort_display_map.append((ci, sort_index, disp_index))
+                ci += 1
+            else:
+                sort_index = i
+                disp_index = i
+                columns.append(gobject.TYPE_STRING)
+                i += 1
+                sort_display_map.append((ci, sort_index, disp_index))
+                ci += 1
+
         #
         #   Add it all to model and in treeview
         #
@@ -62,25 +72,28 @@ class ResultView(gtk.ScrolledWindow):
             for col in result['cols']:
                 ci = result['cols'].index(col)
                 if result['types'][ci] == gobject.TYPE_LONG:
-                    if row[col] is None:
-                        v = 0
-                    else:
-                        v = long(row[col])
-                    model_row.append(v)
+                    if self.enable_sorting:
+                        if row[col] is None:
+                            v = 0
+                        else:
+                            v = long(row[col])
+                        model_row.append(v)
                     model_row.append(row[col])
                 elif result['types'][ci] == gobject.TYPE_INT:
-                    if row[col] is None:
-                        v = 0
-                    else:
-                        v = int(row[col])
-                    model_row.append(v)
+                    if self.enable_sorting:
+                        if row[col] is None:
+                            v = 0
+                        else:
+                            v = int(row[col])
+                        model_row.append(v)
                     model_row.append(row[col])
                 elif result['types'][ci] == gobject.TYPE_FLOAT:
-                    if row[col] is None:
-                        v = 0
-                    else:
-                        v = float(row[col])
-                    model_row.append(v)
+                    if self.enable_sorting:
+                        if row[col] is None:
+                            v = 0
+                        else:
+                            v = float(row[col])
+                        model_row.append(v)
                     model_row.append(row[col])
                 elif result['types'][ci] == gobject.TYPE_STRING:
                     if row[col] is None:
@@ -124,7 +137,9 @@ class ResultView(gtk.ScrolledWindow):
             render_mysql_string,
             display_column_index)
         col = self.tv_data.get_column(ci-1)
-        col.set_sort_column_id(sort_column_index)
+        col.set_clickable(self.enable_sorting)
+        if self.enable_sorting:
+            col.set_sort_column_id(sort_column_index)
 
     def cleanup(self):
         self.data_loaded = False

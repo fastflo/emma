@@ -71,3 +71,6 @@ class SQLiteTable:
 
     def get_all_records(self):
         return self.host.query_dict("SELECT * FROM %s" % self.name, append_to_log=False)
+
+    def get_table_properties_widget(self):
+        return False

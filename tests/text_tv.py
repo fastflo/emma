@@ -1,6 +1,6 @@
 import gtk
 import gobject
-from emmalib.providers.mysql import MySqlHost, MySqlTable
+from emmalib.providers.mysql import MySqlHost
 from emmalib.widgets.ResultCellRenders import render_mysql_string
 
 
@@ -24,8 +24,8 @@ class Win(gtk.Window):
         self.load_data()
 
     def db_connect(self):
-        _db = 'bohprod'
-        _tb = 'boh_users'
+        _db = 'test'
+        _tb = 'aaa'
         self.host = MySqlHost(None, None, 'Localhost', 'localhost', 3306, 'root', 'root', '', 0)
         self.host.connect()
         self.host.use_db(_db)

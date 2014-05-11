@@ -19,28 +19,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
 
-s = 'Русский текст'
-
-try:
-    s.decode('ASCII')
-    print "ascii", s
-except:
-    try:
-        s.decode('UTF8')
-        print "utf", s
-    except:
-        print 'binary'
-
-
-
-
 # import MySQLdb
 #
 # conn = MySQLdb.connect(host='localhost', user='root', passwd='root')
 # print conn
 # """@type cur: MySQLdb.cursors.Cursor"""
 # cur = conn.cursor()
-# print cur.execute('USE bohprod; SHOW TABLE STATUS;')
+# print cur.execute('USE test; SHOW TABLE STATUS;')
 # res = cur.fetchall()
 # print res
 # print cur.nextset()
@@ -52,8 +37,8 @@ except:
 # print cur.nextset()
 
 
-# _db = 'bohprod'
-# _tb = 'boh_users'
+# _db = 'test'
+# _tb = 'aaa'
 #
 # from MySqlHost import MySqlHost
 #
