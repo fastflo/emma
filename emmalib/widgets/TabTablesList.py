@@ -10,21 +10,34 @@ class TabTablesList(BaseTab):
         @param emma: Emma
         """
         super(TabTablesList, self).__init__()
+        self.emma = emma
 
         self.tab_label.set_text('Tables List')
-        self.ui = gtk.ScrolledWindow()
-        self.ui.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.ui = gtk.VBox()
 
-        self.emma = emma
+        self.sw = gtk.ScrolledWindow()
+        self.sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+
+        self.toolbar = gtk.Toolbar()
+        self.toolbar.set_icon_size(gtk.ICON_SIZE_SMALL_TOOLBAR)
+        self.button_refresh = gtk.ToolButton(gtk.STOCK_REFRESH)
+        self.button_refresh.set_is_important(True)
+        self.button_refresh.connect('clicked', self.redraw)
+        self.toolbar.add(self.button_refresh)
+
         self.model = None
         self.tables_db = None
         self.tables_count = 0
         self.tv = gtk.TreeView()
-        self.ui.add(self.tv)
-        self.ui.show_all()
+        self.sw.add(self.tv)
+
         self.redraw()
 
-    def redraw(self):
+        self.ui.pack_start(self.toolbar, False, False)
+        self.ui.pack_end(self.sw)
+        self.ui.show_all()
+
+    def redraw(self, *args):
         if not self.emma.current_query:
             return
         elif self.emma.current_query.current_host:

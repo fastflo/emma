@@ -22,13 +22,16 @@ class TabProcessList(BaseTab):
         self.host = host
 
         self.toolbar = gtk.Toolbar()
+        self.toolbar.set_icon_size(gtk.ICON_SIZE_SMALL_TOOLBAR)
+        self.button_refresh = gtk.ToolButton(gtk.STOCK_REFRESH)
+        self.button_refresh.set_is_important(True)
+        self.button_refresh.connect('clicked', self.refresh)
+        self.toolbar.add(self.button_refresh)
+
         self.treeviewcontainer = gtk.ScrolledWindow()
         self.treeview = gtk.TreeView()
         self.treeview.connect('button-release-event', self.on_processlist_button_release)
         self.treeviewcontainer.add(self.treeview)
-        self.button_refresh = gtk.ToolButton(gtk.STOCK_REFRESH)
-        self.button_refresh.connect('clicked', self.refresh)
-        self.toolbar.add(self.button_refresh)
 
         self.ui.pack_start(self.toolbar, False, False)
         self.ui.pack_end(self.treeviewcontainer)
