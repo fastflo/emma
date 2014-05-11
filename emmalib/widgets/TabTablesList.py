@@ -29,6 +29,7 @@ class TabTablesList(BaseTab):
         self.tables_db = None
         self.tables_count = 0
         self.tv = gtk.TreeView()
+        self.tv.set_rules_hint(True)
         self.sw.add(self.tv)
 
         self.redraw()
@@ -55,20 +56,20 @@ class TabTablesList(BaseTab):
                 for col in self.tv.get_columns():
                     self.tv.remove_column(col)
 
-            fields = db.status_headers
-            columns = [gobject.TYPE_STRING] * len(fields)
-            if not columns:
-                return
-            self.model = gtk.ListStore(*columns)
-            self.tv.set_model(self.model)
-            _id = 0
-            for field in fields:
-                title = field.replace("_", "__")
-                self.tv.insert_column_with_data_func(
-                    -1, title, gtk.CellRendererText(),
-                    render_mysql_string, _id)
-                _id += 1
-            self.tables_count = 0
+        fields = db.status_headers
+        columns = [gobject.TYPE_STRING] * len(fields)
+        if not columns:
+            return
+        self.model = gtk.ListStore(*columns)
+        self.tv.set_model(self.model)
+        _id = 0
+        for field in fields:
+            title = field.replace("_", "__")
+            self.tv.insert_column_with_data_func(
+                -1, title, gtk.CellRendererText(),
+                render_mysql_string, _id)
+            _id += 1
+        self.tables_count = 0
 
         keys = db.tables.keys()
         if self.tables_count == len(keys):

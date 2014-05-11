@@ -30,6 +30,7 @@ class TabProcessList(BaseTab):
 
         self.treeviewcontainer = gtk.ScrolledWindow()
         self.treeview = gtk.TreeView()
+        self.treeview.set_rules_hint(True)
         self.treeview.connect('button-release-event', self.on_processlist_button_release)
         self.treeviewcontainer.add(self.treeview)
 
