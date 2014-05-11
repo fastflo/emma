@@ -19,17 +19,24 @@ class MainWindow(gtk.Window):
         self.main_notebook.show()
         self.message_notebook = gtk.Notebook()
         self.message_notebook.show()
+
+        convbox = gtk.VBox(True, 0)
         self.connections_tv_container = gtk.ScrolledWindow()
         self.connections_tv_container.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.connections_tv_container.show()
+        self.connections_tv_spinner = gtk.Spinner()
+        convbox.pack_start(self.connections_tv_spinner, True, True)
+        convbox.pack_end(self.connections_tv_container, True, True)
+        convbox.show()
 
         vpaned1 = gtk.VPaned()
 
         vbox1 = gtk.VBox()
+        vbox1.show()
         vbox1.pack_start(widgets.MainMenu(emma, self), False, False)
 
         hpaned1 = gtk.HPaned()
-        hpaned1.pack1(self.connections_tv_container, False, True)
+        hpaned1.pack1(convbox, False, True)
         hpaned1.pack2(self.main_notebook, True, True)
         hpaned1.set_position(200)
         hpaned1.show()
@@ -44,6 +51,7 @@ class MainWindow(gtk.Window):
         self.status_bar = gtk.Statusbar()
 
         vbox1.pack_end(self.status_bar, False, False)
+        vbox1.show()
 
         self.add(vbox1)
 
@@ -51,3 +59,4 @@ class MainWindow(gtk.Window):
         self.resize(1024, 768)
 
         self.show_all()
+        self.connections_tv_spinner.hide()
