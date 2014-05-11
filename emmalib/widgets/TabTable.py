@@ -59,11 +59,11 @@ class TabTable(BaseTab):
         sql_create_tab.add(self.table_textview)
 
         # data
-        self.results = ResultView()
+        self.results_view = ResultView()
 
         self.ui.append_page(sw_fields, gtk.Label('Fields'))
         self.ui.append_page(sw_indexes, gtk.Label('Indexes'))
-        self.ui.append_page(self.results, gtk.Label('Data'))
+        self.ui.append_page(self.results_view, gtk.Label('Data'))
         self.ui.append_page(self.table_properties, gtk.Label('Properties'))
         self.ui.append_page(sql_create_tab, gtk.Label('SQL: Create'))
 
@@ -72,10 +72,11 @@ class TabTable(BaseTab):
         self.ui.connect('switch-page', self.on_notebook_switch_page)
 
         self.ui.show_all()
+        self.ui.set_current_page(0)
 
     def on_notebook_switch_page(self, nb, pointer, page_num):
-        if page_num == 2 and not self.results.data_loaded:
-            self.results.load_data(self.table.get_all_records())
+        if page_num == 2 and not self.results_view.data_loaded:
+            self.results_view.load_data(self.table.get_all_records())
 
     def update(self):
         th = self.table

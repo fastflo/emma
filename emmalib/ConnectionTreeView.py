@@ -79,8 +79,6 @@ class ConnectionsTreeView(gtk.TreeView):
         _iter = self.connections_model.get_iter(path)
         o = self.connections_model.get_value(_iter, 0)
 
-        nb = self.emma.main_notebook
-
         if depth == 1:
             self.current_host = host = o
             if host.connected:
@@ -114,7 +112,6 @@ class ConnectionsTreeView(gtk.TreeView):
             self.get_root_window().set_cursor(watch)
             gobject.idle_add(rfrs, (self, o))
 
-            #rfrs(self, o)
             self.emma.current_query.set_current_db(o)
 
         elif depth == 3:
