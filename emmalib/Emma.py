@@ -1,21 +1,17 @@
-import gc
-import pickle
-import glib
-import gtk
-import gobject
-
-import gtk.gdk
-import gtk.glade
-
 import sql
-from query_regular_expression import *
-from ConnectionTreeView import ConnectionsTreeView
-from Config import Config
-from QueryTab import QueryTab
-from KeyMap import KeyMap
+import gtk
+import glib
+import gobject
+import gtk.gdk
 import dialogs
 import widgets
+import gtk.glade
+
+from Config import Config
+from KeyMap import KeyMap
 from Constants import *
+from query_regular_expression import *
+from ConnectionTreeView import ConnectionsTreeView
 
 
 class Emma:

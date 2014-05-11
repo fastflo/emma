@@ -1,6 +1,7 @@
 import gc
 import gtk
-import widgets
+from TabProcessList import TabProcessList
+from TabTablesList import TabTablesList
 from emmalib.QueryTab import QueryTab
 
 
@@ -66,10 +67,10 @@ class MainNotebook(gtk.Notebook):
         return False
 
     def add_process_list_tab(self, host):
-        self.add_generic_tab(widgets.TabProcessList(self.emma, host))
+        self.add_generic_tab(TabProcessList(self.emma, host))
 
     def add_tables_list_tab(self):
-        self.add_generic_tab(widgets.TabTablesList(self.emma))
+        self.add_generic_tab(TabTablesList(self.emma))
 
     def add_generic_tab(self, tab_class):
         new_page_num = self.append_page(tab_class.get_ui(), tab_class.get_label_ui())

@@ -25,7 +25,6 @@ import time
 import traceback
 import _mysql
 import gobject
-from MySQLdb import converters
 from MySqlDb import *
 
 

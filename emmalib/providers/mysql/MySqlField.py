@@ -53,7 +53,7 @@ class MySqlField:
             return str
 
     def parse_type(self):
-        m = re.match(r'(.+)\((\d+)\,(\d+)\)', self.type)
+        m = re.match(r'(.+)\((\d+),(\d+)\)', self.type)
         if m is not None:
             return m.group(1), int(m.group(2)), m.group(3)
 

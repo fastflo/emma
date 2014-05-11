@@ -100,6 +100,8 @@ class QueryTab(widgets.BaseTab):
 
         self.query_encoding_menu = None
 
+        self.filled_fields = []
+
         # replace textview with gtksourcevice
         try:
             org_tv = self.textview

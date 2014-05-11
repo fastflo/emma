@@ -248,7 +248,6 @@ class ExecuteQueryFromDisk:
                 self.last_query_line = line
                 _start = 0
             else:
-                lb = fp.tell() - len(self.last_query_line)
                 line = self.last_query_line
             _start, end = self.emma.current_query.read_query(line, _start)
             _next = line[end:end + 1]

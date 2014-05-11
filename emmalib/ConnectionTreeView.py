@@ -1,11 +1,8 @@
 import gtk
-import time
 import gobject
-
-import gtk.glade
-
 import dialogs
 import widgets
+import gtk.glade
 from ConnectionWindow import ConnectionWindow
 from Constants import *
 

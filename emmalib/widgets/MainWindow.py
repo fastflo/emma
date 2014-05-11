@@ -1,5 +1,6 @@
 import gtk
-import widgets
+from MainNotebook import MainNotebook
+from MainMenu import MainMenu
 
 
 class MainWindow(gtk.Window):
@@ -15,7 +16,7 @@ class MainWindow(gtk.Window):
         self.accel_group = gtk.AccelGroup()
         self.add_accel_group(self.accel_group)
 
-        self.main_notebook = widgets.MainNotebook(emma)
+        self.main_notebook = MainNotebook(emma)
         self.main_notebook.show()
         self.message_notebook = gtk.Notebook()
         self.message_notebook.show()
@@ -33,7 +34,7 @@ class MainWindow(gtk.Window):
 
         vbox1 = gtk.VBox()
         vbox1.show()
-        vbox1.pack_start(widgets.MainMenu(emma, self), False, False)
+        vbox1.pack_start(MainMenu(emma, self), False, False)
 
         hpaned1 = gtk.HPaned()
         hpaned1.pack1(convbox, False, True)
