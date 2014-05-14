@@ -1057,50 +1057,50 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         # get unique where_clause
         self.kv_list = []
         self.last_th = th
-        for field, field_pos in zip(th.field_order, range(len(th.field_order))):
-            props = th.fields[field]
-            if (
-                (pri_okay >= 0 and props[3] == "PRI") or (
-                    th.host.__class__.__name__ == "sqlite_host" and field.endswith("_id"))):
-                if possible_primary:
-                    possible_primary += ", "
-                possible_primary += field
-                if wildcard:
-                    c = field_pos
-                else:
-                    c = None
-                    try:
-                        c = fields.index(field)
-                    except:
-                        pass
-                if not c is None:
-                    pri_okay = 1
-                    if path:
-                        value = self.model.get_value(row_iter, c)
-                        if primary:
-                            primary += " and "
-                        primary += "`%s`='%s'" % (field, value)
-                        self.kv_list.append((field, value))
-            if uni_okay >= 0 and props[3] == "UNI":
-                if possible_unique:
-                    possible_unique += ", "
-                possible_unique += field
-                if wildcard:
-                    c = field_pos
-                else:
-                    c = None
-                    try:
-                        c = fields.index(field)
-                    except:
-                        pass
-                if not c is None:
-                    uni_okay = 1
-                    if path:
-                        value = self.model.get_value(row_iter, c)
-                        if unique:
-                            unique += " and "
-                        unique += "`%s`='%s'" % (field, value)
-                        self.kv_list.append((field, value))
+        # for field, field_pos in zip(th.field_order, range(len(th.field_order))):
+        #     props = th.fields[field]
+        #     if (
+        #         (pri_okay >= 0 and props[3] == "PRI") or (
+        #             th.host.__class__.__name__ == "sqlite_host" and field.endswith("_id"))):
+        #         if possible_primary:
+        #             possible_primary += ", "
+        #         possible_primary += field
+        #         if wildcard:
+        #             c = field_pos
+        #         else:
+        #             c = None
+        #             try:
+        #                 c = fields.index(field)
+        #             except:
+        #                 pass
+        #         if not c is None:
+        #             pri_okay = 1
+        #             if path:
+        #                 value = self.model.get_value(row_iter, c)
+        #                 if primary:
+        #                     primary += " and "
+        #                 primary += "`%s`='%s'" % (field, value)
+        #                 self.kv_list.append((field, value))
+        #     if uni_okay >= 0 and props[3] == "UNI":
+        #         if possible_unique:
+        #             possible_unique += ", "
+        #         possible_unique += field
+        #         if wildcard:
+        #             c = field_pos
+        #         else:
+        #             c = None
+        #             try:
+        #                 c = fields.index(field)
+        #             except:
+        #                 pass
+        #         if not c is None:
+        #             uni_okay = 1
+        #             if path:
+        #                 value = self.model.get_value(row_iter, c)
+        #                 if unique:
+        #                     unique += " and "
+        #                 unique += "`%s`='%s'" % (field, value)
+        #                 self.kv_list.append((field, value))
 
         if uni_okay < 1 and pri_okay < 1:
             possible_key = "(i can't see any key-fields in this table...)"
