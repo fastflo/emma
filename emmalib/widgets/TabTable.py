@@ -63,9 +63,18 @@ class TabTable(BaseTab):
         #
         #   DATA
         #
-        self.results_view = ResultView()
-        self.results_view.enable_sorting = True
-        self.ui.append_page(self.results_view, gtk.Label('Data'))
+        data_view_vbox = gtk.VBox()
+        self.data_view_toolbar = gtk.Toolbar()
+        self.data_view_toolbar.set_icon_size(gtk.ICON_SIZE_MENU)
+        self.data_view_refresh = gtk.ToolButton(gtk.STOCK_REFRESH)
+        self.data_view_refresh.set_is_important(True)
+        self.data_view_refresh.connect('clicked', self.refresh)
+        self.data_view_toolbar.add(self.data_view_refresh)
+        self.data_view = ResultView()
+        self.data_view.enable_sorting = True
+        data_view_vbox.pack_start(self.data_view_toolbar, expand=False)
+        data_view_vbox.pack_end(self.data_view)
+        self.ui.append_page(data_view_vbox, gtk.Label('Data'))
 
         #
         #   CREATE TABLE/VIEW SQL
@@ -84,8 +93,11 @@ class TabTable(BaseTab):
 
     def on_notebook_switch_page(self, nb, pointer, page_num):
         text = self.ui.get_tab_label_text(self.ui.get_nth_page(page_num))
-        if text == 'Data' and not self.results_view.data_loaded:
-            self.results_view.load_data(self.table.get_all_records())
+        if text == 'Data' and not self.data_view.data_loaded:
+            self.refresh()
+
+    def refresh(self, *args):
+        self.data_view.load_data(self.table.get_all_records())
 
     def update(self):
         self.table_textview.get_buffer().set_text(self.table.get_create_table())

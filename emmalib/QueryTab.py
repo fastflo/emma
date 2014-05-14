@@ -40,8 +40,7 @@ from QueryTabManageRow import QueryTabManageRow
 from QueryTabTreeView import QueryTabTreeView
 from QueryTabResultPopup import QueryTabResultPopup
 from QueryTabPopupEncoding import QueryTabPopupEncoding
-from query_regular_expression import *
-from Constants import *
+from Query import *
 
 
 class QueryTab(widgets.BaseTab):
@@ -617,7 +616,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         _start = 0
         while _start < len(text):
             # search query end
-            query_start, end = self.read_query(text, _start)
+            query_start, end = read_query(text, _start)
             if query_start is None:
                 break
             thisquery = text[query_start:end]
@@ -633,7 +632,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.label.window.process_updates(False)
 
             appendable = False
-            appendable_result = self.is_query_appendable(thisquery)
+            appendable_result = is_query_appendable(thisquery)
             if appendable_result:
                 appendable = True
                 self.editable = self.is_query_editable(thisquery, appendable_result)
@@ -706,7 +705,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             self.last_source = thisquery
             # get sort order!
             sortable = True  # todo
-            current_order = self.get_order_from_query(thisquery)
+            current_order = get_order_from_query(thisquery)
             sens = False
             if len(current_order) > 0:
                 sens = True
@@ -837,7 +836,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
 
     def on_query_column_sort(self, column, col_num):
         query = self.last_source
-        current_order = self.get_order_from_query(query)
+        current_order = get_order_from_query(query)
         col = column.get_title().replace("__", "_")
         new_order = []
         for c, o in current_order:
@@ -905,78 +904,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             )
         self.sort_timer_execute = time.time() + int(self.emma.config.get("result_view_column_sort_timeout")) / 1000.
 
-    def is_query_appendable(self, query):
-        pat = r'(?i)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(union)|(select[ \r\n\t]+(.*)[ \r\n\t]+from[ \r\n\t]+(.*))'
-        if not self.current_host:
-            return False
-        try:
-            r = self.query_select_re
-        except:
-            r = self.query_select_re = re.compile(pat)
-        _start = 0
-        result = False
-        while 1:
-            result = re.search(r, query[_start:])
-            if not result:
-                return False
-            _start += result.end()
-            if result.group(4):
-                return False  # union
-            if result.group(5) and result.group(6) and result.group(7):
-                break  # found select
-        return result
-
-    def get_order_from_query(self, query, return_before_and_after=False):
-        current_order = []
-        try:
-            r = self.query_order_re
-        except:
-            r = self.query_order_re = re.compile(re_src_query_order)
-        # get current order by clause
-        match = re.search(r, query)
-        if not match:
-            print "no order found in", [query]
-            print "re:", [re_src_query_order]
-            return current_order
-        before, order, after = match.groups()
-        order.lower()
-        _start = 0
-        ident = None
-        while 1:
-            item = []
-            while 1:
-                ident, end = self.read_expression(order[_start:])
-                if not ident:
-                    break
-                if ident == ",":
-                    break
-                if ident[0] == "`":
-                    ident = ident[1:-1]
-                item.append(ident)
-                _start += end
-            l = len(item)
-            if l == 0:
-                break
-            elif l == 1:
-                item.append(True)
-            elif l == 2:
-                if item[1].lower() == "asc":
-                    item[1] = True
-                else:
-                    item[1] = False
-            else:
-                print "unknown order item:", item, "ignoring..."
-                item = None
-            if item:
-                current_order.append(tuple(item))
-            if not ident:
-                break
-            _start += 1  # comma
-        return current_order
-
     def get_unique_where(self, query, path=None, col_num=None, return_fields=False):
         # call is_query_appendable before!
-        result = self.is_query_appendable(query)
+        result = is_query_appendable(query)
         if not result:
             return None, None, None, None, None
 
@@ -991,7 +921,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         tables = table_list.split(",")
 
         if len(tables) > 1:
-            print "sorry, i can't edit queries with more than one than one source-table:", tables
+            print "sorry, i can't edit queries with more than one source-table:", tables
             return None, None, None, None, None
 
         # get table_name
@@ -1017,6 +947,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
                 break
 
         # find table handle!
+        th = None
         tries = 0
         new_tables = []
         self.last_th = None
@@ -1133,45 +1064,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             return table, where, field, value, row_iter, fields
         return table, where, field, value, row_iter
 
-    def read_expression(self, query, _start=0, concat=True, update_function=None, update_offset=0, icount=0):
-        ## TODO!
-        # r'(?is)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|([^ \r\n\t]*[ \r\n\t]*\()|(\))|([0-9]+(?:\\.[0-9]*)?)|([^ \r\n\t,()"\'`]+)|(,)')
-        try:
-            r = self.query_expr_re
-        except:
-            r = self.query_expr_re = query_regular_expression
-
-        # print "read expr in", query
-        match = r.search(query, _start)
-        #if match: print match.groups()
-        if not match:
-            return None, None
-        for i in range(1, match.lastindex + 1):
-            if match.group(i):
-                t = match.group(i)
-                e = match.end(i)
-                current_token = t
-                if current_token[len(current_token) - 1] == "(":
-                    while 1:
-                        icount += 1
-                        if update_function is not None and icount >= 10:
-                            icount = 0
-                            update_function(False, update_offset + e)
-                        #print "at", [query[e:e+15]], "..."
-                        exp, end = self.read_expression(query, e, False, update_function, update_offset, icount)
-                        #print "got inner exp:", [exp]
-                        if not exp:
-                            break
-                        e = end
-                        if concat:
-                            t += " " + exp
-                        if exp == ")":
-                            break
-
-                return t, e
-        print "should not happen!"
-        return None, None
-
     def on_query_change_data(self, cellrenderer, path, new_value, col_num, force_update=False):
         row_iter = self.model.get_iter(path)
         if self.append_iter \
@@ -1209,34 +1101,6 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         self.sort_timer_running = False
         self.on_execute_query_clicked()
         return False
-
-    def read_query(self, query, _start=0):
-        try:
-            r = self.find_query_re
-            rw = self.white_find_query_re
-        except:
-            r = self.find_query_re = re.compile(r"""
-                (?s)
-                (
-                ("(?:[^\\]|\\.)*?")|            # double quoted strings
-                ('(?:[^\\]|\\.)*?')|            # single quoted strings
-                (`(?:[^\\]|\\.)*?`)|            # backtick quoted strings
-                (/\*.*?\*/)|                    # c-style comments
-                (\#[^\n]*)|                     # shell-style comments
-                (\--[^\n]*)|                        # sql-style comments
-                ([^;])                          # everything but a semicolon
-                )+
-            """, re.VERBOSE)
-            rw = self.white_find_query_re = re.compile("[ \r\n\t]+")
-
-        m = rw.match(query, _start)
-        if m:
-            _start = m.end(0)
-
-        match = r.match(query, _start)
-        if not match:
-            return None, len(query)
-        return match.start(0), match.end(0)
 
     def get_ui(self):
         return self.ui

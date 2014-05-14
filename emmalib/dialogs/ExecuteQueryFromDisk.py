@@ -9,8 +9,8 @@ import gtk.gdk
 import gtk.glade
 
 import dialogs
-from query_regular_expression import *
-from Constants import *
+
+from emmalib.Query import *
 
 
 class ExecuteQueryFromDisk:
@@ -249,7 +249,7 @@ class ExecuteQueryFromDisk:
                 _start = 0
             else:
                 line = self.last_query_line
-            _start, end = self.emma.current_query.read_query(line, _start)
+            _start, end = read_query(line, _start)
             _next = line[end:end + 1]
             #print "next: '%s'" % next
             if _start is not None:

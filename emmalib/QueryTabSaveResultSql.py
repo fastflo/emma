@@ -1,9 +1,6 @@
-import re
-import os
 import gtk
-import sys
-
 import dialogs
+from Query import *
 
 
 class QueryTabSaveResultSql:
@@ -47,7 +44,7 @@ class QueryTabSaveResultSql:
         # try to guess target table name from query
         table_name = ""
         query = self.query.last_source
-        result = self.query.is_query_appendable(query)
+        result = is_query_appendable(query)
         if result:
             table_list = result.group(7)
             table_list = table_list.replace(" join ", ",")

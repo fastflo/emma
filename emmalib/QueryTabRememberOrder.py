@@ -1,6 +1,5 @@
-import re
-
 import dialogs
+from Query import *
 
 
 class QueryTabRememberOrder:
@@ -18,8 +17,8 @@ class QueryTabRememberOrder:
         query = self.query.last_source
         if not query:
             return None, None, None, None, None
-        current_order = self.query.get_order_from_query(query)
-        result = self.query.is_query_appendable(query)
+        current_order = get_order_from_query(query)
+        result = is_query_appendable(query)
         if not result:
             return None, None, None, None, None
         table_list = result.group(7)
