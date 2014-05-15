@@ -341,8 +341,13 @@ class ConnectionsTreeView(gtk.TreeView):
         _iter = self.connections_model.append(None, [host])
         host.set_update_ui(self.redraw_host, _iter)
 
+    def get_current_table(self):
+        path, column = self.get_cursor()
+        _iter = self.connections_model.get_iter(path)
+        return path, column, _iter, self.connections_model.get_value(_iter, 0)
+
     def on_table_popup(self, popup, item):
-        path, column, _iter, table = self.emma.get_current_table()
+        path, column, _iter, table = self.get_current_table()
         what = item.name
 
         if what == "refresh_table":

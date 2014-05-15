@@ -365,11 +365,6 @@ class Emma:
             if i:
                 self.fc_logic_combobox[i - 1].set_active(0)
 
-    def get_current_table(self):
-        path, column = self.connections_tv.get_cursor()
-        _iter = self.connections_tv.connections_model.get_iter(path)
-        return path, column, _iter, self.connections_tv.connections_model.get_value(_iter, 0)
-
     def on_template(self, button, t):
         current_table = self.get_selected_table()
         current_fc_table = current_table

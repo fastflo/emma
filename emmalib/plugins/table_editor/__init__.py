@@ -141,7 +141,7 @@ class table_editor:
             print 'Cannot find popup "%s"' % popup_name
 
     def edit_table(self, menuitem):
-        path, column, _iter, table = self.emma.get_current_table()
+        path, column, _iter, table = self.emma.connections_tv.get_current_table()
         self.table = table
         tname = self.xml.get_widget("table_name")
         if not tname:
