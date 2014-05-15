@@ -89,7 +89,7 @@ class QueryTabResultPopup(gtk.Menu):
                 print "column not found!"
                 return
             value = q.model.get_value(_iter, col_num)
-            self.query.set_text(value)
+            self.query.emma.clipboard.set_text(value)
             self.query.emma.pri_clipboard.set_text(value)
         elif item.name == "copy_record_as_csv":
             col_max = q.model.get_n_columns()

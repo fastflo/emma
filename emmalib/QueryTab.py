@@ -941,8 +941,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         print "fields:", fields
 
         wildcard = False
-        for field in fields:
-            if field.find("*") != -1:
+        for db_field_object in fields:
+            if db_field_object.find("*") != -1:
                 wildcard = True
                 break
 
@@ -988,50 +988,51 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         # get unique where_clause
         self.kv_list = []
         self.last_th = th
-        # for field, field_pos in zip(th.field_order, range(len(th.field_order))):
-        #     props = th.fields[field]
-        #     if (
-        #         (pri_okay >= 0 and props[3] == "PRI") or (
-        #             th.host.__class__.__name__ == "sqlite_host" and field.endswith("_id"))):
-        #         if possible_primary:
-        #             possible_primary += ", "
-        #         possible_primary += field
-        #         if wildcard:
-        #             c = field_pos
-        #         else:
-        #             c = None
-        #             try:
-        #                 c = fields.index(field)
-        #             except:
-        #                 pass
-        #         if not c is None:
-        #             pri_okay = 1
-        #             if path:
-        #                 value = self.model.get_value(row_iter, c)
-        #                 if primary:
-        #                     primary += " and "
-        #                 primary += "`%s`='%s'" % (field, value)
-        #                 self.kv_list.append((field, value))
-        #     if uni_okay >= 0 and props[3] == "UNI":
-        #         if possible_unique:
-        #             possible_unique += ", "
-        #         possible_unique += field
-        #         if wildcard:
-        #             c = field_pos
-        #         else:
-        #             c = None
-        #             try:
-        #                 c = fields.index(field)
-        #             except:
-        #                 pass
-        #         if not c is None:
-        #             uni_okay = 1
-        #             if path:
-        #                 value = self.model.get_value(row_iter, c)
-        #                 if unique:
-        #                     unique += " and "
-        #                 unique += "`%s`='%s'" % (field, value)
-        #                 self.kv_list.append((field, value))
+        field_pos = 0
+        for db_field_object in th.fields:
+            if (
+                (pri_okay >= 0 and db_field_object.row['Key'] == "PRI") or (
+                    th.host.__class__.__name__ == "sqlite_host" and db_field_object.name.endswith("_id"))):
+                if possible_primary:
+                    possible_primary += ", "
+                possible_primary += db_field_object.name
+                if wildcard:
+                    c = field_pos
+                else:
+                    c = None
+                    try:
+                        c = fields.index(db_field_object.name)
+                    except:
+                        pass
+                if not c is None:
+                    pri_okay = 1
+                    if path:
+                        value = self.model.get_value(row_iter, c)
+                        if primary:
+                            primary += " and "
+                        primary += "`%s`='%s'" % (db_field_object.name, value)
+                        self.kv_list.append((db_field_object.name, value))
+            if uni_okay >= 0 and db_field_object.row['Key'] == "UNI":
+                if possible_unique:
+                    possible_unique += ", "
+                possible_unique += db_field_object.name
+                if wildcard:
+                    c = field_pos
+                else:
+                    c = None
+                    try:
+                        c = fields.index(db_field_object.name)
+                    except:
+                        pass
+                if not c is None:
+                    uni_okay = 1
+                    if path:
+                        value = self.model.get_value(row_iter, c)
+                        if unique:
+                            unique += " and "
+                        unique += "`%s`='%s'" % (db_field_object.name, value)
+                        self.kv_list.append((db_field_object.name, value))
+            field_pos += 1
 
         if uni_okay < 1 and pri_okay < 1:
             possible_key = "(i can't see any key-fields in this table...)"
@@ -1043,7 +1044,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             return table, None, None, None, None
 
         value = ""
-        field = None
+        db_field_object = None
         if path:
             where = primary
             if not where:
@@ -1053,16 +1054,16 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             if not col_num is None:
                 value = self.model.get_value(row_iter, col_num)
                 if wildcard:
-                    field = th.field_order[col_num]
+                    db_field_object = th.field_order[col_num]
                 else:
-                    field = fields[col_num]
+                    db_field_object = fields[col_num]
         else:
             where = possible_primary + possible_unique
 
         # get current edited field and value by col_num
         if return_fields:
-            return table, where, field, value, row_iter, fields
-        return table, where, field, value, row_iter
+            return table, where, db_field_object, value, row_iter, fields
+        return table, where, db_field_object, value, row_iter
 
     def on_query_change_data(self, cellrenderer, path, new_value, col_num, force_update=False):
         row_iter = self.model.get_iter(path)

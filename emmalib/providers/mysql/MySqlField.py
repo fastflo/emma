@@ -34,6 +34,7 @@ field_types_str = [
 
 class MySqlField:
     def __init__(self, row):
+        self.row = row
         self.name = row['Field']
         self.default = row['Default']
         if row['Null'] != 'NO':

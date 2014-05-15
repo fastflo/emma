@@ -1,5 +1,6 @@
 class SQLiteField:
     def __init__(self, row):
+        self.row = row
         self.name = row['name']
         self.default = row['dflt_value']
         if row['notnull'] == 0:

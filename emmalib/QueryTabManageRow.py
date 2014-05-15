@@ -52,12 +52,12 @@ class QueryTabManageRow:
             if not table or not where:
                 dialogs.show_message("delete record", "could not delete this record!?")
                 return
-            if self.emma.current_host.__class__.__name__ == "sqlite_host":
+            if self.query.current_host.__class__.__name__ == "sqlite_host":
                 limit = ""
             else:
                 limit = " limit 1"
             update_query = "delete from `%s` where %s%s" % (table, where, limit)
-            if not self.emma.current_host.query(update_query, encoding=q.encoding):
+            if not self.query.current_host.query(update_query, encoding=q.encoding):
                 return
         if not q.model.remove(row_iter):
             row_iter = q.model.get_iter_first()
@@ -78,11 +78,11 @@ class QueryTabManageRow:
             if query:
                 query += ", "
             if not value.isdigit():
-                value = "'%s'" % self.emma.current_host.escape(value)
-            query += "%s=%s" % (self.emma.current_host.escape_field(field), value)
+                value = "'%s'" % self.query.current_host.escape(value)
+            query += "%s=%s" % (self.query.current_host.escape_field(field), value)
         if query:
             table, where, field, value, row_iter, fields = q.get_unique_where(q.last_source, return_fields=True)
-            if self.emma.last_th.host.__class__.__name__ == "sqlite_host":
+            if self.query.last_th.host.__class__.__name__ == "sqlite_host":
                 print (table, where, field, value, row_iter, fields)
                 keys = []
                 values = []
@@ -95,10 +95,10 @@ class QueryTabManageRow:
                 update_query = "insert into `%s` (%s) values (%s)" % (table, ", ".join(keys), ", ".join(values))
             else:
                 update_query = "insert into `%s` set %s" % (table, query)
-            if not self.emma.current_host.query(update_query, encoding=q.encoding):
+            if not self.query.current_host.query(update_query, encoding=q.encoding):
                 return False
 
-            insert_id = self.emma.current_host.insert_id()
+            insert_id = self.query.current_host.insert_id()
             print "insert id: %r" % insert_id
             where_fields = map(lambda s: s.strip(), where.split(","))
             print "where fields: %r" % (where_fields, )
@@ -107,31 +107,37 @@ class QueryTabManageRow:
             if not where_fields:
                 print "no possible key found to retrieve newly created record"
             else:
-                th = self.emma.current_host.current_db.tables[table]
+                th = self.query.current_host.current_db.tables[table]
                 wc = []
+                print 'where fields = ', where_fields
                 for field in where_fields:
-                    props = th.fields[field]
-                    auto_increment = props[5].find("auto_increment") != -1
-                    if auto_increment:
-                        value = insert_id
-                    else:
-                        if field in q.filled_fields:
-                            # use filled value
-                            value = "'%s'" % self.emma.current_host.escape(q.filled_fields[field])
+                    props = False
+                    for field_object in th.fields:
+                        if field_object.name == field:
+                            props = field_object.row
+                            print props
+                    if props:
+                        auto_increment = props['Extra'].find("auto_increment") != -1
+                        if auto_increment:
+                            value = insert_id
                         else:
-                            # use field default value (maybe none)
-                            value = props[4]
-                            if not value is None:
-                                value = "'%s'" % self.emma.current_host.escape(value)
-                    wc.append("%s=%s" % (self.emma.current_host.escape_field(field), value))
+                            if field in q.filled_fields:
+                                # use filled value
+                                value = "'%s'" % self.query.current_host.escape(q.filled_fields[field])
+                            else:
+                                # use field default value (maybe none)
+                                value = props['Default']
+                                if not value is None:
+                                    value = "'%s'" % self.query.current_host.escape(value)
+                        wc.append("%s=%s" % (self.query.current_host.escape_field(field), value))
                 where = " and ".join(wc)
                 print "select where: %r" % where
                 if fields == ["*"]:
                     field_selector = "*"
                 else:
-                    field_selector = ", ".join(map(self.emma.current_host.escape_field, fields))
-                self.emma.current_host.query("select %s from `%s` where %s limit 1" % (field_selector, table, where))
-                result = self.emma.current_host.handle.store_result().fetch_row(0)
+                    field_selector = ", ".join(map(self.query.current_host.escape_field, fields))
+                self.query.current_host.query("select %s from `%s` where %s limit 1" % (field_selector, table, where))
+                result = self.query.current_host.handle.store_result().fetch_row(0)
                 if len(result) < 1:
                     print "error: can't find modfied row!?"
                 else:
