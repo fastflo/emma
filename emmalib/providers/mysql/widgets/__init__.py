@@ -1,1 +1,3 @@
 from TableProperties import TableProperties
+from TableFields import TableFields
+from TableIndexes import TableIndexes

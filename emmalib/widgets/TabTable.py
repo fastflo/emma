@@ -29,36 +29,17 @@ class TabTable(BaseTab):
         #
         #   FIELDS
         #
-        sw_fields = gtk.ScrolledWindow()
-        sw_fields.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.tv_fields_model = gtk.ListStore(
-            gobject.TYPE_STRING,
-            gobject.TYPE_STRING,
-            gobject.TYPE_STRING,
-            gobject.TYPE_STRING,
-        )
-        self.tv_fields = gtk.TreeView()
-        self.tv_fields.set_rules_hint(True)
-        self.tv_fields.set_model(self.tv_fields_model)
-        sw_fields.add(self.tv_fields)
-        self.ui.append_page(sw_fields, gtk.Label('Fields'))
+        self.table_fields = table.get_table_fields_widget()
+        if self.table_fields:
+            self.ui.append_page(self.table_fields, gtk.Label('Fields'))
 
         #
         #   INDEXES
         #
         if self.table.is_table:
-            sw_indexes = gtk.ScrolledWindow()
-            sw_indexes.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-            self.tv_indexes_model = gtk.ListStore(
-                gobject.TYPE_STRING,
-                gobject.TYPE_STRING,
-                gobject.TYPE_STRING,
-            )
-            self.tv_indexes = gtk.TreeView()
-            self.tv_indexes.set_rules_hint(True)
-            self.tv_indexes.set_model(self.tv_indexes_model)
-            sw_indexes.add(self.tv_indexes)
-            self.ui.append_page(sw_indexes, gtk.Label('Indexes'))
+            self.table_indexes = table.get_table_indexes_widget()
+            if self.table_indexes:
+                self.ui.append_page(self.table_indexes, gtk.Label('Indexes'))
 
         #
         #   DATA
@@ -68,7 +49,7 @@ class TabTable(BaseTab):
         self.data_view_toolbar.set_icon_size(gtk.ICON_SIZE_MENU)
         self.data_view_refresh = gtk.ToolButton(gtk.STOCK_REFRESH)
         self.data_view_refresh.set_is_important(True)
-        self.data_view_refresh.connect('clicked', self.refresh)
+        self.data_view_refresh.connect('clicked', self.refresh_table_data)
         self.data_view_toolbar.add(self.data_view_refresh)
         self.data_view = ResultView()
         self.data_view.enable_sorting = True
@@ -94,47 +75,21 @@ class TabTable(BaseTab):
     def on_notebook_switch_page(self, nb, pointer, page_num):
         text = self.ui.get_tab_label_text(self.ui.get_nth_page(page_num))
         if text == 'Data' and not self.data_view.data_loaded:
-            self.refresh()
+            self.refresh_table_data()
 
-    def refresh(self, *args):
+    def refresh_table_data(self, *args):
         self.data_view.load_data(self.table.get_all_records())
 
     def update(self):
         self.table_textview.get_buffer().set_text(self.table.get_create_table())
+
         if self.table_properties:
             self.table_properties.update()
-        self.build_fields()
+
+        if self.table_fields:
+            self.table_fields.refresh()
+
         if self.table.is_table:
-            self.build_indexes()
-
-    def build_fields(self):
-        self.tv_fields.append_column(gtk.TreeViewColumn("Name", gtk.CellRendererText(), text=0))
-        self.tv_fields.append_column(gtk.TreeViewColumn("Type", gtk.CellRendererText(), text=1))
-        self.tv_fields.append_column(gtk.TreeViewColumn("Null", gtk.CellRendererText(), text=2))
-        self.tv_fields.append_column(gtk.TreeViewColumn("Default", gtk.CellRendererText(), text=3))
-        for f in self.table.fields:
-            self.tv_fields_model.append(
-                (
-                    f.name,
-                    f.type,
-                    f.is_null,
-                    f.default,
-                )
-            )
-
-    def build_indexes(self):
-        if self.table.is_view:
-            return
-
-        self.tv_indexes.append_column(gtk.TreeViewColumn("Name", gtk.CellRendererText(), text=0))
-        self.tv_indexes.append_column(gtk.TreeViewColumn("Column", gtk.CellRendererText(), text=1))
-        self.tv_indexes.append_column(gtk.TreeViewColumn("Unique", gtk.CellRendererText(), text=2))
-        for ix in self.table.indexes:
-            self.tv_indexes_model.append(
-                (
-                    ix.name,
-                    ix.column,
-                    ix.is_unique,
-                )
-            )
+            if self.table_indexes:
+                self.table_indexes.refresh()
 

@@ -20,7 +20,7 @@
 
 from MySqlField import MySqlField
 from MySqlIndex import MySqlIndex
-from widgets import TableProperties
+import widgets
 
 
 class MySqlTable:
@@ -65,7 +65,7 @@ class MySqlTable:
 
     def refresh_fields(self):
         self.fields = []
-        res = self.host.query_dict("describe %s" % self.host.escape_table(self.name))
+        res = self.host.query_dict("show full columns from %s" % self.host.escape_table(self.name))
         if not res:
             return
         for row in res['rows']:
@@ -101,10 +101,23 @@ class MySqlTable:
         return (self.fields[field_name][0], self.fields[field_name][1]),
 
     def get_all_records(self):
-        return self.host.query_dict("SELECT * FROM %s" % self.name, append_to_log=False)
+        return self.host.query_dict('SELECT * FROM %s' % self.name, append_to_log=False)
 
     def get_table_properties_widget(self):
         if self.is_table:
-            return TableProperties(self)
+            return widgets.TableProperties(self)
         else:
             return False
+
+    def get_table_fields_widget(self):
+        if self.is_table:
+            return widgets.TableFields(self)
+        else:
+            return False
+
+    def get_table_indexes_widget(self):
+        if self.is_table:
+            return widgets.TableIndexes(self)
+        else:
+            return False
+

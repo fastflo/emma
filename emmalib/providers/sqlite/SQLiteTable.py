@@ -74,3 +74,9 @@ class SQLiteTable:
 
     def get_table_properties_widget(self):
         return False
+
+    def get_table_fields_widget(self):
+        return False
+
+    def get_table_indexes_widget(self):
+        return False
