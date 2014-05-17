@@ -18,7 +18,25 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
+import gtk
 
-class Connection:
-    def __init__(self):
-        pass
+
+class TableToolbar(gtk.Toolbar):
+    
+    def __init__(self, table):
+        super(TableToolbar, self).__init__()
+
+        self.set_icon_size(gtk.ICON_SIZE_MENU)
+        self.refresh = gtk.ToolButton(gtk.STOCK_REFRESH)
+        self.refresh.set_is_important(True)
+        self.add(self.refresh)
+
+        self.truncate = gtk.ToolButton(gtk.STOCK_CLEAR)
+        self.truncate.set_label('Truncate Table')
+        self.truncate.set_is_important(True)
+        self.add(self.truncate)
+
+        self.drop = gtk.ToolButton(gtk.STOCK_DELETE)
+        self.drop.set_label('Drop table')
+        self.drop.set_is_important(True)
+        self.add(self.drop)

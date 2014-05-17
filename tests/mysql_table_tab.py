@@ -20,6 +20,7 @@
 
 import gtk
 from emmalib.providers.mysql import MySqlHost
+from emmalib.widgets.TabTable import TabTable
 
 
 class Win(gtk.Window):
@@ -27,16 +28,15 @@ class Win(gtk.Window):
     def __init__(self):
         super(Win, self).__init__()
         self.set_position(gtk.WIN_POS_CENTER)
-        self.resize(640, 480)
+        self.resize(800, 600)
         self.connect('destroy', lambda *args: gtk.main_quit())
         self.host = None
         self.table = None
         self.db_connect()
 
-        tp = self.table.get_table_properties_widget()
-        if tp:
-            self.add(tp)
-            tp.update()
+        tt = TabTable(None, self.table)
+        if tt:
+            self.add(tt.get_ui())
 
         self.show_all()
 

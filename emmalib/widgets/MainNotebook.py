@@ -1,3 +1,23 @@
+# -*- coding: utf-8 -*-
+# emma
+#
+# Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
+#               2014 Nickolay Karnaukhov (mr.electronick@gmail.com)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Library General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+
 import gc
 import gtk
 from TabProcessList import TabProcessList
@@ -73,8 +93,11 @@ class MainNotebook(gtk.Notebook):
         self.add_generic_tab(TabTablesList(self.emma))
 
     def add_generic_tab(self, tab_class):
-        new_page_num = self.append_page(tab_class.get_ui(), tab_class.get_label_ui())
-        self.set_tab_reorderable(tab_class.get_ui(), True)
+        ui = tab_class.get_ui()
+        label = tab_class.get_label_ui()
+        print ui, label
+        new_page_num = self.append_page(ui, label)
+        #self.set_tab_reorderable(ui, True)
         tab_class.get_tab_close_button().connect('clicked', self.close_generic_tab, tab_class)
         self.set_current_page(new_page_num)
         self.tabs.append(tab_class)

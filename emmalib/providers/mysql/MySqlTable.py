@@ -79,12 +79,6 @@ class MySqlTable:
         for row in res['rows']:
             self.indexes.append(MySqlIndex(row))
 
-    def __str__(self):
-        output = ""
-        for h, p in zip(self.db.status_headers, self.props):
-            output += "\t%-25.25s: %s\n" % (h, p)
-        return output
-
     def get_create_table(self):
         if not self.create_table:
             self.db.host.select_database(self.db)
@@ -102,6 +96,10 @@ class MySqlTable:
 
     def get_all_records(self):
         return self.host.query_dict('SELECT * FROM %s' % self.name, append_to_log=False)
+
+    #
+    #   WIDGETS
+    #
 
     def get_table_properties_widget(self):
         if self.is_table:
@@ -121,3 +119,12 @@ class MySqlTable:
         else:
             return False
 
+    def get_table_toolbar(self):
+        if self.is_table:
+            return widgets.TableToolbar(self)
+        else:
+            return False
+
+    def get_table_status_string(self):
+        return 'Engine: %s, Rows: %s, Collation: %s, Comment: %s' % \
+               (self.props[1], self.props[4], self.props[14], self.props[17])
