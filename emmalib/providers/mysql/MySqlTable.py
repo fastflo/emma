@@ -99,6 +99,18 @@ class MySqlTable:
     def get_all_records(self):
         return self.host.query_dict('SELECT * FROM %s' % self.name, append_to_log=False)
 
+    def rename(self, new_name):
+        if self.host.query('RENAME TABLE %s TO %s' % (
+            self.host.escape_table(self.name),
+            self.host.escape_table(new_name)
+        )):
+            self.db.tables[new_name] = self
+            del self.db.tables[self.name]
+            self.name = new_name
+            self.refresh_properties()
+            emma_instance.events.on_table_modified(self)
+            return True
+
     #
     #   WIDGETS
     #

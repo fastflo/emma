@@ -30,8 +30,6 @@ class TableProperties(gtk.ScrolledWindow):
         self.set_border_width(8)
         self.table = table
 
-        self.properties = dict(zip(self.table.db.status_headers, self.table.props))
-
         self.tb_name = gtk.Entry()
         self.tb_ai = gtk.Entry()
         self.tb_comment = gtk.Entry()
@@ -49,10 +47,16 @@ class TableProperties(gtk.ScrolledWindow):
         self.cb_rowformat.append_text('Redundant')
 
         self.btn_update = gtk.Button('Update')
+        self.btn_update.connect('clicked', self.on_update_clicked)
 
         vptp = gtk.Viewport()
 
         hbox = gtk.HBox()
+
+        self.info_items_list = ['Update_time', 'Rows', 'Checksum', 'Check_time', 'Index_length', 'Data_length',
+                                'Create_options', 'Avg_row_length', 'Data_free',
+                                'Version', 'Create_time', 'Max_data_length']
+        self.info_items_entries = {}
 
         hbox.pack_start(self.build_ltable(), False, False, 0)
         hbox.pack_start(self.build_rtable(), False, False, 16)
@@ -60,6 +64,11 @@ class TableProperties(gtk.ScrolledWindow):
         vptp.set_shadow_type(gtk.SHADOW_NONE)
         self.add(vptp)
         self.show_all()
+
+    def on_update_clicked(self, *args):
+        if self.tb_name.get_text() != self.table.props_dict['Name']:
+            if self.table.rename(self.tb_name.get_text()):
+                self.update()
 
     def build_ltable(self):
         tbl = gtk.Table(4, 2)
@@ -110,9 +119,7 @@ class TableProperties(gtk.ScrolledWindow):
         return lbl
 
     def build_rtable(self):
-        itemlist = ['Update_time', 'Rows', 'Checksum', 'Check_time', 'Index_length', 'Data_length', 'Create_options',
-                    'Avg_row_length', 'Data_free', 'Version', 'Create_time', 'Max_data_length']
-        tbl = gtk.Table(len(itemlist), 2)
+        tbl = gtk.Table(len(self.info_items_list), 2)
         tbl.set_col_spacings(4)
         tbl.set_row_spacings(4)
 
@@ -124,10 +131,11 @@ class TableProperties(gtk.ScrolledWindow):
         vbox.pack_start(tbl, False, False, 4)
 
         r = 0
-        for item in itemlist:
+        for item in self.info_items_list:
             e = gtk.Entry()
             e.set_editable(False)
-            v = self.properties[item]
+            self.info_items_entries[item] = e
+            v = self.table.props_dict.get(item, '')
             if v is None:
                 v = ''
             e.set_text(v)
@@ -138,13 +146,17 @@ class TableProperties(gtk.ScrolledWindow):
         return vbox
 
     def update(self):
-        self.tb_name.set_text(self.properties['Name'])
-        self.tb_ai.set_text(self.properties['Auto_increment'])
-        self.tb_comment.set_text(self.properties['Comment'])
+        for item in self.info_items_list:
+            v = self.table.props_dict[item] if self.table.props_dict[item] is not None else ''
+            self.info_items_entries[item].set_text(v)
 
-        self.selcb(self.cb_engine, self.properties['Engine'])
-        self.selcb(self.cb_collation, self.properties['Collation'])
-        self.selcb(self.cb_rowformat, self.properties['Row_format'])
+        self.tb_name.set_text(self.table.props_dict['Name'])
+        self.tb_ai.set_text(self.table.props_dict['Auto_increment'])
+        self.tb_comment.set_text(self.table.props_dict['Comment'])
+
+        self.selcb(self.cb_engine, self.table.props_dict['Engine'])
+        self.selcb(self.cb_collation, self.table.props_dict['Collation'])
+        self.selcb(self.cb_rowformat, self.table.props_dict['Row_format'])
 
     def selcb(self, cb, text):
         ix = 0
