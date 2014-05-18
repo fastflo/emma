@@ -18,6 +18,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
+emma_instance = None
+
 if __name__ != 'emmalib':
     print "Don't run __init__.py - run ../emma instead"
     exit()
@@ -62,7 +64,7 @@ def usage():
 
 
 def start(args):
-    global new_instance
+    global emma_instance
 
     debug_output = False
     log_file = None
@@ -90,15 +92,8 @@ def start(args):
     # this singleton will be accessible as sys.stdout!
     OutputHandler(debug_output, log_file, log_flush)
 
-    e = Emma()
-
-    while True:
-        gtk.main()
-        del e
-        if not new_instance:
-            break
-        e = new_instance
-        new_instance = None
-        e.__init__()
+    emma_instance = Emma()
+    emma_instance.start()
+    gtk.main()
 
     return 0

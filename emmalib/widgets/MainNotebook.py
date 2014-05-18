@@ -95,9 +95,8 @@ class MainNotebook(gtk.Notebook):
     def add_generic_tab(self, tab_class):
         ui = tab_class.get_ui()
         label = tab_class.get_label_ui()
-        print ui, label
         new_page_num = self.append_page(ui, label)
-        #self.set_tab_reorderable(ui, True)
+        self.set_tab_reorderable(ui, True)
         tab_class.get_tab_close_button().connect('clicked', self.close_generic_tab, tab_class)
         self.set_current_page(new_page_num)
         self.tabs.append(tab_class)
@@ -122,3 +121,4 @@ class MainNotebook(gtk.Notebook):
                     self.close_query_tab(None, tab)
                 else:
                     self.close_generic_tab(None, tab)
+                gc.collect()

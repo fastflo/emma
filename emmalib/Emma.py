@@ -32,6 +32,7 @@ from KeyMap import KeyMap
 from Constants import *
 from query_regular_expression import *
 from ConnectionTreeView import ConnectionsTreeView
+from EventsManager import EventsManager
 
 
 class Emma:
@@ -44,6 +45,54 @@ class Emma:
         self.query_count = 0
         self.glade_path = glade_path
         self.icons_path = icons_path
+        self.tooltips = gtk.Tooltips()
+        self.sort_timer_running = False
+        self.execution_timer_running = False
+        self.field_conditions_initialized = False
+        self.current_host = None
+
+        self.plugin_pathes = []
+        self.plugins = {}
+
+        self.hosts = {}
+        self.queries = []
+
+        self.clipboard = gtk.Clipboard(gtk.gdk.display_get_default(), "CLIPBOARD")
+        self.pri_clipboard = gtk.Clipboard(gtk.gdk.display_get_default(), "PRIMARY")
+
+        self.config = Config(self)
+        self.config.load()
+
+        self.execute_query_from_disk_dialog = False
+
+        # init dialogs
+        self.about_dialog = dialogs.About()
+        self.changelog_dialog = dialogs.ChangeLog()
+
+        # init event manager
+        self.events = EventsManager(self)
+
+        #
+        #   Vars for use in start
+        #
+        self.glade_file = None
+        self.xml = None
+        self.key_map = None
+        self.mainwindow = None
+        self.current_query = None
+        self.first_template = None
+        self.message_notebook = None
+        self.main_notebook = None
+        self.msg_log = None
+        self.sql_log = None
+        self.blob_view = None
+        self.connections_tv = None
+        self.local_search_window = None
+        self.local_search_entry = None
+        self.local_search_start_at_first_row = None
+        self.local_search_case_sensitive = None
+
+    def start(self):
         self.glade_file = os.path.join(glade_path, "emma.glade")
         if not os.access(self.glade_file, os.R_OK):
             print self.glade_file, "not found!"
@@ -67,13 +116,6 @@ class Emma:
         except glib.GError:
             print "Icon not loaded"
 
-        self.current_query = None
-
-        # init dialogs
-        self.about_dialog = dialogs.About()
-        self.changelog_dialog = dialogs.ChangeLog(emma_path)
-        self.execute_query_from_disk_dialog = False
-
         # init all notebooks
         self.message_notebook = self.mainwindow.message_notebook
         self.main_notebook = self.mainwindow.main_notebook
@@ -96,26 +138,8 @@ class Emma:
         self.local_search_start_at_first_row = self.xml.get_widget("search_start_at_first_row")
         self.local_search_case_sensitive = self.xml.get_widget("search_case_sensitive")
 
-        self.clipboard = gtk.Clipboard(gtk.gdk.display_get_default(), "CLIPBOARD")
-        self.pri_clipboard = gtk.Clipboard(gtk.gdk.display_get_default(), "PRIMARY")
-
-        self.field_edit = self.xml.get_widget("field_edit")
-        self.field_edit_content = self.xml.get_widget("edit_field_content")
-
-        self.tooltips = gtk.Tooltips()
-        self.sort_timer_running = False
-        self.execution_timer_running = False
-        self.field_conditions_initialized = False
-        self.current_host = None
-
-        self.plugin_pathes = []
-        self.plugins = {}
-
-        self.hosts = {}
-        self.queries = []
-
-        self.config = Config(self)
-        self.config.load()
+        # self.field_edit = self.xml.get_widget("field_edit")
+        # self.field_edit_content = self.xml.get_widget("edit_field_content")
 
         self.connections_tv = ConnectionsTreeView(self)
         self.mainwindow.connections_tv_container.add(self.connections_tv)
@@ -123,66 +147,12 @@ class Emma:
 
         self.main_notebook.add_query_tab()
 
-        self.first_template = None
-        # keys = self.config.config.keys()
-        # keys.sort()
-        #
-        # toolbar = self.xml.get_widget("query_toolbar")
-        # toolbar.set_style(gtk.TOOLBAR_ICONS)
-        # for child in toolbar.get_children():
-        #     if not child.name.startswith("template_"):
-        #         continue
-        #     toolbar.remove(child)
-
-        # template_count = 0
-        # for name in keys:
-        #     value = self.config.config[name]
-        #     if not self.config.unpickled:
-        #         prefix = "connection_"
-        #         if name.startswith(prefix) and value == "::sqlite::":
-        #             filename = name[len(prefix):]
-        #             self.add_sqlite(filename)
-        #             continue
-        #         if name.startswith(prefix):
-        #             v = value.split(",")
-        #             port = ""
-        #             p = v[0].rsplit(":", 1)
-        #             if len(p) == 2:
-        #                 port = p[1]
-        #                 v[0] = p[0]
-        #             self.add_mysql_host(name[len(prefix):], v[0], port, v[1], v[2], v[3])
-        #             pass
-        #
-        #     prefix = "template"
-        #     if name.startswith(prefix):
-        #         value = value.replace("`$primary_key$`", "$primary_key$")
-        #         value = value.replace("`$table$`", "$table$")
-        #         value = value.replace("`$field_conditions$`", "$field_conditions$")
-        #         self.config.config[name] = value
-        #         if not self.first_template:
-        #             self.first_template = value
-        #         p = name.split("_", 1)
-        #         template_count += 1
-        #
-        #         button = gtk.ToolButton(gtk.STOCK_EXECUTE)
-        #         button.set_name("template_%d" % template_count)
-        #         button.set_tooltip(self.tooltips, "%s\n%s" % (p[1], value))
-        #         button.connect("clicked", self.on_template, value)
-        #         toolbar.insert(button, -1)
-        #         button.show()
-
         if int(self.config.get("ping_connection_interval")) > 0:
             gobject.timeout_add(
                 int(self.config.get("ping_connection_interval")) * 1000,
                 self.on_connection_ping
             )
         self.init_plugins()
-
-    def __getattr__(self, name):
-        widget = self.xml.get_widget(name)
-        if widget is None:
-            raise AttributeError(name)
-        return widget
 
     def init_plugin(self, plugin):
         try:
@@ -249,46 +219,6 @@ class Emma:
                     print "...error! reconnect seems to fail!"
             _iter = self.connections_tv.connections_model.iter_next(_iter)
         return True
-
-    # def search_query_end(self, text, _start):
-    #     try:
-    #         r = self.query_end_re
-    #     except:
-    #         r = self.query_end_re = re.compile(r'("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(;)')
-    #     while 1:
-    #         result = re.search(r, text[_start:])
-    #         if not result:
-    #             return None
-    #
-    #         _start += result.end()
-    #         if result.group(4):
-    #             return _start
-
-    # def get_field_list(self, s):
-    #     # todo USE IT!
-    #     fields = []
-    #     _start = 0
-    #     ident = None
-    #     while 1:
-    #         item = []
-    #         while 1:
-    #             ident, end = self.read_expression(s[_start:])
-    #             if not ident:
-    #                 break
-    #             if ident == ",":
-    #                 break
-    #             if ident[0] == "`":
-    #                 ident = ident[1:-1]
-    #             item.append(ident)
-    #             _start += end
-    #         if len(item) == 1:
-    #             fields.append(item[0])
-    #         else:
-    #             fields.append(item)
-    #         if not ident:
-    #             break
-    #     print "found fields:", fields
-    #     return fields
 
     def on_execute_query_from_disk_activate(self, button, filename=None):
         if not self.current_host:

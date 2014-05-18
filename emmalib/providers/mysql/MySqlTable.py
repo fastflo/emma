@@ -20,6 +20,8 @@
 
 from MySqlField import MySqlField
 from MySqlIndex import MySqlIndex
+from emmalib.dialogs import confirm
+from emmalib import emma_instance
 import widgets
 
 
@@ -121,10 +123,33 @@ class MySqlTable:
 
     def get_table_toolbar(self):
         if self.is_table:
-            return widgets.TableToolbar(self)
+            toolbar = widgets.TableToolbar(self)
+            toolbar.drop.connect('clicked', self.on_toolbar_drop_table)
+            toolbar.truncate.connect('clicked', self.on_toolbar_truncate_table)
+            return toolbar
         else:
             return False
 
     def get_table_status_string(self):
         return 'Engine: %s, Rows: %s, Collation: %s, Comment: %s' % \
                (self.props[1], self.props[4], self.props[14], self.props[17])
+
+    def on_toolbar_drop_table(self, *args):
+        if not confirm(
+                "Drop table",
+                "do you really want to DROP the <b>%s</b> table in database "
+                "<b>%s</b> on <b>%s</b>?" % (self.name, self.db.name, self.db.host.name),
+                None):
+            return
+        if self.db.query("drop table `%s`" % self.name):
+            emma_instance.events.on_table_dropped(self)
+
+    def on_toolbar_truncate_table(self, *args):
+        if not confirm(
+                "Truncate table",
+                "Do You really want to TRUNCATE the <b>%s</b> table in database "
+                "<b>%s</b> on <b>%s</b>?" % (self.name, self.db.name, self.db.host.name),
+                None):
+            return
+        if self.db.query("truncate table `%s`" % self.name):
+            self.db.refresh()

@@ -144,3 +144,44 @@ def is_query_appendable(query):
             break  # found select
     return result
 
+
+# def search_query_end(self, text, _start):
+#     try:
+#         r = self.query_end_re
+#     except:
+#         r = self.query_end_re = re.compile(r'("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(;)')
+#     while 1:
+#         result = re.search(r, text[_start:])
+#         if not result:
+#             return None
+#
+#         _start += result.end()
+#         if result.group(4):
+#             return _start
+
+# def get_field_list(self, s):
+#     # todo USE IT!
+#     fields = []
+#     _start = 0
+#     ident = None
+#     while 1:
+#         item = []
+#         while 1:
+#             ident, end = self.read_expression(s[_start:])
+#             if not ident:
+#                 break
+#             if ident == ",":
+#                 break
+#             if ident[0] == "`":
+#                 ident = ident[1:-1]
+#             item.append(ident)
+#             _start += end
+#         if len(item) == 1:
+#             fields.append(item[0])
+#         else:
+#             fields.append(item)
+#         if not ident:
+#             break
+#     print "found fields:", fields
+#     return fields
+

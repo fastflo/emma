@@ -391,8 +391,7 @@ class ConnectionsTreeView(gtk.TreeView):
                 return
             db = table.db
             if db.query("drop table `%s`" % table.name):
-                new_tables = db.refresh()
-                self.redraw_db(db, self.emma.connections_tv.get_db_iter(db), new_tables)
+                self.emma.events.on_table_dropped(table)
         elif what == "check_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)

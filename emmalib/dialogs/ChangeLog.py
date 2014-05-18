@@ -1,10 +1,11 @@
 import os
 import gtk
+from emmalib.Constants import emma_path
 
 
 class ChangeLog(gtk.Window):
-    def __init__(self, emma_path, *args, **kwargs):
-        super(ChangeLog, self).__init__(*args, **kwargs)
+    def __init__(self):
+        super(ChangeLog, self).__init__()
 
         self.set_position(gtk.WIN_POS_CENTER)
         self.resize(640, 480)

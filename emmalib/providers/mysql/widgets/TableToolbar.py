@@ -32,11 +32,11 @@ class TableToolbar(gtk.Toolbar):
         self.add(self.refresh)
 
         self.truncate = gtk.ToolButton(gtk.STOCK_CLEAR)
-        self.truncate.set_label('Truncate Table')
+        self.truncate.set_label('Truncate')
         self.truncate.set_is_important(True)
         self.add(self.truncate)
 
         self.drop = gtk.ToolButton(gtk.STOCK_DELETE)
-        self.drop.set_label('Drop table')
+        self.drop.set_label('Drop')
         self.drop.set_is_important(True)
         self.add(self.drop)
