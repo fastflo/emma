@@ -30,6 +30,8 @@ class TableProperties(gtk.ScrolledWindow):
         self.set_border_width(8)
         self.table = table
 
+        self.properties = dict(zip(self.table.db.status_headers, self.table.props))
+
         self.tb_name = gtk.Entry()
         self.tb_ai = gtk.Entry()
         self.tb_comment = gtk.Entry()
@@ -52,19 +54,24 @@ class TableProperties(gtk.ScrolledWindow):
 
         hbox = gtk.HBox()
 
-        hbox.pack_start(self.build_ltable())
-        hbox.pack_end(self.build_rtable())
+        hbox.pack_start(self.build_ltable(), False, False, 0)
+        hbox.pack_start(self.build_rtable(), False, False, 16)
         vptp.add(hbox)
         vptp.set_shadow_type(gtk.SHADOW_NONE)
         self.add(vptp)
         self.show_all()
 
-        self.properties = dict(zip(self.table.db.status_headers, self.table.props))
-        for p in self.properties:
-            print p, self.properties[p]
-
     def build_ltable(self):
         tbl = gtk.Table(4, 2)
+        tbl.set_col_spacings(4)
+        tbl.set_row_spacings(4)
+
+        vbox = gtk.VBox()
+        vbox_l = gtk.Label('Parameters')
+        vbox_l.set_alignment(0, 1)
+        vbox.pack_start(vbox_l, False, False)
+        vbox.pack_start(gtk.HSeparator(), False, False, 4)
+        vbox.pack_start(tbl, False, False, 4)
 
         r = 0
         tbl.attach(self.mklbl('Name'), 0, 1, r, r+1, gtk.FILL, 0)
@@ -91,20 +98,44 @@ class TableProperties(gtk.ScrolledWindow):
         tbl.attach(self.tb_comment, 1, 2, r, r+1, gtk.FILL, 0)
 
         r += 1
-        tbl.attach(self.btn_update, 1, 2, r, r+1, gtk.FILL, 0)
+        self.btn_update.set_alignment(1, 0)
+        tbl.attach(self.btn_update, 1, 2, r, r+1, 0, 0)
 
-        return tbl
+        return vbox
 
     def mklbl(self, text):
-        lbl = gtk.Label(text)
+        lbl = gtk.Label(text+':')
         lbl.set_justify(gtk.JUSTIFY_RIGHT)
+        lbl.set_alignment(1, 0)
         return lbl
 
     def build_rtable(self):
-        r_table = gtk.Table(1, 2)
-        r_table.attach(gtk.Label('aaa'), 0, 1, 0, 1, gtk.FILL, 0)
-        r_table.attach(gtk.Label('bbb'), 1, 2, 0, 1, gtk.FILL, 0)
-        return r_table
+        itemlist = ['Update_time', 'Rows', 'Checksum', 'Check_time', 'Index_length', 'Data_length', 'Create_options',
+                    'Avg_row_length', 'Data_free', 'Version', 'Create_time', 'Max_data_length']
+        tbl = gtk.Table(len(itemlist), 2)
+        tbl.set_col_spacings(4)
+        tbl.set_row_spacings(4)
+
+        vbox = gtk.VBox()
+        vbox_l = gtk.Label('Properties')
+        vbox_l.set_alignment(0, 1)
+        vbox.pack_start(vbox_l, False, False)
+        vbox.pack_start(gtk.HSeparator(), False, False, 4)
+        vbox.pack_start(tbl, False, False, 4)
+
+        r = 0
+        for item in itemlist:
+            e = gtk.Entry()
+            e.set_editable(False)
+            v = self.properties[item]
+            if v is None:
+                v = ''
+            e.set_text(v)
+            tbl.attach(self.mklbl(item), 0, 1, r, r+1, gtk.FILL, 0)
+            tbl.attach(e, 1, 2, r, r+1, gtk.FILL, 0)
+            r += 1
+
+        return vbox
 
     def update(self):
         self.tb_name.set_text(self.properties['Name'])
@@ -121,42 +152,3 @@ class TableProperties(gtk.ScrolledWindow):
             if i[0] == text:
                 cb.set_active(ix)
             ix += 1
-
-    def update_old(self):
-        table = self.table_properties
-        prop_count = len(self.table.props)
-        if len(self.table_property_labels) != prop_count:
-            for c in self.table_property_labels:
-                table.remove(c)
-            for c in self.table_property_entries:
-                table.remove(c)
-            self.table_property_labels = []
-            self.table_property_entries = []
-            table.resize(prop_count, 2)
-            r = 0
-            for h, p in zip(self.table.db.status_headers, self.table.props):
-                l = gtk.Label(h)
-                l.set_alignment(0, 0.5)
-                e = gtk.Entry()
-                e.set_editable(False)
-                if p is None:
-                    p = ""
-                e.set_text(p)
-                table.attach(l, 0, 1, r, r + 1, gtk.FILL, 0)
-                table.attach(e, 1, 2, r, r + 1, gtk.EXPAND | gtk.FILL | gtk.SHRINK, 0)
-                l.show()
-                e.show()
-                self.table_property_labels.append(l)
-                self.table_property_entries.append(e)
-                r += 1
-        else:
-            r = 0
-            for h, p in zip(self.table.db.status_headers, self.table.props):
-                l = self.table_property_labels[r]
-                e = self.table_property_entries[r]
-                l.set_label(h)
-                if p is None:
-                    p = ""
-                e.set_text(p)
-                r += 1
-
