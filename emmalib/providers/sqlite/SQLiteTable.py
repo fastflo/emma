@@ -80,3 +80,15 @@ class SQLiteTable:
 
     def get_table_indexes_widget(self):
         return False
+
+    def get_table_toolbar(self):
+        return False
+
+    def get_table_status_string(self):
+        return ''
+
+    def on_toolbar_drop_table(self, *args):
+        pass
+
+    def on_toolbar_truncate_table(self, *args):
+        pass

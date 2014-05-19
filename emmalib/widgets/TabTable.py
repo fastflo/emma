@@ -38,11 +38,11 @@ class TabTable(BaseTab):
         self.status_text = gtk.Label()
 
         #
-        #   PROPERTIES
+        #   DATA
         #
-        self.table_properties = table.get_table_properties_widget()
-        if self.table_properties:
-            self.notebook.append_page(self.table_properties, gtk.Label('Properties'))
+        self.data_view = ResultView()
+        self.data_view.enable_sorting = True
+        self.notebook.append_page(self.data_view, gtk.Label('Data'))
 
         #
         #   FIELDS
@@ -60,11 +60,11 @@ class TabTable(BaseTab):
                 self.notebook.append_page(self.table_indexes, gtk.Label('Indexes'))
 
         #
-        #   DATA
+        #   PROPERTIES
         #
-        self.data_view = ResultView()
-        self.data_view.enable_sorting = True
-        self.notebook.append_page(self.data_view, gtk.Label('Data'))
+        self.table_properties = table.get_table_properties_widget()
+        if self.table_properties:
+            self.notebook.append_page(self.table_properties, gtk.Label('Properties'))
 
         #
         #   CREATE TABLE/VIEW SQL

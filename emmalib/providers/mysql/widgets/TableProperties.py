@@ -151,7 +151,8 @@ class TableProperties(gtk.ScrolledWindow):
             self.info_items_entries[item].set_text(v)
 
         self.tb_name.set_text(self.table.props_dict['Name'])
-        self.tb_ai.set_text(self.table.props_dict['Auto_increment'])
+        ai = self.table.props_dict.get('Auto_increment', '')
+        self.tb_ai.set_text(ai if ai is not None else '')
         self.tb_comment.set_text(self.table.props_dict['Comment'])
 
         self.selcb(self.cb_engine, self.table.props_dict['Engine'])
