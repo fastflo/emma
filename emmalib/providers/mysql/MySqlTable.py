@@ -111,6 +111,14 @@ class MySqlTable:
             emma_instance.events.on_table_modified(self)
             return True
 
+    def alter_engine(self, new_engine):
+        if self.host.query('ALTER TABLE %s ENGINE=%s' % (
+            self.host.escape_table(self.name),
+            new_engine.upper()
+        )):
+            self.refresh_properties()
+            emma_instance.events.on_table_modified(self)
+
     #
     #   WIDGETS
     #
@@ -133,9 +141,9 @@ class MySqlTable:
         else:
             return False
 
-    def get_table_toolbar(self):
+    def get_table_toolbar(self, tab_table):
         if self.is_table:
-            toolbar = widgets.TableToolbar(self)
+            toolbar = widgets.TableToolbar(tab_table)
             toolbar.refresh.connect('clicked', self.on_toolbar_refresh_table)
             toolbar.drop.connect('clicked', self.on_toolbar_drop_table)
             toolbar.truncate.connect('clicked', self.on_toolbar_truncate_table)

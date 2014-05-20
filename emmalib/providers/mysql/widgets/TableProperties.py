@@ -37,14 +37,13 @@ class TableProperties(gtk.ScrolledWindow):
         self.cb_engine = gtk.combo_box_new_text()
         self.cb_engine.append_text('InnoDB')
         self.cb_engine.append_text('MyISAM')
+        self.cb_engine.connect('changed', self.on_cb_engine_changed)
 
         self.cb_collation = gtk.combo_box_new_text()
         for c in collations:
             self.cb_collation.append_text(c)
 
         self.cb_rowformat = gtk.combo_box_new_text()
-        self.cb_rowformat.append_text('Compact')
-        self.cb_rowformat.append_text('Redundant')
 
         self.btn_update = gtk.Button('Update')
         self.btn_update.connect('clicked', self.on_update_clicked)
@@ -66,9 +65,15 @@ class TableProperties(gtk.ScrolledWindow):
         self.show_all()
 
     def on_update_clicked(self, *args):
+        do_update = False
         if self.tb_name.get_text() != self.table.props_dict['Name']:
             if self.table.rename(self.tb_name.get_text()):
-                self.update()
+                do_update = True
+        if self.cb_engine.get_active_text() != self.table.props_dict['Engine']:
+            if self.table.alter_engine(self.cb_engine.get_active_text()):
+                do_update = True
+        if do_update:
+            self.update()
 
     def build_ltable(self):
         tbl = gtk.Table(4, 2)
@@ -111,6 +116,17 @@ class TableProperties(gtk.ScrolledWindow):
         tbl.attach(self.btn_update, 1, 2, r, r+1, 0, 0)
 
         return vbox
+
+    def on_cb_engine_changed(self, cmb):
+        engine = cmb.get_active_text()
+        self.cb_rowformat.remove_text(0)
+        self.cb_rowformat.remove_text(0)
+        if engine == 'InnoDB':
+            self.cb_rowformat.append_text('Compact')
+            self.cb_rowformat.append_text('Redundant')
+        elif engine == 'MyISAM':
+            self.cb_rowformat.append_text('Fixed')
+            self.cb_rowformat.append_text('Dynamic')
 
     def mklbl(self, text):
         lbl = gtk.Label(text+':')
