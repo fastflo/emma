@@ -83,6 +83,7 @@ class TabTable(BaseTab):
         self.toolbar = table.get_table_toolbar()
         if self.toolbar:
             vbox.pack_start(self.toolbar, False, True)
+            self.toolbar.truncate.connect('clicked', self.update)
             self.toolbar.refresh.connect('clicked', self.update)
         vbox.pack_start(self.notebook, True, True)
         vbox.pack_end(self.create_statusbar(), False, True)
@@ -96,6 +97,8 @@ class TabTable(BaseTab):
         return hbox
 
     def update(self, *args):
+        self.table.refresh()
+
         self.data_view.load_data(self.table.get_all_records())
 
         self.status_text.set_text(self.table.get_table_status_string())

@@ -164,4 +164,4 @@ class MySqlTable:
                 None):
             return
         if self.db.query("truncate table `%s`" % self.name):
-            self.db.refresh()
+            emma_instance.events.on_table_modified(self)

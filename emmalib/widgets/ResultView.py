@@ -34,18 +34,18 @@ class ResultView(gtk.ScrolledWindow):
         self.tv_data.set_rules_hint(True)
         self.tv_data.set_model(self.tv_data_model)
         self.add(self.tv_data)
-        self.data_loaded = False
         self.enable_sorting = False
         self.show_all()
 
     def load_data(self, result):
-        if not result or self.data_loaded:
-            return
+        for col in self.tv_data.get_columns():
+            self.tv_data.remove_column(col)
+        if self.tv_data_model:
+            self.tv_data_model.clear()
         #
         #   Build list store with sort and data columns
         #   Make map of result column index, its display column and sort column
         #
-        self.data_loaded = True
         columns = []
         sort_display_map = []
         i = 0
@@ -162,7 +162,6 @@ class ResultView(gtk.ScrolledWindow):
             col.set_sort_column_id(sort_column_index)
 
     def cleanup(self):
-        self.data_loaded = False
         for col in self.tv_data.get_columns():
             self.tv_data.remove_column(col)
         if self.tv_data_model:
