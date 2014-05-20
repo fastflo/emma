@@ -23,8 +23,10 @@ import gtk
 
 class TableToolbar(gtk.Toolbar):
     
-    def __init__(self, table):
+    def __init__(self, tab_table):
         super(TableToolbar, self).__init__()
+
+        self.tab_table = tab_table
 
         self.set_icon_size(gtk.ICON_SIZE_MENU)
         self.refresh = gtk.ToolButton(gtk.STOCK_REFRESH)
@@ -40,3 +42,7 @@ class TableToolbar(gtk.Toolbar):
         self.drop.set_label('Drop')
         self.drop.set_is_important(True)
         self.add(self.drop)
+
+        self.truncate.connect('clicked', self.tab_table.update)
+        self.refresh.connect('clicked', self.tab_table.update)
+

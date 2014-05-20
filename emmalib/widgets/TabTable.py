@@ -80,11 +80,9 @@ class TabTable(BaseTab):
         self.notebook.set_current_page(0)
 
         vbox = gtk.VBox()
-        self.toolbar = table.get_table_toolbar()
+        self.toolbar = table.get_table_toolbar(self)
         if self.toolbar:
             vbox.pack_start(self.toolbar, False, True)
-            self.toolbar.truncate.connect('clicked', self.update)
-            self.toolbar.refresh.connect('clicked', self.update)
         vbox.pack_start(self.notebook, True, True)
         vbox.pack_end(self.create_statusbar(), False, True)
         vbox.show_all()
@@ -98,19 +96,13 @@ class TabTable(BaseTab):
 
     def update(self, *args):
         self.table.refresh()
-
         self.data_view.load_data(self.table.get_all_records())
-
         self.status_text.set_text(self.table.get_table_status_string())
-
         self.table_textview.get_buffer().set_text(self.table.get_create_table())
-
         if self.table_properties:
             self.table_properties.update()
-
         if self.table_fields:
             self.table_fields.refresh()
-
         if self.table.is_table:
             if self.table_indexes:
                 self.table_indexes.refresh()

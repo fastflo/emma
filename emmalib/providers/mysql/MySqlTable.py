@@ -97,7 +97,7 @@ class MySqlTable:
         return (self.fields[field_name][0], self.fields[field_name][1]),
 
     def get_all_records(self):
-        return self.host.query_dict('SELECT * FROM %s' % self.name, append_to_log=False)
+        return self.host.query_dict('SELECT * FROM %s' % self.name)
 
     def rename(self, new_name):
         if self.host.query('RENAME TABLE %s TO %s' % (
@@ -136,6 +136,7 @@ class MySqlTable:
     def get_table_toolbar(self):
         if self.is_table:
             toolbar = widgets.TableToolbar(self)
+            toolbar.refresh.connect('clicked', self.on_toolbar_refresh_table)
             toolbar.drop.connect('clicked', self.on_toolbar_drop_table)
             toolbar.truncate.connect('clicked', self.on_toolbar_truncate_table)
             return toolbar
@@ -146,6 +147,9 @@ class MySqlTable:
         return 'Engine: %s, Rows: %s, Collation: %s, Comment: %s' % \
                (self.props[1], self.props[4], self.props[14], self.props[17])
 
+    def on_toolbar_refresh_table(self, *args):
+        self.refresh(True)
+
     def on_toolbar_drop_table(self, *args):
         if not confirm(
                 "Drop table",
@@ -154,7 +158,8 @@ class MySqlTable:
                 None):
             return
         if self.db.query("drop table `%s`" % self.name):
-            emma_instance.events.on_table_dropped(self)
+            if emma_instance:
+                emma_instance.events.on_table_dropped(self)
 
     def on_toolbar_truncate_table(self, *args):
         if not confirm(
@@ -164,4 +169,5 @@ class MySqlTable:
                 None):
             return
         if self.db.query("truncate table `%s`" % self.name):
-            emma_instance.events.on_table_modified(self)
+            if emma_instance:
+                emma_instance.events.on_table_modified(self)
