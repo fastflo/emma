@@ -26,6 +26,14 @@ class TableFieldsPopUp(gtk.Menu):
     def __init__(self):
         super(TableFieldsPopUp, self).__init__()
 
+        self.add = gtk.ImageMenuItem(gtk.STOCK_ADD)
+        self.add.set_name('add')
+        self.add.set_label('Add field')
+        self.add.set_always_show_image(True)
+        self.append(self.add)
+
+        self.append(gtk.SeparatorMenuItem())
+
         self.edit = gtk.ImageMenuItem(gtk.STOCK_EDIT)
         self.edit.set_name('edit')
         self.edit.set_label('Edit field')

@@ -23,3 +23,4 @@ from TableFields import TableFields
 from TableFieldsPopUp import TableFieldsPopUp
 from TableIndexes import TableIndexes
 from TableToolbar import TableToolbar
+from TableFieldDialog import TableFieldDialog

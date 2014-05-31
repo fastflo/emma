@@ -21,6 +21,8 @@
 import gtk
 import gobject
 from TableFieldsPopUp import TableFieldsPopUp
+from TableFieldDialog import TableFieldDialog
+from providers.mysql.MySqlField import MySqlField
 
 
 class TableFields(gtk.ScrolledWindow):
@@ -46,7 +48,26 @@ class TableFields(gtk.ScrolledWindow):
         self.tv_fields.set_model(self.tv_fields_model)
         self.tv_fields.connect("button-release-event", self.on_button_release)
         self.pop_up = TableFieldsPopUp()
+        self.pop_up.add.connect('activate', self.on_add_activate)
+        self.pop_up.edit.connect('activate', self.on_edit_activate)
         self.add(self.tv_fields)
+
+    def on_add_activate(self, *args):
+        dialog = TableFieldDialog(MySqlField({}))
+        dialog.run()
+        dialog.destroy()
+        print args
+
+    def on_edit_activate(self, *args):
+        path, column = self.tv_fields.get_cursor()
+        _iter = self.tv_fields_model.get_iter(path)
+        _field_name = self.tv_fields_model.get_value(_iter, 2)
+        print 'Field selected:', _field_name
+        for f in self.table.fields:
+            if f.name == _field_name:
+                dialog = TableFieldDialog(f)
+                dialog.run()
+                dialog.destroy()
 
     def refresh(self):
         for col in self.tv_fields.get_columns():
@@ -74,7 +95,7 @@ class TableFields(gtk.ScrolledWindow):
                     False,
                     fn,
                     f.name,
-                    f.type,
+                    f.type_string,
                     f.row['Collation'],
                     "YES" if f.is_null else "NO",
                     f.default,
@@ -91,4 +112,4 @@ class TableFields(gtk.ScrolledWindow):
     def on_button_release(self, tv, event):
         if not tv or not event or not event.button == 3:
             return False
-        self.pop_up.popup(None, None, None, event.button, event.time)
+        self.pop_up.popup(None, None, None, event.button, event.time, tv)

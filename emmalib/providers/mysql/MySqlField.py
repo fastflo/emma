@@ -20,8 +20,18 @@
 
 import re
 
+field_types = [
+    'TINYINT', 'SMALLINT', 'MEDIUMINT', 'INT', 'BIGINT',
+    'DECIMAL', 'DOUBLE', 'FLOAT', 'REAL',
+    'DATE', 'DATETIME', 'TIMESTAMP', 'TIME', 'YEAR',
+    'CHAR', 'VARCHAR',
+    'BLOB', 'TINYBLOB', 'MEDIUMBLOB', 'LONGBLOB',
+    'TEXT', 'TINYTEXT', 'MEDIUMTEXT', 'LONGTEXT',
+    'BINARY', 'VARBINARY',
+    'ENUM', 'SET'
+]
 field_types_int = ['bit', 'bool', 'boolean', 'tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'integer']
-field_types_float = ['decimal', 'double', 'float']
+field_types_float = ['decimal', 'double', 'float', 'real']
 field_types_str = [
     'date', 'datetime', 'timestamp', 'time', 'year',
     'char', 'varchar',
@@ -35,33 +45,57 @@ field_types_str = [
 class MySqlField:
     def __init__(self, row):
         self.row = row
-        self.name = row['Field']
-        self.default = row['Default']
-        if row['Null'] != 'NO':
-            self.is_null = True
-        else:
-            self.is_null = False
-        self.type = row['Type']
+        print row
+        if len(row) > 0:
+            self.name = row['Field']
+            self.default = row['Default']
+            if row['Null'] != 'NO':
+                self.is_null = True
+            else:
+                self.is_null = False
 
-        self._t_type, self._t_size, self._t_scale = self.parse_type()
+            print self.parse_type()
+            _t_type, self.size, self.precission, self.unsigned = self.parse_type()
+            self.type = _t_type.upper()
+            self.type_string = self.row['Type']
+            self.auto_increment = self.row['Extra'] == 'auto_increment'
+        else:
+            self.name = ''
+            self.default = ''
+            self.is_null = True
+            self.type = 'INT'
+            self.type_string = 'int(11)'
+            self.size = 11
+            self.precission = 0
+            self.unsigned = False
+            self.auto_increment = False
 
     def get_py_type(self):
-        if self._t_type in field_types_int:
+        _t_type, _t_size, _t_scale, _t_unsigned = self.parse_type()
+        if _t_type in field_types_int:
             return long
-        if self._t_type in field_types_float:
+        if _t_type in field_types_float:
             return float
-        if self._t_type in field_types_str:
+        if _t_type in field_types_str:
             return str
 
     def parse_type(self):
-        m = re.match(r'(.+)\((\d+),(\d+)\)', self.type)
+        m = re.match(r'(.+)\((\d+),(\d+)\)\s(unsigned)', self.row['Type'])
         if m is not None:
-            return m.group(1), int(m.group(2)), m.group(3)
+            return m.group(1), int(m.group(2)), m.group(3), True
 
-        m = re.match(r'(.+)\((\d+)\)', self.type)
+        m = re.match(r'(.+)\((\d+),(\d+)\)', self.row['Type'])
         if m is not None:
-            return m.group(1), int(m.group(2)), 0
+            return m.group(1), int(m.group(2)), m.group(3), False
 
-        m = re.match(r'(.+)', self.type)
+        m = re.match(r'(.+)\((\d+)\)\s(unsigned)', self.row['Type'])
         if m is not None:
-            return m.group(1), 0, 0
+            return m.group(1), int(m.group(2)), 0, True
+
+        m = re.match(r'(.+)\((\d+)\)', self.row['Type'])
+        if m is not None:
+            return m.group(1), int(m.group(2)), 0, False
+
+        m = re.match(r'(.+)', self.row['Type'])
+        if m is not None:
+            return m.group(1), 0, 0, False

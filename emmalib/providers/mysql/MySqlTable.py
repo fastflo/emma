@@ -99,6 +99,10 @@ class MySqlTable:
     def get_all_records(self):
         return self.host.query_dict('SELECT * FROM %s' % self.name)
 
+    #
+    #   ALTER TABLE
+    #
+
     def rename(self, new_name):
         if self.host.query('RENAME TABLE %s TO %s' % (
             self.host.escape_table(self.name),

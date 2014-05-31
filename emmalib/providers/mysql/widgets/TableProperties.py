@@ -107,6 +107,8 @@ class TableProperties(gtk.ScrolledWindow):
             self.cb_collation.set_active(0)
 
     def on_update_clicked(self, *args):
+        if not args:
+            return
         do_update = False
         if self.tb_name.get_text() != self.table.props_dict['Name']:
             if self.table.rename(self.tb_name.get_text()):
@@ -118,10 +120,7 @@ class TableProperties(gtk.ScrolledWindow):
             if self.table.alter_row_format(self.cb_rowformat.get_active_text()):
                 do_update = True
         if self.cb_collation.get_active_text() != self.table.props_dict['Collation']:
-            if self.table.alter_collation(
-                    self.cb_charset.get_active_text(),
-                    self.cb_collation.get_active_text()
-            ):
+            if self.table.alter_collation(self.cb_charset.get_active_text(), self.cb_collation.get_active_text()):
                 do_update = True
         if self.tb_comment.get_text() != self.table.props_dict['Comment']:
             if self.table.alter_comment(self.tb_comment.get_text()):
@@ -134,8 +133,7 @@ class TableProperties(gtk.ScrolledWindow):
 
     def on_cb_engine_changed(self, cmb):
         engine = cmb.get_active_text()
-        self.cb_rowformat.remove_text(0)
-        self.cb_rowformat.remove_text(0)
+        self.cb_rowformat.get_model().clear()
         if engine == 'InnoDB':
             self.cb_rowformat.append_text('Compact')
             self.cb_rowformat.append_text('Redundant')
