@@ -18,7 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import sql
 import gtk
 import glib
 import gobject
@@ -38,7 +37,6 @@ from EventsManager import EventsManager
 class Emma:
     def __init__(self):
         self.emma_path = emma_path
-        self.sql = sql
         self.created_once = {}
         self.queries = []
         self.stored_orders = {}
