@@ -108,7 +108,8 @@ class MySqlTable:
             del self.db.tables[self.name]
             self.name = new_name
             self.refresh_properties()
-            emma_instance.events.on_table_modified(self)
+            if emma_instance:
+                emma_instance.events.on_table_modified(self)
             return True
 
     def alter_engine(self, new_engine):
@@ -117,7 +118,35 @@ class MySqlTable:
             new_engine.upper()
         )):
             self.refresh_properties()
-            emma_instance.events.on_table_modified(self)
+            if emma_instance:
+                emma_instance.events.on_table_modified(self)
+
+    def alter_row_format(self, new_row_format):
+        if self.host.query('ALTER TABLE %s ROW_FORMAT=%s' % (
+            self.host.escape_table(self.name),
+            new_row_format.upper()
+        )):
+            self.refresh_properties()
+            if emma_instance:
+                emma_instance.events.on_table_modified(self)
+
+    def alter_comment(self, new_comment):
+        if self.host.query("ALTER TABLE %s COMMENT='%s'" % (
+            self.host.escape_table(self.name),
+            new_comment
+        )):
+            self.refresh_properties()
+            if emma_instance:
+                emma_instance.events.on_table_modified(self)
+
+    def alter_auto_increment(self, new_ai):
+        if self.host.query("ALTER TABLE %s AUTO_INCREMENT=%s" % (
+            self.host.escape_table(self.name),
+            new_ai
+        )):
+            self.refresh_properties()
+            if emma_instance:
+                emma_instance.events.on_table_modified(self)
 
     #
     #   WIDGETS

@@ -64,6 +64,28 @@ class TableProperties(gtk.ScrolledWindow):
         self.add(vptp)
         self.show_all()
 
+    #
+    #   Refresh table properties
+    #
+
+    def update(self):
+        for item in self.info_items_list:
+            v = self.table.props_dict[item] if self.table.props_dict[item] is not None else ''
+            self.info_items_entries[item].set_text(v)
+
+        self.tb_name.set_text(self.table.props_dict['Name'])
+        ai = self.table.props_dict.get('Auto_increment', '')
+        self.tb_ai.set_text(ai if ai is not None else '')
+        self.tb_comment.set_text(self.table.props_dict['Comment'])
+
+        self.selcb(self.cb_engine, self.table.props_dict['Engine'])
+        self.selcb(self.cb_collation, self.table.props_dict['Collation'])
+        self.selcb(self.cb_rowformat, self.table.props_dict['Row_format'])
+
+    #
+    #   Update table properties actions
+    #
+
     def on_update_clicked(self, *args):
         do_update = False
         if self.tb_name.get_text() != self.table.props_dict['Name']:
@@ -72,8 +94,40 @@ class TableProperties(gtk.ScrolledWindow):
         if self.cb_engine.get_active_text() != self.table.props_dict['Engine']:
             if self.table.alter_engine(self.cb_engine.get_active_text()):
                 do_update = True
+        if self.cb_rowformat.get_active_text() != self.table.props_dict['Row_format']:
+            if self.table.alter_row_format(self.cb_rowformat.get_active_text()):
+                do_update = True
+        if self.tb_comment.get_text() != self.table.props_dict['Comment']:
+            if self.table.alter_comment(self.tb_comment.get_text()):
+                do_update = True
+        if self.tb_ai.get_text() != self.table.props_dict['Comment']:
+            if self.table.alter_auto_increment(self.tb_ai.get_text()):
+                do_update = True
         if do_update:
             self.update()
+
+    def on_cb_engine_changed(self, cmb):
+        engine = cmb.get_active_text()
+        self.cb_rowformat.remove_text(0)
+        self.cb_rowformat.remove_text(0)
+        if engine == 'InnoDB':
+            self.cb_rowformat.append_text('Compact')
+            self.cb_rowformat.append_text('Redundant')
+            if self.table.props_dict['Engine'] == 'InnoDB':
+                self.selcb(self.cb_rowformat, self.table.props_dict['Row_format'])
+            else:
+                self.selcb(self.cb_rowformat, 'Compact')
+        elif engine == 'MyISAM':
+            self.cb_rowformat.append_text('Fixed')
+            self.cb_rowformat.append_text('Dynamic')
+            if self.table.props_dict['Engine'] == 'MyISAM':
+                self.selcb(self.cb_rowformat, self.table.props_dict['Row_format'])
+            else:
+                self.selcb(self.cb_rowformat, 'Dynamic')
+
+    #
+    #   Build UI
+    #
 
     def build_ltable(self):
         tbl = gtk.Table(4, 2)
@@ -88,45 +142,26 @@ class TableProperties(gtk.ScrolledWindow):
         vbox.pack_start(tbl, False, False, 4)
 
         r = 0
-        tbl.attach(self.mklbl('Name'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.tb_name, 1, 2, r, r+1, gtk.FILL, 0)
-
+        self.mkrow(tbl, self.tb_name, 'Name', r)
         r += 1
-        tbl.attach(self.mklbl('Engine'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.cb_engine, 1, 2, r, r+1, gtk.FILL, 0)
-
+        self.mkrow(tbl, self.cb_engine, 'Engine', r)
         r += 1
-        tbl.attach(self.mklbl('Collation'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.cb_collation, 1, 2, r, r+1, gtk.FILL, 0)
-
+        self.mkrow(tbl, self.cb_collation, 'Collation', r)
         r += 1
-        tbl.attach(self.mklbl('Auto increment'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.tb_ai, 1, 2, r, r+1, gtk.FILL, 0)
-
+        self.mkrow(tbl, self.tb_ai, 'Auto increment', r)
         r += 1
-        tbl.attach(self.mklbl('Row format'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.cb_rowformat, 1, 2, r, r+1, gtk.FILL, 0)
-
+        self.mkrow(tbl, self.cb_rowformat, 'Row format', r)
         r += 1
-        tbl.attach(self.mklbl('Comment'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.tb_comment, 1, 2, r, r+1, gtk.FILL, 0)
-
+        self.mkrow(tbl, self.tb_comment, 'Comment', r)
         r += 1
         self.btn_update.set_alignment(1, 0)
         tbl.attach(self.btn_update, 1, 2, r, r+1, 0, 0)
 
         return vbox
 
-    def on_cb_engine_changed(self, cmb):
-        engine = cmb.get_active_text()
-        self.cb_rowformat.remove_text(0)
-        self.cb_rowformat.remove_text(0)
-        if engine == 'InnoDB':
-            self.cb_rowformat.append_text('Compact')
-            self.cb_rowformat.append_text('Redundant')
-        elif engine == 'MyISAM':
-            self.cb_rowformat.append_text('Fixed')
-            self.cb_rowformat.append_text('Dynamic')
+    def mkrow(self, tbl, child, label, r):
+        tbl.attach(self.mklbl(label), 0, 1, r, r+1, gtk.FILL, 0)
+        tbl.attach(child, 1, 2, r, r+1, gtk.FILL, 0)
 
     def mklbl(self, text):
         lbl = gtk.Label(text+':')
@@ -160,20 +195,6 @@ class TableProperties(gtk.ScrolledWindow):
             r += 1
 
         return vbox
-
-    def update(self):
-        for item in self.info_items_list:
-            v = self.table.props_dict[item] if self.table.props_dict[item] is not None else ''
-            self.info_items_entries[item].set_text(v)
-
-        self.tb_name.set_text(self.table.props_dict['Name'])
-        ai = self.table.props_dict.get('Auto_increment', '')
-        self.tb_ai.set_text(ai if ai is not None else '')
-        self.tb_comment.set_text(self.table.props_dict['Comment'])
-
-        self.selcb(self.cb_engine, self.table.props_dict['Engine'])
-        self.selcb(self.cb_collation, self.table.props_dict['Collation'])
-        self.selcb(self.cb_rowformat, self.table.props_dict['Row_format'])
 
     def selcb(self, cb, text):
         ix = 0
