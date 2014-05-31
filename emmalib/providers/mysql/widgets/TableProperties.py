@@ -84,7 +84,7 @@ class TableProperties(gtk.ScrolledWindow):
 
         col = self.table.props_dict['Collation']
         col_s = col.split('_')
-        if len(col_s) == 2:
+        if len(col_s) >= 2:
             self.selcb(self.cb_charset, col.split('_')[0])
         else:
             self.selcb(self.cb_charset, col)
