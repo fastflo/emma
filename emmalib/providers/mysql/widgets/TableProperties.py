@@ -39,11 +39,11 @@ class TableProperties(gtk.ScrolledWindow):
         self.cb_engine.append_text('MyISAM')
         self.cb_engine.connect('changed', self.on_cb_engine_changed)
 
+        self.cb_charset = gtk.combo_box_new_text()
         self.cb_collation = gtk.combo_box_new_text()
         for c in collations:
-            self.cb_collation.append_text(c)
-            for l in collations[c]:
-                self.cb_collation.append_text(l)
+            self.cb_charset.append_text(c)
+        self.cb_charset.connect('changed', self.on_cb_charset_changed)
 
         self.cb_rowformat = gtk.combo_box_new_text()
 
@@ -81,12 +81,30 @@ class TableProperties(gtk.ScrolledWindow):
         self.tb_comment.set_text(self.table.props_dict['Comment'])
 
         self.selcb(self.cb_engine, self.table.props_dict['Engine'])
-        self.selcb(self.cb_collation, self.table.props_dict['Collation'])
+
+        col = self.table.props_dict['Collation']
+        col_s = col.split('_')
+        if len(col_s) == 2:
+            self.selcb(self.cb_charset, col.split('_')[0])
+        else:
+            self.selcb(self.cb_charset, col)
+        self.selcb(self.cb_collation, col)
+
         self.selcb(self.cb_rowformat, self.table.props_dict['Row_format'])
 
     #
     #   Update table properties actions
     #
+
+    def on_cb_charset_changed(self, cb):
+        at = cb.get_active_text()
+        self.cb_collation.get_model().clear()
+        for i in collations[at]:
+            self.cb_collation.append_text(i)
+        self.selcb(self.cb_collation, at+'_general_ci')
+        print self.cb_collation.get_active_text()
+        if self.cb_collation.get_active_text() is None:
+            self.cb_collation.set_active(0)
 
     def on_update_clicked(self, *args):
         do_update = False
@@ -99,10 +117,16 @@ class TableProperties(gtk.ScrolledWindow):
         if self.cb_rowformat.get_active_text() != self.table.props_dict['Row_format']:
             if self.table.alter_row_format(self.cb_rowformat.get_active_text()):
                 do_update = True
+        if self.cb_collation.get_active_text() != self.table.props_dict['Collation']:
+            if self.table.alter_collation(
+                    self.cb_charset.get_active_text(),
+                    self.cb_collation.get_active_text()
+            ):
+                do_update = True
         if self.tb_comment.get_text() != self.table.props_dict['Comment']:
             if self.table.alter_comment(self.tb_comment.get_text()):
                 do_update = True
-        if self.tb_ai.get_text() != self.table.props_dict['Comment']:
+        if self.tb_ai.get_text() != self.table.props_dict['Auto_increment']:
             if self.table.alter_auto_increment(self.tb_ai.get_text()):
                 do_update = True
         if do_update:
@@ -147,6 +171,8 @@ class TableProperties(gtk.ScrolledWindow):
         self.mkrow(tbl, self.tb_name, 'Name', r)
         r += 1
         self.mkrow(tbl, self.cb_engine, 'Engine', r)
+        r += 1
+        self.mkrow(tbl, self.cb_charset, 'Charset', r)
         r += 1
         self.mkrow(tbl, self.cb_collation, 'Collation', r)
         r += 1

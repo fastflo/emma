@@ -148,6 +148,15 @@ class MySqlTable:
             if emma_instance:
                 emma_instance.events.on_table_modified(self)
 
+    def alter_collation(self, charset, collation):
+        if self.host.query("ALTER TABLE %s DEFAULT CHARACTER SET %s COLLATE %s" % (
+            self.host.escape_table(self.name),
+            charset, collation
+        )):
+            self.refresh_properties()
+            if emma_instance:
+                emma_instance.events.on_table_modified(self)
+
     #
     #   WIDGETS
     #
