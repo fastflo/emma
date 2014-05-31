@@ -42,6 +42,8 @@ class TableProperties(gtk.ScrolledWindow):
         self.cb_collation = gtk.combo_box_new_text()
         for c in collations:
             self.cb_collation.append_text(c)
+            for l in collations[c]:
+                self.cb_collation.append_text(l)
 
         self.cb_rowformat = gtk.combo_box_new_text()
 
