@@ -254,7 +254,7 @@ class TableFieldDialog(gtk.Dialog):
         self.cb_sign.set_state(field.unsigned)
 
         self.cb_auto_increment = gtk.CheckButton()
-        self.cb_auto_increment.set_state(field.auto_increment)
+        self.cb_auto_increment.set_active(field.auto_increment)
 
         self.cb_primary = gtk.CheckButton()
         self.cb_unique = gtk.CheckButton()
@@ -372,6 +372,9 @@ class TableFieldDialog(gtk.Dialog):
             sql += 'ALTER TABLE `%s` CHANGE `%s` `%s`' % (table_name, self.field.name, self.tb_name.get_text(),)
 
         sql += ' %s(%s)' % (self.cb_type.get_active_text(), int(self.sp_size.get_value()),)
+
+        if self.cb_auto_increment.get_active():
+            sql += ' AUTO_INCREMENT '
 
         if self.tb_default.get_text() != '':
             sql += ' DEFAULT %s' % (self.tb_default.get_text())
