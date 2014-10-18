@@ -55,18 +55,27 @@ class TableFields(gtk.ScrolledWindow):
     def on_add_activate(self, *args):
         dialog = TableFieldDialog(MySqlField({}))
         dialog.run()
+        answer = dialog.run()
+        if answer == gtk.RESPONSE_OK:
+            q = dialog.get_sql(self.table.name)
+            self.table.db.query(q)
+            self.table.refresh()
+            self.refresh()
         dialog.destroy()
-        print args
 
     def on_edit_activate(self, *args):
         path, column = self.tv_fields.get_cursor()
         _iter = self.tv_fields_model.get_iter(path)
         _field_name = self.tv_fields_model.get_value(_iter, 2)
-        print 'Field selected:', _field_name
         for f in self.table.fields:
             if f.name == _field_name:
                 dialog = TableFieldDialog(f)
-                dialog.run()
+                answer = dialog.run()
+                if answer == gtk.RESPONSE_OK:
+                    q = dialog.get_sql(self.table.name)
+                    self.table.db.query(q)
+                    self.table.refresh()
+                    self.refresh()
                 dialog.destroy()
 
     def refresh(self):

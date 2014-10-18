@@ -1,6 +1,6 @@
 import gtk
 from emmalib import emma_instance
-from providers.mysql.MySqlField import field_types
+from emmalib.providers.mysql.MySqlField import MySqlField
 from collations import collations
 
 field_types_conf = {
@@ -212,17 +212,26 @@ class TableFieldDialog(gtk.Dialog):
         if field.name:
             super(TableFieldDialog, self).__init__(
                 'Edit field: %s' % field.name,
-                emma_instance.main_window if emma_instance else None,
+                emma_instance.mainwindow if emma_instance else None,
                 gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                 (gtk.STOCK_APPLY, gtk.RESPONSE_OK, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
             )
         else:
             super(TableFieldDialog, self).__init__(
                 'Add Field',
-                emma_instance.main_window if emma_instance else None,
+                emma_instance.mainwindow if emma_instance else None,
                 gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                 (gtk.STOCK_ADD, gtk.RESPONSE_OK, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
             )
+
+        self.set_border_width(8)
+
+        self.vbox.set_spacing(8)
+        lbl = gtk.Label('Field properties')
+        lbl.set_justify(gtk.JUSTIFY_LEFT)
+        lbl.set_alignment(0, 0)
+        self.vbox.pack_start(lbl)
+        self.vbox.pack_start(gtk.HSeparator())
 
         self.tb_name = gtk.Entry()
         self.tb_name.set_text(field.name)
@@ -332,7 +341,6 @@ class TableFieldDialog(gtk.Dialog):
         for i in sorted(collations[at]):
             self.cb_collation.append_text(i)
         self.selcb(self.cb_collation, at+'_general_ci')
-        print self.cb_collation.get_active_text()
         if self.cb_collation.get_active_text() is None:
             self.cb_collation.set_active(0)
 
@@ -355,3 +363,27 @@ class TableFieldDialog(gtk.Dialog):
             if i[0] == text:
                 cb.set_active(ix)
             ix += 1
+
+    def get_sql(self, table_name):
+        sql = ''
+        if self.field.name == '':
+            sql += 'ALTER TABLE `%s` ADD COLUMN `%s`' % (table_name, self.tb_name.get_text(),)
+        else:
+            sql += 'ALTER TABLE `%s` CHANGE `%s` `%s`' % (table_name, self.field.name, self.tb_name.get_text(),)
+
+        sql += ' %s(%s)' % (self.cb_type.get_active_text(), int(self.sp_size.get_value()),)
+
+        if self.tb_default.get_text() != '':
+            sql += ' DEFAULT %s' % (self.tb_default.get_text())
+
+        return sql
+
+
+if __name__ == '__main__':
+
+    f = MySqlField({})
+    w = TableFieldDialog(f)
+    answer = w.run()
+    if answer == gtk.RESPONSE_OK:
+        print w.get_sql('table_name')
+    w.destroy()
