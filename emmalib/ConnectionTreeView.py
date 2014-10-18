@@ -114,7 +114,6 @@ class ConnectionsTreeView(gtk.TreeView):
                 ctv, obj = arg
                 new_tables = obj.refresh()
                 ctv.redraw_db(obj, _iter, new_tables, True)
-                ctv.get_root_window().set_cursor(None)
                 ctv.emma.mainwindow.connections_tv_spinner.stop()
                 ctv.emma.mainwindow.connections_tv_spinner.hide()
                 ctv.show()
@@ -122,11 +121,9 @@ class ConnectionsTreeView(gtk.TreeView):
             self.current_host = o.host
             o.host.select_database(o)
 
-            watch = gtk.gdk.Cursor(gtk.gdk.WATCH)
             self.hide()
             self.emma.mainwindow.connections_tv_spinner.show()
             self.emma.mainwindow.connections_tv_spinner.start()
-            self.get_root_window().set_cursor(watch)
             gobject.idle_add(rfrs, (self, o))
 
             self.emma.current_query.set_current_db(o)
