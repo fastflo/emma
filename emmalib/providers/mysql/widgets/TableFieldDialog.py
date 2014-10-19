@@ -9,196 +9,224 @@ field_types_conf = {
         'null': True, 'sign': True,
         'ai': True, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'SMALLINT': {
         'size': True, 'precission': False,
         'null': True, 'sign': True,
         'ai': True, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'MEDIUMINT': {
         'size': True, 'precission': False,
         'null': True, 'sign': True,
         'ai': True, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'INT': {
         'size': True, 'precission': False,
         'null': True, 'sign': True,
         'ai': True, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'BIGINT': {
         'size': True, 'precission': False,
         'null': True, 'sign': True,
         'ai': True, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'DECIMAL': {
         'size': True, 'precission': True,
         'null': True, 'sign': True,
         'ai': True, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'DOUBLE': {
         'size': True, 'precission': True,
         'null': True, 'sign': True,
         'ai': True, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'FLOAT': {
         'size': True, 'precission': True,
         'null': True, 'sign': True,
         'ai': True, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'REAL': {
         'size': True, 'precission': True,
         'null': True, 'sign': False,
         'ai': True, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'DATE': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'DATETIME': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'TIMESTAMP': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'TIME': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'YEAR': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'CHAR': {
         'size': True, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': True
+        'default': True, 'charset': True,
+        'values': False
     },
     'VARCHAR': {
         'size': True, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': True
+        'default': True, 'charset': True,
+        'values': False
     },
     'BLOB': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'TINYBLOB': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'MEDIUMBLOB': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'LONGBLOB': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': False
     },
     'TEXT': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': True
+        'default': True, 'charset': True,
+        'values': False
     },
     'TINYTEXT': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': True
+        'default': True, 'charset': True,
+        'values': False
     },
     'MEDIUMTEXT': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': True
+        'default': True, 'charset': True,
+        'values': False
     },
     'LONGTEXT': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': True
+        'default': True, 'charset': True,
+        'values': False
     },
     'BINARY': {
         'size': True, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': True
+        'default': True, 'charset': True,
+        'values': False
     },
     'VARBINARY': {
         'size': True, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': True,
         'un': True, 'ft': True,
-        'default': True, 'charset': True
+        'default': True, 'charset': True,
+        'values': False
     },
     'ENUM': {
         'size': False, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': False,
         'un': False, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': True,
+        'values': True
     },
     'SET': {
         'size': True, 'precission': False,
         'null': True, 'sign': False,
         'ai': False, 'pk': False,
         'un': False, 'ft': False,
-        'default': True, 'charset': False
+        'default': True, 'charset': False,
+        'values': True
     }
 }
 
@@ -262,6 +290,9 @@ class TableFieldDialog(gtk.Dialog):
         if field.default:
             self.tb_default.set_text(field.default)
 
+        self.tb_values = gtk.Entry()
+        self.tb_values.set_text(field.values)
+
         self.cb_charset = gtk.combo_box_new_text()
         self.cb_collation = gtk.combo_box_new_text()
         for c in sorted(collations):
@@ -318,6 +349,9 @@ class TableFieldDialog(gtk.Dialog):
         tbl.attach(self.cb_collation, 1, 4, r, r+1, gtk.FILL, 0)
         r += 1
         self.mksep(tbl, r)
+        r += 1
+        tbl.attach(self.mklbl('Values'), 0, 1, r, r+1, gtk.FILL, 0)
+        tbl.attach(self.tb_values, 1, 4, r, r+1, gtk.FILL, 0)
 
         self.vbox.pack_start(tbl)
 
@@ -336,6 +370,8 @@ class TableFieldDialog(gtk.Dialog):
 
         self.tb_default.set_sensitive(conf['default'])
         self.cb_charset.set_sensitive(conf['charset'])
+
+        self.tb_values.set_sensitive(conf['values'])
 
     def on_cb_charset_changed(self, cb):
         at = cb.get_active_text()
@@ -373,10 +409,13 @@ class TableFieldDialog(gtk.Dialog):
         else:
             sql += "ALTER TABLE `%s` CHANGE `%s` `%s`" % (table_name, self.field.name, self.tb_name.get_text(),)
 
+        _values = self.tb_values.get_text()
         _type = self.cb_type.get_active_text()
         _size = int(self.sp_size.get_value())
         if self.sp_size.get_state() != gtk.STATE_INSENSITIVE:
             sql += ' %s(%s)' % (_type, _size)
+        elif _type == 'ENUM' or _type == 'SET':
+            sql += ' %s(%s) ' % (_type, _values)
         else:
             sql += ' %s ' % _type
 

@@ -23,6 +23,7 @@ import gobject
 from TableFieldsPopUp import TableFieldsPopUp
 from TableFieldDialog import TableFieldDialog
 from providers.mysql.MySqlField import MySqlField
+import dialogs
 
 
 class TableFields(gtk.ScrolledWindow):
@@ -50,11 +51,26 @@ class TableFields(gtk.ScrolledWindow):
         self.pop_up = TableFieldsPopUp()
         self.pop_up.add.connect('activate', self.on_add_activate)
         self.pop_up.edit.connect('activate', self.on_edit_activate)
+        self.pop_up.drop.connect('activate', self.on_drop_activate)
         self.add(self.tv_fields)
+
+    def on_drop_activate(self, *args):
+        path, column = self.tv_fields.get_cursor()
+        _iter = self.tv_fields_model.get_iter(path)
+        _field_name = self.tv_fields_model.get_value(_iter, 2)
+        if not dialogs.confirm(
+                "Drop field",
+                "Do you really want to DROP field <b>%s</b> from table <b>%s</b>"
+                " in database <b>%s</b> on <b>%s</b>?" % (_field_name,
+                                                          self.table.name, self.table.db.name,
+                                                          self.table.db.host.name),
+                None):
+            return
+        self.table.drop_field(_field_name)
+        self.refresh()
 
     def on_add_activate(self, *args):
         dialog = TableFieldDialog(MySqlField({}))
-        dialog.run()
         answer = dialog.run()
         if answer == gtk.RESPONSE_OK:
             q = dialog.get_sql(self.table.name)

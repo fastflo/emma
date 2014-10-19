@@ -55,7 +55,7 @@ class MySqlField:
                 self.is_null = False
 
             #print self.parse_type()
-            _t_type, self.size, self.precission, self.unsigned = self.parse_type()
+            _t_type, self.size, self.precission, self.unsigned, self.values = self.parse_type()
             self.type = _t_type.upper()
             self.type_string = self.row['Type']
             self.auto_increment = self.row['Extra'] == 'auto_increment'
@@ -71,9 +71,10 @@ class MySqlField:
             self.unsigned = False
             self.auto_increment = False
             self.collation = ''
+            self.values = ''
 
     def get_py_type(self):
-        _t_type, _t_size, _t_scale, _t_unsigned = self.parse_type()
+        _t_type, _t_size, _t_scale, _t_unsigned, _t_values = self.parse_type()
         if _t_type in field_types_int:
             return long
         if _t_type in field_types_float:
@@ -84,20 +85,25 @@ class MySqlField:
     def parse_type(self):
         m = re.match(r'(.+)\((\d+),(\d+)\)\s(unsigned)', self.row['Type'])
         if m is not None:
-            return m.group(1), int(m.group(2)), m.group(3), True
+            return m.group(1), int(m.group(2)), m.group(3), True, []
 
         m = re.match(r'(.+)\((\d+),(\d+)\)', self.row['Type'])
         if m is not None:
-            return m.group(1), int(m.group(2)), m.group(3), False
+            return m.group(1), int(m.group(2)), m.group(3), False, []
 
         m = re.match(r'(.+)\((\d+)\)\s(unsigned)', self.row['Type'])
         if m is not None:
-            return m.group(1), int(m.group(2)), 0, True
+            return m.group(1), int(m.group(2)), 0, True, []
 
         m = re.match(r'(.+)\((\d+)\)', self.row['Type'])
         if m is not None:
-            return m.group(1), int(m.group(2)), 0, False
+            return m.group(1), int(m.group(2)), 0, False, []
+
+        m = re.match(r'(.+)\((.+)\)', self.row['Type'])
+        if m is not None:
+            return m.group(1), 0, 0, False, m.group(2)
 
         m = re.match(r'(.+)', self.row['Type'])
         if m is not None:
-            return m.group(1), 0, 0, False
+            return m.group(1), 0, 0, False, []
+

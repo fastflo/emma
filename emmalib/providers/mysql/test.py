@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
-
+#import re
 # import MySQLdb
 #
 # conn = MySQLdb.connect(host='localhost', user='root', passwd='root')
@@ -75,3 +75,12 @@
 # print "Table indexes:"
 # for i in table.indexes:
 #     print i.__dict__
+
+#
+# enum = "enum('default','current_week','current_week_and_next')"
+# m = re.match(r'(.+)\((.+)\)', enum)
+# if m is not None:
+#     a = m.group(2).split(',')
+#     for s in a:
+#         a[a.index(s)] = s[1:-1]
+#     print a
