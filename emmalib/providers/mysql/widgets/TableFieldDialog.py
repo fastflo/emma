@@ -248,10 +248,10 @@ class TableFieldDialog(gtk.Dialog):
         self.sp_prec.set_wrap(True)
 
         self.cb_null = gtk.CheckButton()
-        self.cb_null.set_state(field.is_null)
+        self.cb_null.set_active(field.is_null)
 
         self.cb_sign = gtk.CheckButton()
-        self.cb_sign.set_state(field.unsigned)
+        self.cb_sign.set_active(field.unsigned)
 
         self.cb_auto_increment = gtk.CheckButton()
         self.cb_auto_increment.set_active(field.auto_increment)
@@ -373,11 +373,21 @@ class TableFieldDialog(gtk.Dialog):
 
         sql += ' %s(%s)' % (self.cb_type.get_active_text(), int(self.sp_size.get_value()),)
 
+        if self.cb_sign.get_active():
+            sql += ' UNSIGNED '
+
+        if self.cb_null.get_active():
+            sql += ' NULL '
+        else:
+            sql += ' NOT NULL '
+
         if self.cb_auto_increment.get_active():
             sql += ' AUTO_INCREMENT '
 
         if self.tb_default.get_text() != '':
             sql += ' DEFAULT %s' % (self.tb_default.get_text())
+
+        print sql
 
         return sql
 
