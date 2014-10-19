@@ -373,9 +373,12 @@ class TableFieldDialog(gtk.Dialog):
         else:
             sql += "ALTER TABLE `%s` CHANGE `%s` `%s`" % (table_name, self.field.name, self.tb_name.get_text(),)
 
-        sql += ' %s(%s)' % (self.cb_type.get_active_text(), int(self.sp_size.get_value()),)
-
-        # CHARACTER SET utf8 COLLATE utf8_bin
+        _type = self.cb_type.get_active_text()
+        _size = int(self.sp_size.get_value())
+        if self.sp_size.get_state() != gtk.STATE_INSENSITIVE:
+            sql += ' %s(%s)' % (_type, _size)
+        else:
+            sql += ' %s ' % _type
 
         charset = self.cb_charset.get_active_text()
         collation = self.cb_collation.get_active_text()
