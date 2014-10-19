@@ -261,6 +261,8 @@ class TableFieldDialog(gtk.Dialog):
         self.cb_fulltext = gtk.CheckButton()
 
         self.tb_default = gtk.Entry()
+        if field.default:
+            self.tb_default.set_text(field.default)
 
         self.cb_charset = gtk.combo_box_new_text()
         self.cb_collation = gtk.combo_box_new_text()
@@ -270,6 +272,13 @@ class TableFieldDialog(gtk.Dialog):
 
         self.cb_type.connect('changed', self.on_cb_type_changed)
         self.selcb(self.cb_type, field.type.upper())
+
+        for ch in collations:
+            for co in collations[ch]:
+                if co == field.collation:
+                    self.selcb(self.cb_charset, ch)
+                    self.selcb(self.cb_collation, co)
+                    #print co
 
         tbl = gtk.Table(4, 4)
         tbl.set_col_spacings(8)
@@ -369,9 +378,17 @@ class TableFieldDialog(gtk.Dialog):
         if self.field.name == '':
             sql += 'ALTER TABLE `%s` ADD COLUMN `%s`' % (table_name, self.tb_name.get_text(),)
         else:
-            sql += 'ALTER TABLE `%s` CHANGE `%s` `%s`' % (table_name, self.field.name, self.tb_name.get_text(),)
+            sql += "ALTER TABLE `%s` CHANGE `%s` `%s`" % (table_name, self.field.name, self.tb_name.get_text(),)
 
         sql += ' %s(%s)' % (self.cb_type.get_active_text(), int(self.sp_size.get_value()),)
+
+        # CHARACTER SET utf8 COLLATE utf8_bin
+
+        charset = self.cb_charset.get_active_text()
+        collation = self.cb_collation.get_active_text()
+
+        if charset is not None and collation is not None:
+            sql += ' CHARACTER SET %s COLLATE %s ' % (charset, collation)
 
         if self.cb_sign.get_active():
             sql += ' UNSIGNED '
@@ -385,7 +402,7 @@ class TableFieldDialog(gtk.Dialog):
             sql += ' AUTO_INCREMENT '
 
         if self.tb_default.get_text() != '':
-            sql += ' DEFAULT %s' % (self.tb_default.get_text())
+            sql += " DEFAULT '%s' " % (self.tb_default.get_text())
 
         print sql
 

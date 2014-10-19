@@ -59,6 +59,7 @@ class MySqlField:
             self.type = _t_type.upper()
             self.type_string = self.row['Type']
             self.auto_increment = self.row['Extra'] == 'auto_increment'
+            self.collation = row['Collation']
         else:
             self.name = ''
             self.default = ''
@@ -69,6 +70,7 @@ class MySqlField:
             self.precission = 0
             self.unsigned = False
             self.auto_increment = False
+            self.collation = ''
 
     def get_py_type(self):
         _t_type, _t_size, _t_scale, _t_unsigned = self.parse_type()
