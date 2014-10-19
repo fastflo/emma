@@ -45,6 +45,7 @@ class TableFields(gtk.ScrolledWindow):
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
             gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
         )
         self.tv_fields.set_model(self.tv_fields_model)
         self.tv_fields.connect("button-release-event", self.on_button_release)
@@ -113,6 +114,7 @@ class TableFields(gtk.ScrolledWindow):
         self.tv_fields.append_column(gtk.TreeViewColumn("Null", gtk.CellRendererText(), text=5))
         self.tv_fields.append_column(gtk.TreeViewColumn("Default", gtk.CellRendererText(), text=6))
         self.tv_fields.append_column(gtk.TreeViewColumn("Extra", gtk.CellRendererText(), text=7))
+        self.tv_fields.append_column(gtk.TreeViewColumn("Comment", gtk.CellRendererText(), text=8))
         fn = 1
         for f in self.table.fields:
             self.tv_fields_model.append(
@@ -125,6 +127,7 @@ class TableFields(gtk.ScrolledWindow):
                     "YES" if f.is_null else "NO",
                     f.default,
                     f.row['Extra'],
+                    f.comment
                 )
             )
             fn += 1

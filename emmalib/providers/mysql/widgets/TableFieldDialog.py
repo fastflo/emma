@@ -293,6 +293,9 @@ class TableFieldDialog(gtk.Dialog):
         self.tb_values = gtk.Entry()
         self.tb_values.set_text(field.values)
 
+        self.tb_comment = gtk.Entry()
+        self.tb_comment.set_text(field.comment)
+
         self.cb_charset = gtk.combo_box_new_text()
         self.cb_collation = gtk.combo_box_new_text()
         for c in sorted(collations):
@@ -352,6 +355,11 @@ class TableFieldDialog(gtk.Dialog):
         r += 1
         tbl.attach(self.mklbl('Values'), 0, 1, r, r+1, gtk.FILL, 0)
         tbl.attach(self.tb_values, 1, 4, r, r+1, gtk.FILL, 0)
+        r += 1
+        self.mksep(tbl, r)
+        r += 1
+        tbl.attach(self.mklbl('Comment'), 0, 1, r, r+1, gtk.FILL, 0)
+        tbl.attach(self.tb_comment, 1, 4, r, r+1, gtk.FILL, 0)
 
         self.vbox.pack_start(tbl)
 
@@ -438,6 +446,10 @@ class TableFieldDialog(gtk.Dialog):
 
         if self.tb_default.get_text() != '':
             sql += " DEFAULT '%s' " % (self.tb_default.get_text())
+
+        comment = self.tb_comment.get_text()
+        if comment != '':
+            sql += " COMMENT  '%s' " % comment.replace("'", "''")
 
         print sql
 

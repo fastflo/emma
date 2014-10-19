@@ -60,6 +60,7 @@ class MySqlField:
             self.type_string = self.row['Type']
             self.auto_increment = self.row['Extra'] == 'auto_increment'
             self.collation = row['Collation']
+            self.comment = row['Comment']
         else:
             self.name = ''
             self.default = ''
@@ -72,6 +73,7 @@ class MySqlField:
             self.auto_increment = False
             self.collation = ''
             self.values = ''
+            self.comment = ''
 
     def get_py_type(self):
         _t_type, _t_size, _t_scale, _t_unsigned, _t_values = self.parse_type()
