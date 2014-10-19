@@ -20,6 +20,7 @@
 
 import gtk
 import gobject
+from TableIndexesPopUp import TableIndexesPopUp
 
 
 class TableIndexes(gtk.ScrolledWindow):
@@ -38,7 +39,26 @@ class TableIndexes(gtk.ScrolledWindow):
         self.tv_indexes = gtk.TreeView()
         self.tv_indexes.set_rules_hint(True)
         self.tv_indexes.set_model(self.tv_indexes_model)
+
+        self.tv_indexes.connect("button-release-event", self.on_button_release)
+        self.pop_up = TableIndexesPopUp()
+        self.pop_up.add.connect('activate', self.on_add_activate)
+        self.pop_up.edit.connect('activate', self.on_edit_activate)
+        self.pop_up.drop.connect('activate', self.on_drop_activate)
+
         self.add(self.tv_indexes)
+
+    def on_add_activate(self, item):
+        if not item:
+            return
+
+    def on_edit_activate(self, item):
+        if not item:
+            return
+
+    def on_drop_activate(self, item):
+        if not item:
+            return
 
     def refresh(self):
         for col in self.tv_indexes.get_columns():
@@ -57,3 +77,8 @@ class TableIndexes(gtk.ScrolledWindow):
                     ix.is_unique,
                 )
             )
+
+    def on_button_release(self, tv, event):
+        if not tv or not event or not event.button == 3:
+            return False
+        self.pop_up.popup(None, None, None, event.button, event.time, tv)
