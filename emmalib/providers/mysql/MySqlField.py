@@ -85,19 +85,19 @@ class MySqlField:
     def parse_type(self):
         m = re.match(r'(.+)\((\d+),(\d+)\)\s(unsigned)', self.row['Type'])
         if m is not None:
-            return m.group(1), int(m.group(2)), m.group(3), True, []
+            return m.group(1), int(m.group(2)), m.group(3), True, ''
 
         m = re.match(r'(.+)\((\d+),(\d+)\)', self.row['Type'])
         if m is not None:
-            return m.group(1), int(m.group(2)), m.group(3), False, []
+            return m.group(1), int(m.group(2)), m.group(3), False, ''
 
         m = re.match(r'(.+)\((\d+)\)\s(unsigned)', self.row['Type'])
         if m is not None:
-            return m.group(1), int(m.group(2)), 0, True, []
+            return m.group(1), int(m.group(2)), 0, True, ''
 
         m = re.match(r'(.+)\((\d+)\)', self.row['Type'])
         if m is not None:
-            return m.group(1), int(m.group(2)), 0, False, []
+            return m.group(1), int(m.group(2)), 0, False, ''
 
         m = re.match(r'(.+)\((.+)\)', self.row['Type'])
         if m is not None:
@@ -105,5 +105,5 @@ class MySqlField:
 
         m = re.match(r'(.+)', self.row['Type'])
         if m is not None:
-            return m.group(1), 0, 0, False, []
+            return m.group(1), 0, 0, False, ''
 
