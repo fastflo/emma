@@ -257,8 +257,6 @@ class TableFieldDialog(gtk.Dialog):
         self.cb_auto_increment.set_active(field.auto_increment)
 
         self.cb_primary = gtk.CheckButton()
-        self.cb_unique = gtk.CheckButton()
-        self.cb_fulltext = gtk.CheckButton()
 
         self.tb_default = gtk.Entry()
         if field.default:
@@ -306,9 +304,6 @@ class TableFieldDialog(gtk.Dialog):
         self.mkrow(tbl, self.cb_auto_increment, 'Auto Increment', r)
         self.mkrow(tbl, self.cb_primary, 'Primary key', r, 2)
         r += 1
-        self.mkrow(tbl, self.cb_unique, 'Unique', r)
-        self.mkrow(tbl, self.cb_fulltext, 'Fulltext', r, 2)
-        r += 1
         self.mksep(tbl, r)
         r += 1
         tbl.attach(self.mklbl('Default'), 0, 1, r, r+1, gtk.FILL, 0)
@@ -338,8 +333,6 @@ class TableFieldDialog(gtk.Dialog):
 
         self.cb_auto_increment.set_sensitive(conf['ai'])
         self.cb_primary.set_sensitive(conf['pk'])
-        self.cb_unique.set_sensitive(conf['un'])
-        self.cb_fulltext.set_sensitive(conf['ft'])
 
         self.tb_default.set_sensitive(conf['default'])
         self.cb_charset.set_sensitive(conf['charset'])
