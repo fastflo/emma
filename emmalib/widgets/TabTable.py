@@ -37,6 +37,8 @@ class TabTable(BaseTab):
         self.table = table
         self.status_text = gtk.Label()
 
+        self.table.connect('changed', self.table_changed)
+
         #
         #   DATA
         #
@@ -75,7 +77,7 @@ class TabTable(BaseTab):
         sql_create_tab.add(self.table_textview)
         self.notebook.append_page(sql_create_tab, gtk.Label('SQL: Create'))
 
-        self.update()
+        self.load()
 
         self.notebook.set_current_page(0)
 
@@ -96,6 +98,9 @@ class TabTable(BaseTab):
 
     def update(self, *args):
         self.table.refresh()
+        self.load()
+
+    def load(self):
         self.data_view.load_data(self.table.get_all_records())
         self.status_text.set_text(self.table.get_table_status_string())
         self.table_textview.get_buffer().set_text(self.table.get_create_table())
@@ -107,3 +112,5 @@ class TabTable(BaseTab):
             if self.table_indexes:
                 self.table_indexes.refresh()
 
+    def table_changed(self, table):
+        print 'Table `%s` fired CHANGED event!' % table.name

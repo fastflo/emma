@@ -2,7 +2,7 @@
 # emma
 #
 # Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
-#               2014 Nickolay Karnaukhov (mr.electronick@gmail.com)
+# 2014 Nickolay Karnaukhov (mr.electronick@gmail.com)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,10 +23,16 @@ from MySqlIndex import MySqlIndex
 from emmalib.dialogs import confirm
 from emmalib import emma_instance
 import widgets
+import gobject
 
 
-class MySqlTable:
+class MySqlTable(gobject.GObject):
+    __gsignals__ = {
+        'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
+    }
+
     def __init__(self, db, props, props_description):
+        gobject.GObject.__init__(self)
         self.handle = db.handle
         self.host = db.host
         self.db = db
@@ -53,9 +59,9 @@ class MySqlTable:
         self.db.host.select_database(self.db)
         if refresh_props:
             self.refresh_properties()
-
         self.refresh_fields()
         self.refresh_indexes()
+        self.emit('changed')
 
     def refresh_properties(self):
         self.host.query("show table status like '%s'" % self.name)
@@ -100,13 +106,13 @@ class MySqlTable:
         return self.host.query_dict('SELECT * FROM %s' % self.name)
 
     #
-    #   ALTER TABLE
+    # ALTER TABLE
     #
 
     def rename(self, new_name):
-        if self.host.query('RENAME TABLE %s TO %s' % (
-            self.host.escape_table(self.name),
-            self.host.escape_table(new_name)
+        if self.host.query('RENAME TABLE `%s` TO `%s`' % (
+                self.host.escape_table(self.name),
+                self.host.escape_table(new_name)
         )):
             self.db.tables[new_name] = self
             del self.db.tables[self.name]
@@ -117,18 +123,18 @@ class MySqlTable:
             return True
 
     def alter_engine(self, new_engine):
-        if self.host.query('ALTER TABLE %s ENGINE=%s' % (
-            self.host.escape_table(self.name),
-            new_engine.upper()
+        if self.host.query('ALTER TABLE `%s` ENGINE=%s' % (
+                self.host.escape_table(self.name),
+                new_engine.upper()
         )):
             self.refresh_properties()
             if emma_instance:
                 emma_instance.events.on_table_modified(self)
 
     def alter_row_format(self, new_row_format):
-        if self.host.query('ALTER TABLE %s ROW_FORMAT=%s' % (
-            self.host.escape_table(self.name),
-            new_row_format.upper()
+        if self.host.query('ALTER TABLE `%s` ROW_FORMAT=%s' % (
+                self.host.escape_table(self.name),
+                new_row_format.upper()
         )):
             self.refresh_properties()
             if emma_instance:
@@ -136,8 +142,8 @@ class MySqlTable:
 
     def alter_comment(self, new_comment):
         if self.host.query("ALTER TABLE %s COMMENT='%s'" % (
-            self.host.escape_table(self.name),
-            new_comment
+                self.host.escape_table(self.name),
+                new_comment
         )):
             self.refresh_properties()
             if emma_instance:
@@ -145,8 +151,8 @@ class MySqlTable:
 
     def alter_auto_increment(self, new_ai):
         if self.host.query("ALTER TABLE %s AUTO_INCREMENT=%s" % (
-            self.host.escape_table(self.name),
-            new_ai
+                self.host.escape_table(self.name),
+                new_ai
         )):
             self.refresh_properties()
             if emma_instance:
@@ -154,8 +160,8 @@ class MySqlTable:
 
     def alter_collation(self, charset, collation):
         if self.host.query("ALTER TABLE %s DEFAULT CHARACTER SET %s COLLATE %s" % (
-            self.host.escape_table(self.name),
-            charset, collation
+                self.host.escape_table(self.name),
+                charset, collation
         )):
             self.refresh_properties()
             if emma_instance:
