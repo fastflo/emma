@@ -8,7 +8,7 @@ from stat import *
 import gtk.gdk
 import gtk.glade
 
-import dialogs
+import emmalib.dialogs
 
 from emmalib.Query import *
 

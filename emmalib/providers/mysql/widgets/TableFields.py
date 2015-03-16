@@ -22,8 +22,8 @@ import gtk
 import gobject
 from TableFieldsPopUp import TableFieldsPopUp
 from TableFieldDialog import TableFieldDialog
-from providers.mysql.MySqlField import MySqlField
-import dialogs
+from emmalib.providers.mysql.MySqlField import MySqlField
+import emmalib.dialogs
 
 
 class TableFields(gtk.ScrolledWindow):

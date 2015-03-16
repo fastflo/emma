@@ -26,7 +26,7 @@ try:
 except:
     pass
 
-from providers.sqlite.SQLiteHost import *
+from emmalib.providers.sqlite.SQLiteHost import *
 from SQLiteDb import SQLiteDb
 from SQLiteHandle import SQLiteHandle
 from SQLiteHost import SQLiteHost

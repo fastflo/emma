@@ -22,7 +22,7 @@ import os
 import gtk
 import sys
 
-import dialogs
+import emmalib.dialogs
 
 
 class TabBlobView(gtk.VBox):
