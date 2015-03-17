@@ -24,8 +24,9 @@ import sys
 import time
 import traceback
 import _mysql
-import gobject
+
 from MySqlDb import *
+
 
 
 # as of mysql 5.1: http://dev.mysql.com/doc/mysqld-version-reference/en/mysqld-version-reference-reservedwords-5-1.html

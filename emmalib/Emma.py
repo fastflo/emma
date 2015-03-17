@@ -21,11 +21,12 @@
 import gtk
 import glib
 import gobject
+
 import gtk.gdk
-import dialogs
-import widgets
 import gtk.glade
 
+import dialogs
+import widgets
 from Config import Config
 from KeyMap import KeyMap
 from Constants import *

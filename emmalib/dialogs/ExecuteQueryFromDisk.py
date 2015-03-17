@@ -1,15 +1,12 @@
 import gc
 import bz2
-import gtk
 import time
 import datetime
 from stat import *
 
-import gtk.gdk
 import gtk.glade
 
-import emmalib.dialogs
-
+from emmalib.dialogs import show_message
 from emmalib.Query import *
 
 
@@ -59,7 +56,7 @@ class ExecuteQueryFromDisk:
             try:
                 exclude_regex = re.compile(exclude_regex, re.DOTALL)
             except:
-                dialogs.show_message(
+                show_message(
                     "execute query from disk", "error compiling your regular expression: %s" % sys.exc_value)
                 return
 
@@ -67,10 +64,10 @@ class ExecuteQueryFromDisk:
         try:
             sbuf = os.stat(filename)
         except:
-            dialogs.show_message("execute query from disk", "%s does not exists!" % filename)
+            show_message("execute query from disk", "%s does not exists!" % filename)
             return
         if not S_ISREG(sbuf.st_mode):
-            dialogs.show_message("execute query from disk", "%s exists, but is not a regular file!" % filename)
+            show_message("execute query from disk", "%s exists, but is not a regular file!" % filename)
             return
 
         size = sbuf.st_size
@@ -88,7 +85,7 @@ class ExecuteQueryFromDisk:
                 fp = file(filename, "rb")
                 self.last_query_line = fp.readline()
             except:
-                dialogs.show_message(
+                show_message(
                     "execute query from disk",
                     "error opening query from file %s: %s" % (filename, sys.exc_value))
                 return
@@ -179,7 +176,7 @@ class ExecuteQueryFromDisk:
                 if exclude and exclude_regex.match(query):
                     print "skipping query %r" % query[0:80]
                 elif not host.query(query, True, append_to_log) and stop_on_error:
-                    dialogs.show_message(
+                    show_message(
                         "execute query from disk",
                         "an error occoured. maybe remind the line number and press cancel to close this dialog!")
                     self.query_from_disk = False
@@ -189,11 +186,11 @@ class ExecuteQueryFromDisk:
         update_ui(True, fp.tell())
         fp.close()
         if not self.query_from_disk:
-            dialogs.show_message("execute query from disk",
+            show_message("execute query from disk",
                                  "aborted by user whish - click cancel again to close window")
             return
         else:
-            dialogs.show_message("execute query from disk", "done!")
+            show_message("execute query from disk", "done!")
         p.hide()
 
     def on_cancel_execute_from_disk_clicked(self, button):

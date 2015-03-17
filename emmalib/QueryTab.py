@@ -21,13 +21,14 @@
 import gc
 import gtk
 import time
-import pango
 import gobject
 import traceback
 import gtksourceview2
 from gtk import keysyms
 from gtk import glade
 from stat import *
+
+import pango
 
 import dialogs
 import widgets

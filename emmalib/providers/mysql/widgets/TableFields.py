@@ -20,10 +20,11 @@
 
 import gtk
 import gobject
+
 from TableFieldsPopUp import TableFieldsPopUp
 from TableFieldDialog import TableFieldDialog
 from emmalib.providers.mysql.MySqlField import MySqlField
-import emmalib.dialogs
+from emmalib.dialogs import confirm
 
 
 class TableFields(gtk.ScrolledWindow):
@@ -59,7 +60,7 @@ class TableFields(gtk.ScrolledWindow):
         path, column = self.tv_fields.get_cursor()
         _iter = self.tv_fields_model.get_iter(path)
         _field_name = self.tv_fields_model.get_value(_iter, 2)
-        if not dialogs.confirm(
+        if not confirm(
                 "Drop field",
                 "Do you really want to DROP field <b>%s</b> from table <b>%s</b>"
                 " in database <b>%s</b> on <b>%s</b>?" % (_field_name,
