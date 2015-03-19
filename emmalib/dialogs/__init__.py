@@ -1,10 +1,5 @@
 import gtk
 
-from About import About
-from ChangeLog import ChangeLog
-from ExecuteQueryFromDisk import ExecuteQueryFromDisk
-
-
 def alert(message):
     dialog = gtk.MessageDialog(None, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE, message)
     dialog.set_border_width(5)
@@ -53,3 +48,7 @@ def input_dialog(title, message, default="", window=None):
     if answer != gtk.RESPONSE_ACCEPT:
         return None
     return entry.get_text()
+
+from About import About
+from ChangeLog import ChangeLog
+from ExecuteQueryFromDisk import ExecuteQueryFromDisk

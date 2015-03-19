@@ -220,7 +220,7 @@ class Emma:
         return True
 
     def on_execute_query_from_disk_activate(self, button, filename=None):
-        if not self.current_host:
+        if not self.connections_tv.current_host:
             dialogs.show_message("execute query from disk", "no host selected!")
             return
         if not self.execute_query_from_disk_dialog:

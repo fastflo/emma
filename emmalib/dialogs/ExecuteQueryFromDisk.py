@@ -7,6 +7,7 @@ from stat import *
 import gtk.glade
 
 from emmalib.Query import *
+from emmalib.dialogs import show_message
 
 
 class ExecuteQueryFromDisk:
@@ -45,7 +46,7 @@ class ExecuteQueryFromDisk:
         self.window.hide()
 
     def on_start_execute_from_disk_clicked(self, button):
-        host = self.emma.current_host
+        host = self.emma.connections_tv.current_host
         fc = self.glade.get_widget("eqfd_file_chooser")
 
         exclude = self.glade.get_widget("eqfd_exclude").get_active()
@@ -180,7 +181,6 @@ class ExecuteQueryFromDisk:
                         "an error occoured. maybe remind the line number and press cancel to close this dialog!")
                     self.query_from_disk = False
                     break
-                    #print "exec", [query]
         query = ""
         update_ui(True, fp.tell())
         fp.close()
@@ -220,7 +220,6 @@ class ExecuteQueryFromDisk:
             if _start is None:
                 while 1:
                     line = fp.readline()
-                    #print "line:", [line]
                     if line == "":
                         if len(current_query) > 0:
                             return ' '.join(current_query), _start, count_lines
