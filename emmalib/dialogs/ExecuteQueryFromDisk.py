@@ -6,7 +6,6 @@ from stat import *
 
 import gtk.glade
 
-from emmalib.dialogs import show_message
 from emmalib.Query import *
 
 
