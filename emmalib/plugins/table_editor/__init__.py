@@ -150,10 +150,11 @@ class table_editor:
         e = tname.grab_focus()
         e = self.xml.get_widget("table_comment").set_text(table.props[14])
         self.model.clear()
-        for name in table.field_order:
-            field = table.fields[name]
-            comment = self.extract_comment(field[5])  # todo
-            self.model.append(row=(field[0], field[1], comment, list(field), field))
+        if hasattr(table, "field_order"):
+            for name in table.field_order:
+                field = table.fields[name]
+                comment = self.extract_comment(field[5])  # todo
+                self.model.append(row=(field[0], field[1], comment, list(field), field))
         self.xml.get_widget("table_deletefield").set_sensitive(False)
         self.xml.get_widget("table_field_properties").set_sensitive(False)
         self.deleted = set()
