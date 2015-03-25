@@ -24,7 +24,7 @@ import re
 import gc
 
 import gtk.glade
-
+import emmalib.dialogs
 
 pp = pprint.PrettyPrinter()
 
@@ -414,14 +414,14 @@ class table_editor:
         # table comment
         # todo
         comment = self.xml.get_widget("table_comment").get_text()
-        if comment != self.table["Comment"]:
+        if comment != self.table.comment:
             query += "%scomment = '%s' " % (add, esc(comment))
             add = ""
             table_changed = True
 
         # ask user
         if query != no_changes:
-            if not self.emma.confirm(
+            if not emmalib.dialogs.confirm(
                     "edit table",
                     "do you really want to edit the <b>%s</b> table in database <b>%s</b> "
                     "on <b>%s</b> with this sql:\n<b>%s</b>" % (self.table.name,
@@ -442,10 +442,10 @@ class table_editor:
             self.table.create_table = None
             self.table.refresh()
             new_tables = self.table.db.refresh()
-            self.emma.connection_tv.redraw_db(self.table.db, self.emma.connections_tv.get_db_iter(self.table.db), new_tables)
+            self.emma.connections_tv.redraw_db(self.table.db, self.emma.connections_tv.get_db_iter(self.table.db), new_tables)
             self.window.hide()
             return
-        self.emma.show_message("edit table", "sorry, can't change table - sql error")
+        emmalib.dialogs.show_message("edit table", "sorry, can't change table - sql error")
 
         # table_editor->hide();
         #
