@@ -104,7 +104,7 @@ class MySqlTable(gobject.GObject):
         return (self.fields[field_name][0], self.fields[field_name][1]),
 
     def get_all_records(self):
-        return self.host.query_dict('SELECT * FROM %s' % self.name)
+        return self.host.query_dict('SELECT * FROM `%s`' % self.name)
 
     #
     # ALTER TABLE
