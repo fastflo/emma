@@ -1,3 +1,4 @@
+.idea
 /emmalib/*.pyc
 /emmalib/dialogs/*.pyc
 *.pyc

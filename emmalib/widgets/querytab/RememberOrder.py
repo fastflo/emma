@@ -18,11 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import dialogs
-from Query import *
+import emmalib.dialogs
+from emmalib.Query import *
 
 
-class QueryTabRememberOrder:
+class RememberOrder:
     def __init__(self, query, emma):
         """
         @param query: QueryTab
@@ -49,15 +49,16 @@ class QueryTabRememberOrder:
         tables = map(lambda s: s.strip(), table_list.split(","))
 
         if len(tables) > 1:
-            dialogs.show_message("store table order", "can't store table order of multi-table queries!")
+            emmalib.dialogs.show_message("store table order", "can't store table order of multi-table queries!")
             return
         table = tables[0]
 
         print "---\ntable: %s order: %s" % (table, current_order)
-        config_name = "stored_order_db_%s_table_%s" % (self.emma.current_host.current_db.name, table)
+
+        config_name = "stored_order_db_%s_table_%s" % (self.emma.current_query.current_db.name, table)
         print "config name %s" % config_name
         self.emma.config.config[config_name] = str(current_order)
-        if not self.emma.current_host.current_db.name in self.emma.stored_orders:
-            self.emma.stored_orders[self.emma.current_host.current_db.name] = {}
-        self.emma.stored_orders[self.emma.current_host.current_db.name][table] = current_order
+        if not self.emma.current_query.current_db.name in self.emma.stored_orders:
+            self.emma.stored_orders[self.emma.current_query.current_db.name] = {}
+        self.emma.stored_orders[self.emma.current_query.current_db.name][table] = current_order
         self.emma.config.save()

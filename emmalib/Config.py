@@ -41,7 +41,7 @@ class Config:
         if not filename:
             filename = "."
         filename += "/.emma"
-        #print filename
+        # print filename
         if os.path.isfile(filename):
             print "detected emma config file %r. converting to directory" % filename
             temp_dir = filename + "_temp"
@@ -165,7 +165,7 @@ class Config:
                     name, value = map(lambda a: a.strip("\r\n \t"), varval)
                     value = varval[1].strip("\r\n \t")
                     self.config[name] = value
-                    #setattr(self, "cfg_%s" % name, value)
+                    # setattr(self, "cfg_%s" % name, value)
                 fp.close()
             except:
                 print "could not load config file %r: %s" % (filename, sys.exc_value)

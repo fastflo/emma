@@ -19,30 +19,30 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 import gc
-import gtk
-import time
 import gobject
-import traceback
+import gtk
 import gtksourceview2
-from gtk import keysyms
+import time
+import traceback
 from gtk import glade
+from gtk import keysyms
 from stat import *
 
 import pango
 
 import dialogs
 import widgets
-from QueryTabRememberOrder import QueryTabRememberOrder
-from QueryTabRemoveOrder import QueryTabRemoveOrder
-from QueryTabSetRequltFont import QueryTabSetResultFont
-from QueryTabLocalSearch import QueryTabLocalSearch
-from QueryTabSaveResultSql import QueryTabSaveResultSql
-from QueryTabSaveResultCsv import QueryTabSaveResultCsv
-from QueryTabManageRow import QueryTabManageRow
-from QueryTabTreeView import QueryTabTreeView
-from QueryTabResultPopup import QueryTabResultPopup
-from QueryTabPopupEncoding import QueryTabPopupEncoding
 from Query import *
+from QueryTabLocalSearch import QueryTabLocalSearch
+from QueryTabManageRow import QueryTabManageRow
+from QueryTabPopupEncoding import QueryTabPopupEncoding
+from QueryTabRemoveOrder import QueryTabRemoveOrder
+from QueryTabResultPopup import QueryTabResultPopup
+from QueryTabSaveResultCsv import QueryTabSaveResultCsv
+from QueryTabSaveResultSql import QueryTabSaveResultSql
+from QueryTabSetRequltFont import QueryTabSetResultFont
+from QueryTabTreeView import QueryTabTreeView
+from emmalib.widgets.querytab.RememberOrder import RememberOrder as QueryTabRememberOrder
 
 
 class QueryTab(widgets.BaseTab):
