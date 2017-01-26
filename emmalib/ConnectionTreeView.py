@@ -427,12 +427,14 @@ class ConnectionsTreeView(gtk.TreeView):
         elif what == "check_tables":
             self.current_host = db.host
             self.current_host.select_database(db)
+            db.refresh()
             self.emma.current_query.on_execute_query_clicked(
                 None,
                 "check table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
         elif what == "repair_tables":
             self.current_host = db.host
             self.current_host.select_database(db)
+            db.refresh()
             self.emma.current_query.on_execute_query_clicked(
                 None,
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
