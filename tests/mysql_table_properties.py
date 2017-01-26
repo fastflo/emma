@@ -42,7 +42,7 @@ class Win(gtk.Window):
 
     def db_connect(self):
         _db = 'test'
-        _tb = 'aaa'
+        _tb = 'test'
         self.host = MySqlHost(None, None, 'Localhost', 'localhost', 3306, 'root', 'root', '', 0)
         self.host.connect()
         self.host.use_db(_db)
