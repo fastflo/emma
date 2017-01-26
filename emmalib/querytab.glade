@@ -347,7 +347,7 @@
                 <property name="homogeneous">True</property>
               </packing>
             </child>
-            <child>
+            <!--child>
               <widget class="GtkToolButton" id="remember_order">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -360,7 +360,7 @@
                 <property name="expand">False</property>
                 <property name="homogeneous">True</property>
               </packing>
-            </child>
+            </child-->
           </widget>
           <packing>
             <property name="expand">False</property>

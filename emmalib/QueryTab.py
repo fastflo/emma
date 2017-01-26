@@ -186,7 +186,7 @@ class QueryTab(widgets.BaseTab):
         #   INIT Query tab actions
         #
 
-        self.remember_order_action = QueryTabRememberOrder(self, emma)
+        QueryTabRememberOrder(self, emma)
         self.remove_order_action = QueryTabRemoveOrder(self, emma)
         self.set_result_font_action = QueryTabSetResultFont(self, emma)
         self.local_search_action = QueryTabLocalSearch(self, emma)

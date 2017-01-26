@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+import gtk
 
 import emmalib.dialogs
 from emmalib.Query import *
@@ -30,8 +31,13 @@ class RememberOrder:
         """
         self.emma = emma
         self.query = query
-        button = self.query.xml.get_widget('remember_order')
-        button.connect('clicked', self.on_remember_order_clicked)
+        # button = self.query.xml.get_widget('remember_order')
+        # button = gtk.Button('Save Order', gtk.STOCK_DIALOG_WARNING)
+        # button.connect('clicked', self.on_remember_order_clicked)
+        # query.toolbar.append_widget(button, 'Remember order for this table!', None)
+        query.toolbar.insert_item('Save Order', 'Remember order for this table!', None,
+                                  gtk.image_new_from_stock(gtk.STOCK_DIALOG_WARNING,gtk.ICON_SIZE_LARGE_TOOLBAR),
+                                  self.on_remember_order_clicked, None, -1)
 
     def on_remember_order_clicked(self, button):
         query = self.query.last_source
