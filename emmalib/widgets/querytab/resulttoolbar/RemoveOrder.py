@@ -18,10 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
+import gtk
 import re
 
 
-class QueryTabRemoveOrder:
+class RemoveOrder(gtk.ToolButton):
     def __init__(self, query, emma):
         """
         @param query: QueryTab
@@ -29,8 +30,13 @@ class QueryTabRemoveOrder:
         """
         self.emma = emma
         self.query = query
-        button = self.query.xml.get_widget('remove_order')
-        button.connect('clicked', self.on_remove_order_clicked)
+        super(RemoveOrder, self).__init__()
+
+        self.set_label('Remove Order')
+        self.set_icon_name(gtk.STOCK_CANCEL)
+        self.set_tooltip_text('Remove order for this table')
+
+        self.connect('clicked', self.on_remove_order_clicked)
 
     def on_remove_order_clicked(self, button):
         query = self.query.last_source

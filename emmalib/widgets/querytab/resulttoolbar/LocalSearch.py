@@ -24,20 +24,25 @@ import gtk
 import dialogs
 
 
-class QueryTabLocalSearch:
+class LocalSearch(gtk.ToolButton):
 
     def __init__(self, query, emma):
         """
         @param query: QueryTab
         @param emma: Emma
         """
+        super(LocalSearch, self).__init__()
         self.emma = emma
         self.query = query
-        button = self.query.xml.get_widget('local_search_button')
-        button.connect('clicked', self.on_local_search_button_clicked)
+
+        self.set_label('Find')
+        self.set_icon_name(gtk.STOCK_FIND)
+        self.set_tooltip_text('Search for regular expression in this result (Ctrl+f / F3)')
+
+        self.connect('clicked', self.on_local_search_button_clicked)
 
     def on_local_search_button_clicked(self, button, again=False):
-        if not self.query.local_search.get_property("sensitive"):
+        if not self.get_property("sensitive"):
             return
 
         query_view = self.query.treeview

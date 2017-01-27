@@ -33,16 +33,11 @@ import pango
 import dialogs
 import widgets
 from Query import *
-from QueryTabLocalSearch import QueryTabLocalSearch
-from QueryTabManageRow import QueryTabManageRow
-from QueryTabPopupEncoding import QueryTabPopupEncoding
-from QueryTabRemoveOrder import QueryTabRemoveOrder
 from QueryTabResultPopup import QueryTabResultPopup
-from QueryTabSaveResultCsv import QueryTabSaveResultCsv
-from QueryTabSaveResultSql import QueryTabSaveResultSql
-from QueryTabSetRequltFont import QueryTabSetResultFont
 from QueryTabTreeView import QueryTabTreeView
-from emmalib.widgets.querytab.RememberOrder import RememberOrder as QueryTabRememberOrder
+from widgets.querytab.DatabaseEventBox import DatabaseEventBox
+from widgets.querytab.EncodingEventBox import EncodingEventBox
+from widgets.querytab.ResultToolbar import ResultToolbar
 
 
 class QueryTab(widgets.BaseTab):
@@ -59,31 +54,41 @@ class QueryTab(widgets.BaseTab):
 
         self.emma = emma
 
-        self.save_result = self.xml.get_widget('save_result')
-        self.save_result_sql = self.xml.get_widget('save_result_sql')
-        self.local_search = self.xml.get_widget('local_search_button')
-        self.remove_order = self.xml.get_widget('remove_order')
+        #---------------------------
+        #   INIT BOTTOM PART
+        #
 
-        self.label = self.xml.get_widget('query_label')
+        hbox7 = self.xml.get_widget('hbox7')
+        self.toolbar = ResultToolbar(self, self.emma)
+        hbox7.pack_start(self.toolbar, False, False)
+        vbox3 = gtk.VBox()
+        self.label = gtk.Label()
+        self.label.set_alignment(0, 1)
+        vbox3.pack_start(self.label, False, False)
+        scrolledwindow6 = gtk.ScrolledWindow()
+        self.treeview = QueryTabTreeView(self.emma)
+        scrolledwindow6.add(self.treeview)
+        self.treeview.show()
+        vbox3.pack_start(scrolledwindow6)
+        hbox18 = gtk.HBox()
+        self.encoding_event_box = EncodingEventBox(self, self.emma)
+        self.database_event_box = DatabaseEventBox(self, self.emma)
+        hbox18.add(self.encoding_event_box)
+        hbox18.add(self.database_event_box)
+        hbox18.show_all()
+        vbox3.pack_end(hbox18, False, False)
+        vbox3.show_all()
+        hbox7.pack_end(vbox3, True, True)
 
-        self.add_record = self.xml.get_widget('add_record_tool')
-        self.delete_record = self.xml.get_widget('delete_record_tool')
-
-        self.query_bottom_label = self.xml.get_widget('query_bottom_label')
-        self.query_db_label = self.xml.get_widget('query_db_label')
+        #
+        #   INIT BOTTOM PART
+        #---------------------------
 
         self.textview = self.xml.get_widget('query_text')
 
         self.query_text_sw = self.xml.get_widget('query_text_sw')
-        self.apply_record = self.xml.get_widget('apply_record_tool')
-        self.ui = self.xml.get_widget('first_query')
-        self.toolbar = self.xml.get_widget('inner_query_toolbar')
-        self.toolbar.set_style(gtk.TOOLBAR_ICONS)
 
-        self.scrolledwindow6 = self.xml.get_widget('scrolledwindow6')
-        self.treeview = QueryTabTreeView(emma)
-        self.scrolledwindow6.add(self.treeview)
-        self.treeview.show()
+        self.ui = self.xml.get_widget('first_query')
 
         self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
 
@@ -182,22 +187,6 @@ class QueryTab(widgets.BaseTab):
             self.textview.get_buffer().set_text(self.query)
         self.last_auto_name = None
 
-        #
-        #   INIT Query tab actions
-        #
-
-        QueryTabRememberOrder(self, emma)
-        self.remove_order_action = QueryTabRemoveOrder(self, emma)
-        self.set_result_font_action = QueryTabSetResultFont(self, emma)
-        self.local_search_action = QueryTabLocalSearch(self, emma)
-        self.save_result_sql_action = QueryTabSaveResultSql(self, emma)
-        self.save_result_csv_action = QueryTabSaveResultCsv(self, emma)
-        self.manage_row_action = QueryTabManageRow(self, emma)
-
-        #
-        #
-        #
-
         self.emma.key_map.connect('key-release', self.key_release)
         self.init_from_config()
 
@@ -237,7 +226,7 @@ class QueryTab(widgets.BaseTab):
         if self.append_iter:
             if path == self.model.get_path(self.append_iter):
                 return
-            self.manage_row_action.on_apply_record_tool_clicked(None)
+            self.toolbar.apply_record.on_apply_record_tool_clicked(None)
 
     # todo: move to keymap
     def on_query_view_key_press_event(self, tv, event):
@@ -251,9 +240,9 @@ class QueryTab(widgets.BaseTab):
 
         _iter = self.model.get_iter(path)
         if event.keyval == keysyms.Down and not self.model.iter_next(_iter):
-            if self.append_iter and not self.manage_row_action.on_apply_record_tool_clicked(None):
+            if self.append_iter and not self.toolbar.apply_record.on_apply_record_tool_clicked(None):
                 return True
-            self.manage_row_action.on_add_record_tool_clicked(None)
+            self.toolbar.add_record.on_add_record_tool_clicked(None)
             return True
 
     def on_query_view_button_press_event(self, tv, event):
@@ -277,56 +266,6 @@ class QueryTab(widgets.BaseTab):
         else:
             return True
 
-    def on_query_bottom_eventbox_button_press_event(self, ebox, event):
-        if not self.query_encoding_menu:
-            self.query_encoding_menu = QueryTabPopupEncoding(self)
-        self.query_encoding_menu.popup(None, None, None, event.button, event.time)
-
-    def on_query_db_eventbox_button_press_event(self, ebox, event):
-        q = self
-        host = q.current_host
-        db = q.current_db
-        if q.last_path is not None:
-            try:
-                self.emma.connections_tv.connections_model.get_iter(q.last_path)
-                self.emma.connections_tv.set_cursor(q.last_path)
-                return
-            except:
-                # path was not valid
-                pass
-
-        i = self.emma.connections_tv.connections_model.get_iter_root()
-        while i and self.emma.connections_tv.connections_model.iter_is_valid(i):
-            if self.emma.connections_tv.connections_model[i][0] == host:
-                break
-            i = self.emma.connections_tv.connections_model.iter_next(i)
-        else:
-            print "host not found in connections list!"
-            q.current_host = q.current_db = None
-            q.update_db_label()
-            return
-
-        host_path = self.emma.connections_tv.connections_model.get_path(i)
-        self.emma.connections_tv.scroll_to_cell(host_path, column=None, use_align=True, row_align=0.0, col_align=0.0)
-        if db is None:
-            self.emma.connections_tv.set_cursor(host_path)
-            return
-        k = self.emma.connections_tv.connections_model.iter_children(i)
-        while k and self.emma.connections_tv.connections_model.iter_is_valid(k):
-            if self.emma.connections_tv.connections_model[k][0] == db:
-                break
-            k = self.emma.connections_tv.connections_model.iter_next(k)
-        else:
-            print "database not found in connections list!"
-            q.current_db = None
-            q.update_db_label()
-            self.emma.connections_tv.set_cursor(host_path)
-            return
-        path = self.emma.connections_tv.connections_model.get_path(k)
-        #self.connections_tv.scroll_to_cell(path, column=None, use_align=True, row_align=0.125, col_align=0.0)
-        self.emma.connections_tv.set_cursor(path)
-        return
-
     def auto_rename(self, new_auto_name):
         label = self.get_label()
         if label is None:
@@ -348,8 +287,7 @@ class QueryTab(widgets.BaseTab):
 
     def user_rename(self, new_name):
         # tab_widget = self.nb.get_tab_label(self.page)
-        label = self.get_label()
-        label.set_text(new_name)
+        self.get_label().set_text(new_name)
 
     def destroy(self):
         # try to free some memory
@@ -372,7 +310,7 @@ class QueryTab(widgets.BaseTab):
         h = self.current_host
         d = self.current_db
         if not h:
-            self.query_db_label.set_label("no host/database selected")
+            self.database_event_box.set_label("no host/database selected")
             return
         title = "selected host"
         if d:
@@ -385,7 +323,7 @@ class QueryTab(widgets.BaseTab):
         else:
             hname = "%s(%s)" % (h.name, h.host)
 
-        self.query_db_label.set_label("%s: %s@%s%s" % (
+        self.database_event_box.set_label("%s: %s@%s%s" % (
             title,
             h.user, hname,
             dname
@@ -408,7 +346,7 @@ class QueryTab(widgets.BaseTab):
         self.update_db_label()
 
     def update_bottom_label(self):
-        self.query_bottom_label.set_label("encoding: %s" % self.encoding)
+        self.encoding_event_box.set_label("encoding: %s" % self.encoding)
 
     def set_query_encoding(self, encoding):
         self.encoding = encoding
@@ -587,17 +525,18 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
         update = False
         select = False
         self.editable = False
+
         # single popup
-        self.add_record.set_sensitive(False)
-        self.delete_record.set_sensitive(False)
+        self.toolbar.add_record.set_sensitive(False)
+        self.toolbar.delete_record.set_sensitive(False)
         # per query buttons
-        self.add_record.set_sensitive(False)
-        self.delete_record.set_sensitive(False)
-        self.apply_record.set_sensitive(False)
-        self.local_search.set_sensitive(False)
-        self.remove_order.set_sensitive(False)
-        self.save_result.set_sensitive(False)
-        self.save_result_sql.set_sensitive(False)
+        self.toolbar.add_record.set_sensitive(False)
+        self.toolbar.delete_record.set_sensitive(False)
+        self.toolbar.apply_record.set_sensitive(False)
+        self.toolbar.local_search.set_sensitive(False)
+        self.toolbar.remove_order.set_sensitive(False)
+        self.toolbar.save_result_csv.set_sensitive(False)
+        self.toolbar.save_result_sql.set_sensitive(False)
 
         affected_rows = 0
         last_insert_id = 0
@@ -700,9 +639,9 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
 
             # query with result
             self.append_iter = None
-            self.local_search.set_sensitive(True)
-            self.add_record.set_sensitive(appendable)
-            self.delete_record.set_sensitive(self.editable)
+            self.toolbar.local_search.set_sensitive(True)
+            self.toolbar.add_record.set_sensitive(appendable)
+            self.toolbar.delete_record.set_sensitive(self.editable)
             select = True
             self.last_source = thisquery
             # get sort order!
@@ -711,7 +650,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             sens = False
             if len(current_order) > 0:
                 sens = True
-            self.remove_order.set_sensitive(sens and sortable)
+            self.toolbar.remove_order.set_sensitive(sens and sortable)
 
             sort_fields = dict()
             for c, o in current_order:
@@ -810,8 +749,8 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             # there was a query with a result
             result.append("rows: %d" % num_rows)
             result.append("fields: %d" % field_count)
-            self.save_result.set_sensitive(True)
-            self.save_result_sql.set_sensitive(True)
+            self.toolbar.save_result_csv.set_sensitive(True)
+            self.toolbar.save_result_sql.set_sensitive(True)
         if update:
             # there was a query without a result
             result.append("affected rows: %d" % affected_rows)

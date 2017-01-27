@@ -1,95 +1,23 @@
-# -*- coding: utf-8 -*-
-# emma
-#
-# Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
-#               2014 Nickolay Karnaukhov (mr.electronick@gmail.com)
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Library General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
-
-import dialogs
+import gtk
 
 
-class QueryTabManageRow:
-
+class ApplyRecord(gtk.ToolButton):
     def __init__(self, query, emma):
         """
         @param query: QueryTab
         @param emma: Emma
         """
+        super(ApplyRecord, self).__init__()
         self.emma = emma
         self.query = query
 
-        button_add = self.query.xml.get_widget('add_record_tool')
-        button_add.connect('clicked', self.on_add_record_tool_clicked)
+        self.set_label('Store Record')
+        self.set_icon_name(gtk.STOCK_APPLY)
+        self.set_tooltip_text('Store appended row')
 
-        button_del = self.query.xml.get_widget('delete_record_tool')
-        button_del.connect('clicked', self.on_delete_record_tool_clicked)
+        self.connect('clicked', self.on_clicked)
 
-        button_apl = self.query.xml.get_widget('apply_record_tool')
-        button_apl.connect('clicked', self.on_apply_record_tool_clicked)
-
-    def on_add_record_tool_clicked(self, button):
-        q = self.query
-        if not q.add_record.get_property("sensitive"):
-            return
-
-        path, column = q.treeview.get_cursor()
-        if path:
-            _iter = q.model.insert_after(q.model.get_iter(path))
-        else:
-            _iter = q.model.append()
-        q.treeview.grab_focus()
-        q.treeview.set_cursor(q.model.get_path(_iter))
-        q.filled_fields = dict()
-        q.append_iter = _iter
-        q.apply_record.set_sensitive(True)
-
-    def on_delete_record_tool_clicked(self, button):
-        q = self.query
-        path, column = q.treeview.get_cursor()
-        if not path:
-            return
-        row_iter = q.model.get_iter(path)
-        if q.append_iter \
-                and q.model.iter_is_valid(q.append_iter) \
-                and q.model.get_path(q.append_iter) == q.model.get_path(row_iter):
-            q.append_iter = None
-            q.apply_record.set_sensitive(False)
-        else:
-            table, where, field, value, row_iter = self.query.get_unique_where(q.last_source, path)
-            if not table or not where:
-                dialogs.show_message("delete record", "could not delete this record!?")
-                return
-            if self.query.current_host.__class__.__name__ == "sqlite_host":
-                limit = ""
-            else:
-                limit = " limit 1"
-            update_query = "delete from `%s` where %s%s" % (table, where, limit)
-            if not self.query.current_host.query(update_query, encoding=q.encoding):
-                return
-        if not q.model.remove(row_iter):
-            row_iter = q.model.get_iter_first()
-            while row_iter:
-                new = q.model.iter_next(row_iter)
-                if new is None:
-                    break
-                row_iter = new
-        if row_iter:
-            q.treeview.set_cursor(q.model.get_path(row_iter))
-
-    def on_apply_record_tool_clicked(self, button):
+    def on_clicked(self, button):
         q = self.query
         if not q.append_iter:
             return

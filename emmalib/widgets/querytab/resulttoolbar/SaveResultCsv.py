@@ -25,7 +25,7 @@ import sys
 import dialogs
 
 
-class QueryTabSaveResultCsv:
+class SaveResultCsv(gtk.ToolButton):
 
     def __init__(self, query, emma):
         """
@@ -34,8 +34,14 @@ class QueryTabSaveResultCsv:
         """
         self.emma = emma
         self.query = query
-        button = self.query.xml.get_widget('save_result')
-        button.connect('clicked', self.on_save_result_clicked)
+        super(SaveResultCsv, self).__init__()
+
+        self.set_label('Save as CSV')
+        self.set_icon_name(gtk.STOCK_SAVE_AS)
+        self.set_tooltip_text('Save result as CSV file')
+
+        self.connect('clicked', self.on_save_result_clicked)
+        self.set_sensitive(False)
 
     def on_save_result_clicked(self, button):
         d = self.emma.assign_once(

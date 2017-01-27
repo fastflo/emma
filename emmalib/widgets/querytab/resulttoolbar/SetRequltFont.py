@@ -21,7 +21,7 @@
 import gtk
 
 
-class QueryTabSetResultFont:
+class SetResultFont(gtk.ToolButton):
 
     def __init__(self, query, emma):
         """
@@ -30,8 +30,13 @@ class QueryTabSetResultFont:
         """
         self.emma = emma
         self.query = query
-        button = self.query.xml.get_widget('query_result_font')
-        button.connect('clicked', self.on_query_result_font_clicked)
+        super(SetResultFont, self).__init__()
+
+        self.set_label('Font')
+        self.set_icon_name(gtk.STOCK_SELECT_FONT)
+        self.set_tooltip_text('Set font of result view')
+
+        self.connect('clicked', self.on_query_result_font_clicked)
 
     def on_query_result_font_clicked(self, button):
         d = self.emma.assign_once("query result font", gtk.FontSelectionDialog, "select result font")

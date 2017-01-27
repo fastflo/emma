@@ -23,7 +23,7 @@ import dialogs
 from Query import *
 
 
-class QueryTabSaveResultSql:
+class SaveResultSql(gtk.ToolButton):
 
     def __init__(self, query, emma):
         """
@@ -32,9 +32,14 @@ class QueryTabSaveResultSql:
         """
         self.emma = emma
         self.query = query
-        self.button = self.query.xml.get_widget('save_result_sql')
-        self.button.connect('clicked', self.on_save_result_sql_clicked)
-        self.button.set_sensitive(False)
+        super(SaveResultSql, self).__init__()
+
+        self.set_label('Save as SQL')
+        self.set_icon_name(gtk.STOCK_SAVE_AS)
+        self.set_tooltip_text('Save result as sql insert script')
+        
+        self.connect('clicked', self.on_save_result_sql_clicked)
+        self.set_sensitive(False)
 
     def on_save_result_sql_clicked(self, button):
         title = "save results as sql insert script"
