@@ -71,7 +71,7 @@ class TabBlobView(gtk.VBox):
 
         self.show_all()
 
-    def on_blob_update_clicked(self, button):
+    def on_blob_update_clicked(self, _):
         q = self.emma.current_query
         path, column = q.treeview.get_cursor()
         if not q.model:
@@ -97,7 +97,7 @@ class TabBlobView(gtk.VBox):
         else:
             self.tv.set_wrap_mode(gtk.WRAP_NONE)
 
-    def on_blob_load_clicked(self, button):
+    def on_blob_load_clicked(self, _):
         d = self.emma.assign_once(
             "load dialog",
             gtk.FileChooserDialog,
@@ -118,12 +118,11 @@ class TabBlobView(gtk.VBox):
             query_text = fp.read().decode(self.emma.current_query.encoding, "ignore")
             fp.close()
         except:
-            show_message("load blob contents", "loading blob contents from file %s: %s" % (filename,
-                                                                                                   sys.exc_value))
+            show_message("load blob contents", "loading blob contents from file %s: %s" % (filename, sys.exc_value))
             return
         self.tv.get_buffer().set_text(query_text)
 
-    def on_blob_save_clicked(self, button):
+    def on_blob_save_clicked(self, _):
         d = self.emma.assign_once(
             "save dialog",
             gtk.FileChooserDialog,

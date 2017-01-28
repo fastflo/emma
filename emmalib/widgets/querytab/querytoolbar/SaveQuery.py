@@ -1,5 +1,6 @@
 import gtk
 import os
+import sys
 import dialogs
 
 
@@ -19,7 +20,7 @@ class SaveQuery(gtk.ToolButton):
 
         self.connect('clicked', self.on_clicked)
 
-    def on_clicked(self, button):
+    def on_clicked(self, _):
         d = self.emma.assign_once(
             "save dialog",
             gtk.FileChooserDialog, "Save query", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE,

@@ -43,7 +43,7 @@ class SaveResultCsv(gtk.ToolButton):
         self.connect('clicked', self.on_save_result_clicked)
         self.set_sensitive(False)
 
-    def on_save_result_clicked(self, button):
+    def on_save_result_clicked(self, _):
         d = self.emma.assign_once(
             "save results dialog",
             gtk.FileChooserDialog, "save results", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE,

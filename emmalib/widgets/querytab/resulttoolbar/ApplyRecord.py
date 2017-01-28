@@ -17,7 +17,7 @@ class ApplyRecord(gtk.ToolButton):
 
         self.connect('clicked', self.on_clicked)
 
-    def on_clicked(self, button):
+    def on_clicked(self, _):
         q = self.query
         if not q.append_iter:
             return

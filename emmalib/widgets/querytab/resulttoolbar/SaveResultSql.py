@@ -41,7 +41,7 @@ class SaveResultSql(gtk.ToolButton):
         self.connect('clicked', self.on_save_result_sql_clicked)
         self.set_sensitive(False)
 
-    def on_save_result_sql_clicked(self, button):
+    def on_save_result_sql_clicked(self, _):
         title = "save results as sql insert script"
         d = self.emma.assign_once(
             "save results dialog",

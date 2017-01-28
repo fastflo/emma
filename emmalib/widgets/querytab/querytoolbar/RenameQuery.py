@@ -18,7 +18,7 @@ class RenameQuery(gtk.ToolButton):
 
         self.connect('clicked', self.on_clicked)
 
-    def on_clicked(self, button):
+    def on_clicked(self, _):
         label = self.query.get_label()
         new_name = dialogs.input_dialog("Rename tab", "Please enter the new name of this tab:",
                                         label.get_text(),

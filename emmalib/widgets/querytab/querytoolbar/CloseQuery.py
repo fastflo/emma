@@ -17,5 +17,5 @@ class CloseQuery(gtk.ToolButton):
 
         self.connect('clicked', self.on_clicked)
 
-    def on_clicked(self, button):
+    def on_clicked(self, _):
         self.emma.main_notebook.close_query_tab()
