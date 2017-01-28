@@ -97,5 +97,5 @@ class ApplyRecord(gtk.ToolButton):
         else:
             q.model.remove(q.append_iter)
         q.append_iter = None
-        q.apply_record.set_sensitive(False)
+        q.toolbar.apply_record.set_sensitive(False)
         return True

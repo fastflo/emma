@@ -31,4 +31,4 @@ class AddRecord(gtk.ToolButton):
         q.treeview.set_cursor(q.model.get_path(_iter))
         q.filled_fields = dict()
         q.append_iter = _iter
-        q.apply_record.set_sensitive(True)
+        q.toolbar.apply_record.set_sensitive(True)

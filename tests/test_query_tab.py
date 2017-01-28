@@ -20,7 +20,7 @@
 
 import gtk
 
-from emmalib import widgets
+from widgets import TabBlobView
 from emmalib.Config import Config
 from emmalib.KeyMap import KeyMap
 from emmalib.QueryTab import QueryTab
@@ -42,7 +42,7 @@ class Win(gtk.Window):
         self.key_map = KeyMap(self)
         self.config = Config(self)
         self.config.load()
-        self.blob_view = widgets.TabBlobView(self)
+        self.blob_view = TabBlobView(self)
 
         self.mainwindow = self
         self.main_notebook = type('Dummy', (object,), {})

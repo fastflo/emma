@@ -18,15 +18,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import gc
 import gobject
 import gtk
 import gtksourceview2
 import time
 import traceback
-from gtk import glade
 from gtk import keysyms
-from stat import *
 
 import pango
 
@@ -38,6 +35,7 @@ from QueryTabTreeView import QueryTabTreeView
 from widgets.querytab.DatabaseEventBox import DatabaseEventBox
 from widgets.querytab.EncodingEventBox import EncodingEventBox
 from widgets.querytab.ResultToolbar import ResultToolbar
+from widgets.querytab.querytoolbar.QueryToolbar import QueryToolbar
 
 
 class QueryTab(widgets.BaseTab):
@@ -46,19 +44,39 @@ class QueryTab(widgets.BaseTab):
         @param emma: Emma
         """
         super(QueryTab, self).__init__()
-        self.xml = gtk.glade.XML(os.path.join(emma.glade_path, 'querytab.glade'), "first_query")
-        self.xml.signal_autoconnect(self)
 
         self.tab_label.set_text('Query')
         self.tab_label_icon.set_from_file(os.path.join(icons_path, 'page_code.png'))
 
         self.emma = emma
 
+        self.ui = gtk.VPaned()
+
+        #---------------------------
+        #   INIT TOP PART
+        #
+
+        vbox2 = gtk.VBox()
+
+        self.query_toolbar = QueryToolbar(self, emma)
+        vbox2.pack_start(self.query_toolbar, False, False)
+
+        self.query_text_sw = gtk.ScrolledWindow()
+        self.query_text_sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.textview = gtk.TextView()
+        self.query_text_sw.add(self.textview)
+
+        vbox2.pack_end(self.query_text_sw, True, True)
+
+        #
+        #   INIT TOP PART
+        #---------------------------
+
         #---------------------------
         #   INIT BOTTOM PART
         #
 
-        hbox7 = self.xml.get_widget('hbox7')
+        hbox7 = gtk.HBox()
         self.toolbar = ResultToolbar(self, self.emma)
         hbox7.pack_start(self.toolbar, False, False)
         vbox3 = gtk.VBox()
@@ -66,6 +84,7 @@ class QueryTab(widgets.BaseTab):
         self.label.set_alignment(0, 1)
         vbox3.pack_start(self.label, False, False)
         scrolledwindow6 = gtk.ScrolledWindow()
+        scrolledwindow6.set_policy(gtk.POLICY_AUTOMATIC,gtk.POLICY_AUTOMATIC)
         self.treeview = QueryTabTreeView(self.emma)
         scrolledwindow6.add(self.treeview)
         self.treeview.show()
@@ -84,11 +103,9 @@ class QueryTab(widgets.BaseTab):
         #   INIT BOTTOM PART
         #---------------------------
 
-        self.textview = self.xml.get_widget('query_text')
-
-        self.query_text_sw = self.xml.get_widget('query_text_sw')
-
-        self.ui = self.xml.get_widget('first_query')
+        self.ui.pack1(vbox2)
+        self.ui.pack2(hbox7)
+        self.ui.show_all()
 
         self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
 
@@ -108,6 +125,24 @@ class QueryTab(widgets.BaseTab):
 
         self.filled_fields = []
 
+        self.init_gtk_sourceview()
+
+        self.current_host = None
+        self.current_db = None
+        self.model = None
+        self.last_source = None
+        self.result_info = None
+        self.append_iter = None
+        self.last_path = None
+        self.encoding = None
+        if hasattr(self, "query"):
+            self.textview.get_buffer().set_text(self.query)
+        self.last_auto_name = None
+
+        self.emma.key_map.connect('key-release', self.key_release)
+        self.init_from_config()
+
+    def init_gtk_sourceview(self):
         # replace textview with gtksourcevice
         try:
             org_tv = self.textview
@@ -175,21 +210,6 @@ class QueryTab(widgets.BaseTab):
         except:
             dialogs.alert(traceback.format_exc())
 
-        self.current_host = None
-        self.current_db = None
-        self.model = None
-        self.last_source = None
-        self.result_info = None
-        self.append_iter = None
-        self.last_path = None
-        self.encoding = None
-        if hasattr(self, "query"):
-            self.textview.get_buffer().set_text(self.query)
-        self.last_auto_name = None
-
-        self.emma.key_map.connect('key-release', self.key_release)
-        self.init_from_config()
-
     def init_from_config(self):
         self.set_query_encoding(self.emma.config.get("db_encoding"))
         self.set_query_font(self.emma.config.get("query_text_font"))
@@ -226,7 +246,7 @@ class QueryTab(widgets.BaseTab):
         if self.append_iter:
             if path == self.model.get_path(self.append_iter):
                 return
-            self.toolbar.apply_record.on_apply_record_tool_clicked(None)
+            self.toolbar.apply_record.on_clicked(None)
 
     # todo: move to keymap
     def on_query_view_key_press_event(self, tv, event):
@@ -285,10 +305,6 @@ class QueryTab(widgets.BaseTab):
             print "last auto name %r not in %r!" % (self.last_auto_name, current_name)
         return
 
-    def user_rename(self, new_name):
-        # tab_widget = self.nb.get_tab_label(self.page)
-        self.get_label().set_text(new_name)
-
     def destroy(self):
         # try to free some memory
         if self.model:
@@ -345,12 +361,9 @@ class QueryTab(widgets.BaseTab):
         self.current_db = db
         self.update_db_label()
 
-    def update_bottom_label(self):
-        self.encoding_event_box.set_label("encoding: %s" % self.encoding)
-
     def set_query_encoding(self, encoding):
         self.encoding = encoding
-        self.update_bottom_label()
+        self.encoding_event_box.set_label("encoding: %s" % self.encoding)
 
     def set_query_font(self, font_name):
         self.textview.get_pango_context()
@@ -365,409 +378,9 @@ class QueryTab(widgets.BaseTab):
     def set_wrap_mode(self, wrap):
         self.textview.set_wrap_mode(wrap)
 
-    def on_rename_query_tab_clicked(self, button):
-        label = self.get_label()
-        new_name = dialogs.input_dialog("Rename tab", "Please enter the new name of this tab:",
-                                        label.get_text(),
-                                        self.emma.mainwindow)
-        if new_name is None:
-            return
-        if new_name == "":
-            self.last_auto_name = None
-            self.update_db_label()
-            return
-        self.user_rename(new_name)
-
-    def on_closequery_button_clicked(self, button):
-        self.emma.main_notebook.close_query_tab()
-
     def on_query_tab_label_close_button_clicked(self, button, page_index):
         print button, page_index
         self.emma.main_notebook.close_query_tab(page_index)
-
-    def on_newquery_button_clicked(self, button):
-        self.emma.main_notebook.add_query_tab()
-
-    def on_query_font_clicked(self, button):
-        d = self.emma.assign_once("query text font", gtk.FontSelectionDialog, "select query font")
-        d.set_font_name(self.emma.config.get("query_text_font"))
-        answer = d.run()
-        d.hide()
-        if not answer == gtk.RESPONSE_OK:
-            return
-        font_name = d.get_font_name()
-        self.set_query_font(font_name)
-        self.emma.config.config["query_text_font"] = font_name
-        self.emma.config.save()
-
-    def on_load_query_clicked(self, button):
-        d = self.emma.assign_once(
-            "load dialog",
-            gtk.FileChooserDialog, "Load query", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_OPEN,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT))
-
-        d.set_default_response(gtk.RESPONSE_ACCEPT)
-        answer = d.run()
-        d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT:
-            return
-
-        filename = d.get_filename()
-        try:
-            sbuf = os.stat(filename)
-        except:
-            dialogs.show_message("Load query", "%s does not exists!" % filename)
-            return
-        if not S_ISREG(sbuf.st_mode):
-            dialogs.show_message("Load query", "%s exists, but is not a file!" % filename)
-            return
-
-        size = sbuf.st_size
-        _max = int(self.emma.config.get("ask_execute_query_from_disk_min_size"))
-        if size > _max:
-            if dialogs.confirm("load query", """
-<b>%s</b> is very big (<b>%.2fMB</b>)!
-opening it in the normal query-view may need a very long time!
-if you just want to execute this skript file without editing and
-syntax-highlighting, i can open this file using the <b>execute file from disk</b> function.
-<b>shall i do this?</b>""" % (filename, size / 1024.0 / 1000.0), self.emma.mainwindow):
-                self.emma.on_execute_query_from_disk_activate(None, filename)
-                return
-        try:
-            fp = file(filename, "rb")
-            query_text = fp.read()
-            fp.close()
-        except:
-            dialogs.show_message("Load Query", "Error reading query from file %s: %s" % (filename, sys.exc_value))
-            return
-        self.textview.get_buffer().set_text(query_text)
-
-    def on_save_query_clicked(self, button):
-        d = self.emma.assign_once(
-            "save dialog",
-            gtk.FileChooserDialog, "Save query", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
-
-        d.set_default_response(gtk.RESPONSE_ACCEPT)
-        answer = d.run()
-        d.hide()
-        if not answer == gtk.RESPONSE_ACCEPT:
-            return
-        filename = d.get_filename()
-        if os.path.exists(filename):
-            if not os.path.isfile(filename):
-                dialogs.show_message("save query", "%s already exists and is not a file!" % filename)
-                return
-            if not dialogs.confirm(
-                    "Overwrite file?",
-                    "%s already exists! Do you want to overwrite it?" % filename, self.emma.mainwindow):
-                return
-        b = self.textview.get_buffer()
-        query_text = b.get_text(b.get_start_iter(), b.get_end_iter())
-        try:
-            fp = file(filename, "wb")
-            fp.write(query_text)
-            fp.close()
-        except:
-            dialogs.show_message("Save Query", "Error writing query to file %s: %s" % (filename, sys.exc_value))
-
-    def on_execution_timeout(self, button):
-        value = button.get_value()
-        if value < 0.1:
-            self.execution_timer_running = False
-            return False
-        if not self.on_execute_query_clicked():
-            # stop on error
-            button.set_value(0)
-            value = 0
-        if value != self.execution_timer_interval:
-            self.execution_timer_running = False
-            self.on_reexecution_spin_changed(button)
-            return False
-        return True
-
-    def on_reexecution_spin_changed(self, button):
-        value = button.get_value()
-        if self.execution_timer_running:
-            return
-        self.execution_timer_running = True
-        self.execution_timer_interval = value
-        gobject.timeout_add(int(value * 1000), self.on_execution_timeout, button)
-
-    def on_execute_query_clicked(self, button=None, query=None):
-        field_count = 0
-        if not query:
-            b = self.textview.get_buffer()
-            text = b.get_text(b.get_start_iter(), b.get_end_iter())
-        else:
-            text = query
-
-        self.current_host = host = self.current_host
-        if not host:
-            dialogs.show_message(
-                "error executing this query!",
-                "could not execute query, because there is no selected host!"
-            )
-            return
-
-        self.current_db = self.current_db
-        if self.current_db:
-            host.select_database(self.current_db)
-        elif host.current_db:
-            if not dialogs.confirm(
-                    "query without selected db",
-                    """warning: this query tab has no database selected
-                    but the host-connection already has the database '%s' selected.
-                    the author knows no way to deselect this database.
-                    do you want to continue?""" % host.current_db.name, self.emma.mainwindow):
-                return
-
-        update = False
-        select = False
-        self.editable = False
-
-        # single popup
-        self.toolbar.add_record.set_sensitive(False)
-        self.toolbar.delete_record.set_sensitive(False)
-        # per query buttons
-        self.toolbar.add_record.set_sensitive(False)
-        self.toolbar.delete_record.set_sensitive(False)
-        self.toolbar.apply_record.set_sensitive(False)
-        self.toolbar.local_search.set_sensitive(False)
-        self.toolbar.remove_order.set_sensitive(False)
-        self.toolbar.save_result_csv.set_sensitive(False)
-        self.toolbar.save_result_sql.set_sensitive(False)
-
-        affected_rows = 0
-        last_insert_id = 0
-        num_rows = 0
-
-        query_time = 0
-        download_time = 0
-        display_time = 0
-        query_count = 0
-        total_start = time.time()
-
-        # cleanup last query model and treeview
-        for col in self.treeview.get_columns():
-            self.treeview.remove_column(col)
-        if self.model:
-            self.model.clear()
-
-        _start = 0
-        while _start < len(text):
-            # search query end
-            query_start, end = read_query(text, _start)
-            if query_start is None:
-                break
-            thisquery = text[query_start:end]
-            print "about to execute query %r" % thisquery
-            _start = end + 1
-
-            thisquery.strip(" \r\n\t;")
-            if not thisquery:
-                continue  # empty query
-            query_count += 1
-            query_hint = re.sub("[\n\r\t ]+", " ", thisquery[:40])
-            self.label.set_text("executing query %d %s..." % (query_count, query_hint))
-            self.label.window.process_updates(False)
-
-            appendable = False
-            appendable_result = is_query_appendable(thisquery)
-            if appendable_result:
-                appendable = True
-                self.editable = self.is_query_editable(thisquery, appendable_result)
-            print "appendable: %s, editable: %s" % (appendable, self.editable)
-
-            ret = host.query(thisquery, encoding=self.encoding)
-            query_time += host.query_time
-
-            # if stop on error is enabled
-            if not ret:
-                print "mysql error: %r" % (host.last_error, )
-                message = "error at: %s" % host.last_error.replace(
-                    "You have an error in your SQL syntax.  "
-                    "Check the manual that corresponds to your MySQL server version for the right syntax to use near ",
-                    "")
-                message = "error at: %s" % message.replace("You have an error in your SQL syntax; "
-                                                           "check the manual that corresponds to your MySQL server "
-                                                           "version for the right syntax to use near ", "")
-
-                line_pos = 0
-                pos = message.find("at line ")
-                if pos != -1:
-                    line_no = int(message[pos + 8:])
-                    while 1:
-                        line_no -= 1
-                        if line_no < 1:
-                            break
-                        p = thisquery.find("\n", line_pos)
-                        if p == -1:
-                            break
-                        line_pos = p + 1
-
-                i = self.textview.get_buffer().get_iter_at_offset(query_start + line_pos)
-
-                match = re.search("error at: '(.*)'", message, re.DOTALL)
-                if match and match.group(1):
-                    # set focus and cursor!
-                    #print "search for ->%s<-" % match.group(1)
-                    pos = text.find(match.group(1), query_start + line_pos, query_start + len(thisquery))
-                    if not pos == -1:
-                        i.set_offset(pos)
-                else:
-                    match = re.match("Unknown column '(.*?')", message)
-                    if match:
-                        # set focus and cursor!
-                        pos = thisquery.find(match.group(1))
-                        if not pos == 1:
-                            i.set_offset(query_start + pos)
-
-                self.textview.get_buffer().place_cursor(i)
-                self.textview.scroll_to_iter(i, 0.0)
-                self.textview.grab_focus()
-                self.label.set_text(re.sub("[\r\n\t ]+", " ", message))
-                return
-
-            field_count = host.handle.field_count()
-            if field_count == 0:
-                # query without result
-                update = True
-                affected_rows += host.handle.affected_rows()
-                last_insert_id = host.handle.insert_id()
-                continue
-
-            # query with result
-            self.append_iter = None
-            self.toolbar.local_search.set_sensitive(True)
-            self.toolbar.add_record.set_sensitive(appendable)
-            self.toolbar.delete_record.set_sensitive(self.editable)
-            select = True
-            self.last_source = thisquery
-            # get sort order!
-            sortable = True  # todo
-            current_order = get_order_from_query(thisquery)
-            sens = False
-            if len(current_order) > 0:
-                sens = True
-            self.toolbar.remove_order.set_sensitive(sens and sortable)
-
-            sort_fields = dict()
-            for c, o in current_order:
-                sort_fields[c.lower()] = o
-            self.label.set_text("downloading resultset...")
-            self.label.window.process_updates(False)
-
-            start_download = time.time()
-            result = host.handle.store_result()
-            download_time = time.time() - start_download
-            if download_time < 0:
-                download_time = 0
-
-            self.label.set_text("displaying resultset...")
-            self.label.window.process_updates(False)
-
-            # store field info
-            self.result_info = result.describe()
-            num_rows = result.num_rows()
-
-            for col in self.treeview.get_columns():
-                self.treeview.remove_column(col)
-
-            columns = [gobject.TYPE_STRING] * field_count
-            self.model = gtk.ListStore(*columns)
-            self.treeview.set_model(self.model)
-            self.treeview.set_rules_hint(True)
-            self.treeview.set_headers_clickable(True)
-            for i in range(field_count):
-                title = self.result_info[i][0].replace("_", "__").replace("[\r\n\t ]+", " ")
-                text_renderer = gtk.CellRendererText()
-                if self.editable:
-                    text_renderer.set_property("editable", True)
-                    text_renderer.connect("edited", self.on_query_change_data, i)
-                l = self.treeview.insert_column_with_data_func(
-                    -1, title, text_renderer, widgets.ResultCellRenders.render_mysql_string, i)
-
-                col = self.treeview.get_column(l - 1)
-
-                if self.emma.config.get_bool("result_view_column_resizable"):
-                    col.set_resizable(True)
-                else:
-                    col.set_resizable(False)
-                    col.set_min_width(int(self.emma.config.get("result_view_column_width_min")))
-                    col.set_max_width(int(self.emma.config.get("result_view_column_width_max")))
-
-                if sortable:
-                    col.set_clickable(True)
-                    col.connect("clicked", self.on_query_column_sort, i)
-                    # set sort indicator
-                    field_name = self.result_info[i][0].lower()
-                    try:
-                        sort_col = sort_fields[field_name]
-                        col.set_sort_indicator(True)
-                        if sort_col:
-                            col.set_sort_order(gtk.SORT_ASCENDING)
-                        else:
-                            col.set_sort_order(gtk.SORT_DESCENDING)
-                    except:
-                        col.set_sort_indicator(False)
-                else:
-                    col.set_clickable(False)
-                    col.set_sort_indicator(False)
-
-            cnt = 0
-            start_display = time.time()
-            last_display = start_display
-            for row in result.fetch_row(0):
-                def to_string(f):
-                    if type(f) == str:
-                        f = f.decode(self.encoding, "replace")
-                    elif f is None:
-                        pass
-                    else:
-                        f = str(f)
-                    return f
-                self.model.append(map(to_string, row))
-                cnt += 1
-                if not cnt % 100 == 0:
-                    continue
-
-                now = time.time()
-                if (now - last_display) < 0.2:
-                    continue
-
-                self.label.set_text("displayed %d rows..." % cnt)
-                self.label.window.process_updates(False)
-                last_display = now
-
-            display_time = time.time() - start_display
-            if display_time < 0:
-                display_time = 0
-
-        result = []
-        if select:
-            # there was a query with a result
-            result.append("rows: %d" % num_rows)
-            result.append("fields: %d" % field_count)
-            self.toolbar.save_result_csv.set_sensitive(True)
-            self.toolbar.save_result_sql.set_sensitive(True)
-        if update:
-            # there was a query without a result
-            result.append("affected rows: %d" % affected_rows)
-            result.append("insert_id: %d" % last_insert_id)
-        total_time = time.time() - total_start
-        result.append("| total time: %.2fs (query: %.2fs" % (total_time, query_time))
-        if select:
-            result.append("download: %.2fs display: %.2fs" % (download_time, display_time))
-        result.append(")")
-
-        self.label.set_text(' '.join(result))
-        self.emma.blob_view.tv.set_editable(self.editable)
-        self.emma.blob_view.blob_update.set_sensitive(self.editable)
-        self.emma.blob_view.blob_load.set_sensitive(self.editable)
-        # todo update_buttons()
-        gc.collect()
-        return True
 
     def is_query_editable(self, query, result=None):
         table, where, field, value, row_iter = self.get_unique_where(query)
