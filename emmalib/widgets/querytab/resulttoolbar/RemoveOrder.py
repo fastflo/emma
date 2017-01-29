@@ -51,5 +51,5 @@ class RemoveOrder(gtk.ToolButton):
         new_query = re.sub("(?i)order[ \r\n\t]+by[ \r\n\t]+", "", before + after)
         self.query.set(new_query)
         self.emma.sort_timer_running = False
-        self.emma.on_execute_query_clicked()
+        self.emma.events.emit('execute_query')
 

@@ -36,6 +36,10 @@ class KeyMap(gobject.GObject):
         """
         super(KeyMap, self).__init__()
         self.emma = emma
+
+        self.emma.mainwindow.connect('key_release_event', self.on_mainwindow_key_release_event)
+        self.emma.mainwindow.connect('key_press_event', self.on_mainwindow_key_press_event)
+
         self.left_control_key_is_pressed = False
         self.right_control_key_is_pressed = False
 
@@ -52,10 +56,10 @@ class KeyMap(gobject.GObject):
         #   QueryTab stuff
         #
         if event.keyval == keysyms.F9:
-            self.emma.current_query.on_execute_query_clicked()
+            self.emma.events.emit('execute_query', None, None)
 
         if event.keyval == keysyms.Return and self.if_ctrl():
-            self.emma.current_query.on_execute_query_clicked()
+            self.emma.events.emit('execute_query')
             return False
 
         if event.keyval == keysyms.t and self.if_ctrl():

@@ -392,11 +392,11 @@ class ConnectionsTreeView(gtk.TreeView):
         elif what == "check_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
-            self.emma.current_query.on_execute_query_clicked(None, "check table `%s`" % table.name)
+            self.emma.events.emit('execute_query', None, "check table `%s`" % table.name)
         elif what == "repair_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
-            self.emma.current_query.on_execute_query_clicked(None, "repair table `%s`" % table.name)
+            self.emma.events.emit('execute_query', None, "repair table `%s`" % table.name)
 
     def on_db_popup(self, popup, item):
         path, column = self.get_cursor()
@@ -428,14 +428,16 @@ class ConnectionsTreeView(gtk.TreeView):
             self.current_host = db.host
             self.current_host.select_database(db)
             db.refresh()
-            self.emma.current_query.on_execute_query_clicked(
+            self.emma.events.emit(
+                'execute_query',
                 None,
                 "check table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
         elif what == "repair_tables":
             self.current_host = db.host
             self.current_host.select_database(db)
             db.refresh()
-            self.emma.current_query.on_execute_query_clicked(
+            self.emma.events.emit(
+                'execute_query',
                 None,
                 "repair table %s" % (",".join(map(lambda s: "`%s`" % s, db.tables.keys()))))
         elif what == "list_tables":

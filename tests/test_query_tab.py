@@ -19,18 +19,21 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 import gtk
+from emmalib.EventsManager import EventsManager
+import dialogs
 
-from widgets import TabBlobView
 from emmalib.Config import Config
 from emmalib.KeyMap import KeyMap
-from emmalib.QueryTab import QueryTab
 from emmalib.providers.mysql import MySqlHost
+from widgets import TabBlobView
+from widgets.QueryTab import QueryTab
 
 
 class Win(gtk.Window):
 
     def __init__(self):
         super(Win, self).__init__()
+        self.mainwindow = self
         self.current_host = None
         self.set_position(gtk.WIN_POS_CENTER)
         self.resize(800, 600)
@@ -43,6 +46,7 @@ class Win(gtk.Window):
         self.config = Config(self)
         self.config.load()
         self.blob_view = TabBlobView(self)
+        self.events = EventsManager(self)
 
         self.mainwindow = self
         self.main_notebook = type('Dummy', (object,), {})
@@ -61,20 +65,10 @@ class Win(gtk.Window):
         return obj
 
     def dummy_close_query_tab(self):
-        parent = None
-        md = gtk.MessageDialog(parent,
-                               gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO,
-                               gtk.BUTTONS_CLOSE, "Can't close in test mode")
-        md.run()
-        md.destroy()
+        dialogs.alert('Test mode')
 
     def dummy_add_query_tab(self):
-        parent = None
-        md = gtk.MessageDialog(parent,
-                               gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO,
-                               gtk.BUTTONS_CLOSE, "Can't add in test mode")
-        md.run()
-        md.destroy()
+        dialogs.alert('Test mode')
 
     def db_connect(self):
         _db = 'test'

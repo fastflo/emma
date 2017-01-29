@@ -1,9 +1,15 @@
+import gobject
+import gtk
 from widgets import TabTable
 
 
-class EventsManager:
+class EventsManager(gobject.GObject):
+    __gsignals__ = {
+        'execute_query': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.Object, str))
+    }
 
     def __init__(self, emma):
+        gobject.GObject.__init__(self)
         self.emma = emma
 
     def on_table_modified(self, table):

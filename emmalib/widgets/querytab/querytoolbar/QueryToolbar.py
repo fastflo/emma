@@ -20,33 +20,28 @@ class QueryToolbar(gtk.Toolbar):
         # self.emma = emma
         # self.query = query
 
-        query_toolbar = self
-        btn_close_query = CloseQuery(query, emma)
-        query_toolbar.insert(btn_close_query, 0)
+        self.insert(CloseQuery(query, emma), 0)
 
-        query_toolbar.insert(gtk.SeparatorToolItem(), 0)
+        self.insert(gtk.SeparatorToolItem(), 0)
 
-        btn_rename_query = RenameQuery(query, emma)
-        query_toolbar.insert(btn_rename_query, 0)
+        self.insert(RenameQuery(query, emma), 0)
 
-        btn_new_query = NewQuery(query, emma)
-        query_toolbar.insert(btn_new_query, 0)
+        self.insert(NewQuery(query, emma), 0)
 
-        query_toolbar.insert(gtk.SeparatorToolItem(), 0)
+        self.insert(gtk.SeparatorToolItem(), 0)
 
-        btn_set_font = SetFont(query, emma)
-        query_toolbar.insert(btn_set_font, 0)
+        # btn_set_font = SetFont(query, emma)
+        # self.insert(btn_set_font, 0)
+        #
+        # self.insert(gtk.SeparatorToolItem(), 0)
 
-        query_toolbar.insert(gtk.SeparatorToolItem(), 0)
+        # btn_load_query = LoadQuery(query, emma)
+        # self.insert(btn_load_query, 0)
+        #
+        # btn_save_query = SaveQuery(query, emma)
+        # self.insert(btn_save_query, 0)
 
-        btn_load_query = LoadQuery(query, emma)
-        query_toolbar.insert(btn_load_query, 0)
+        # self.reex = ReExBox(query, emma)
+        # self.insert(self.reex, 0)
 
-        btn_save_query = SaveQuery(query, emma)
-        query_toolbar.insert(btn_save_query, 0)
-
-        self.reex = ReExBox(query, emma)
-        query_toolbar.insert(self.reex, 0)
-
-        btn_ex_query = ExecuteQuery(query, emma)
-        query_toolbar.insert(btn_ex_query, 0)
+        self.insert(ExecuteQuery(query, emma), 0)

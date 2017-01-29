@@ -23,6 +23,10 @@ class ExecuteQuery(gtk.ToolButton):
         self.set_tooltip_text('Execute Query (F9, Ctrl+Enter)')
 
         self.connect('clicked', self.on_clicked)
+        self.emma.events.connect('execute_query', self.on_event)
+
+    def on_event(self, a, b, c):
+        self.on_clicked(b, c)
 
     def on_clicked(self, button=None, query=None):
         field_count = 0

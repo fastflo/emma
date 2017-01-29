@@ -1,5 +1,6 @@
 import gtk
 
+
 def alert(message):
     dialog = gtk.MessageDialog(None, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE, message)
     dialog.set_border_width(5)

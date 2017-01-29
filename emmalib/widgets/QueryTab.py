@@ -21,15 +21,18 @@
 import gobject
 import gtk
 import gtksourceview2
+import os
+import re
 import time
 import traceback
 from gtk import keysyms
 
 import pango
+from Constants import icons_path
+import Query
 
 import dialogs
-import widgets
-from Query import *
+from widgets import BaseTab
 from QueryTabResultPopup import QueryTabResultPopup
 from QueryTabTreeView import QueryTabTreeView
 from widgets.querytab.DatabaseEventBox import DatabaseEventBox
@@ -38,7 +41,7 @@ from widgets.querytab.ResultToolbar import ResultToolbar
 from widgets.querytab.querytoolbar.QueryToolbar import QueryToolbar
 
 
-class QueryTab(widgets.BaseTab):
+class QueryTab(BaseTab):
     def __init__(self, emma):
         """
         @param emma: Emma
@@ -434,7 +437,7 @@ class QueryTab(widgets.BaseTab):
         self.set(new_query)
 
         if self.emma.config.get("result_view_column_sort_timeout") <= 0:
-            self.on_execute_query_clicked()
+            self.emma.events.emit('execute_query')
 
         new_order = dict(new_order)
 
@@ -460,7 +463,7 @@ class QueryTab(widgets.BaseTab):
 
     def get_unique_where(self, query, path=None, col_num=None, return_fields=False):
         # call is_query_appendable before!
-        result = is_query_appendable(query)
+        result = Query.is_query_appendable(query)
         if not result:
             return None, None, None, None, None
 
@@ -654,7 +657,7 @@ class QueryTab(widgets.BaseTab):
         if self.sort_timer_execute > time.time():
             return True
         self.sort_timer_running = False
-        self.on_execute_query_clicked()
+        self.emma.events.emit('execute_query')
         return False
 
     def get_ui(self):

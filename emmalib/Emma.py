@@ -36,7 +36,9 @@ from EventsManager import EventsManager
 
 
 class Emma:
+
     def __init__(self):
+
         self.emma_path = emma_path
         self.created_once = {}
         self.queries = []
@@ -105,9 +107,6 @@ class Emma:
 
         self.mainwindow = widgets.MainWindow(self)
         self.mainwindow.connect('destroy', lambda *args: gtk.main_quit())
-
-        self.mainwindow.connect('key_release_event', self.key_map.on_mainwindow_key_release_event)
-        self.mainwindow.connect('key_press_event', self.key_map.on_mainwindow_key_press_event)
 
         try:
             icon = gtk.gdk.pixbuf_new_from_file(os.path.join(icons_path, "emma.png"))
@@ -514,7 +513,7 @@ class Emma:
             t = new_query
         except:
             pass
-        self.current_query.on_execute_query_clicked(None, t)
+        self.events.emit('execute_query')
 
     def process_events(self):
         while gtk.events_pending():

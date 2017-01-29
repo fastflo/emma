@@ -22,7 +22,7 @@ import gc
 import gtk
 from TabProcessList import TabProcessList
 from TabTablesList import TabTablesList
-from emmalib.QueryTab import QueryTab
+from widgets.QueryTab import QueryTab
 
 
 class MainNotebook(gtk.Notebook):
@@ -47,7 +47,7 @@ class MainNotebook(gtk.Notebook):
         for q in self.emma.queries:
             if q.ui == page_ui:
                 self.emma.current_query = q
-                q.on_query_db_eventbox_button_press_event(None, None)
+                q.database_event_box.on_query_db_eventbox_button_press_event(None, None)
                 return
 
     #

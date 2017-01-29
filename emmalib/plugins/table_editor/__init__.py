@@ -469,15 +469,15 @@ class table_editor:
 plugin_instance = None
 
 
-def plugin_init(emma_instance):
-    global plugin_instance
-    plugin_instance = table_editor(emma_instance)
-    return plugin_instance
-
-
-def plugin_unload():
-    global plugin_instance
-    plugin_instance.cleanup()
-    del plugin_instance
-    plugin_instance = None
-    gc.collect()
+# def plugin_init(emma_instance):
+#     global plugin_instance
+#     plugin_instance = table_editor(emma_instance)
+#     return plugin_instance
+#
+#
+# def plugin_unload():
+#     global plugin_instance
+#     plugin_instance.cleanup()
+#     del plugin_instance
+#     plugin_instance = None
+#     gc.collect()

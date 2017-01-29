@@ -37,16 +37,16 @@ class ReExBox(gtk.ToolItem):
 
     def on_execution_timeout(self, button):
         value = button.get_value()
-        if value < 0.1:
-            self.query.execution_timer_running = False
-            return False
-        if not self.query.on_execute_query_clicked():
-            # stop on error
-            button.set_value(0)
-            value = 0
-        if value != self.query.execution_timer_interval:
-            self.query.execution_timer_running = False
-            self.query.query_toolbar.reex.on_change(button)
-            return False
+        # if value < 0.1:
+        #     self.query.execution_timer_running = False
+        #     return False
+        # if not self.query.on_execute_query_clicked():
+        #     # stop on error
+        #     button.set_value(0)
+        #     value = 0
+        # if value != self.query.execution_timer_interval:
+        #     self.query.execution_timer_running = False
+        #     self.query.query_toolbar.reex.on_change(button)
+        #     return False
         return True
 
