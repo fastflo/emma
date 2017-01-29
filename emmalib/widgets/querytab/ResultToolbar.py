@@ -1,3 +1,6 @@
+"""
+Result tool bar
+"""
 import gtk
 from resulttoolbar.AddRecord import AddRecord
 from resulttoolbar.RememberOrder import RememberOrder
@@ -11,6 +14,9 @@ from resulttoolbar.SetRequltFont import SetResultFont
 
 
 class ResultToolbar(gtk.Toolbar):
+    """
+    Result tool bar
+    """
     def __init__(self, query, emma):
         """
         @param query: QueryTab

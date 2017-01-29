@@ -2,11 +2,11 @@ import gtk
 
 
 class SetFont(gtk.ToolButton):
+    """
+    @param query: QueryTab
+    @param emma: Emma
+    """
     def __init__(self, query, emma):
-        """
-        @param query: QueryTab
-        @param emma: Emma
-        """
         super(SetFont, self).__init__()
         self.emma = emma
         self.query = query
@@ -18,6 +18,10 @@ class SetFont(gtk.ToolButton):
         self.connect('clicked', self.on_clicked)
 
     def on_clicked(self, _):
+        """
+        @param _:
+        @return:
+        """
         d = self.emma.assign_once("query text font", gtk.FontSelectionDialog, "select query font")
         d.set_font_name(self.emma.config.get("query_text_font"))
         answer = d.run()

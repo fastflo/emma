@@ -25,6 +25,10 @@ from gtk import keysyms
 
 class KeyMap(gobject.GObject):
 
+    """
+
+    @param emma: Emma
+    """
     __gsignals__ = {
         'key-press': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.gdk.Event,)),
         'key-release': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.gdk.Event,)),
@@ -44,6 +48,11 @@ class KeyMap(gobject.GObject):
         self.right_control_key_is_pressed = False
 
     def on_mainwindow_key_press_event(self, _window, event):
+        """
+
+        @param _window:
+        @param event:
+        """
         self.emit('key-press', event)
         if event.keyval == keysyms.Control_L:
             self.left_control_key_is_pressed = True
@@ -51,6 +60,12 @@ class KeyMap(gobject.GObject):
             self.right_control_key_is_pressed = True
 
     def on_mainwindow_key_release_event(self, _window, event):
+        """
+
+        @param _window:
+        @param event:
+        @return:
+        """
         self.emit('key-release', event)
         #
         #   QueryTab stuff
@@ -74,13 +89,6 @@ class KeyMap(gobject.GObject):
 
         if event.keyval == keysyms.F3:
             self.emma.current_query.local_search_action.on_local_search_button_clicked(None, True)
-        #
-        #   Panel switches
-        #
-        # if event.keyval == keysyms.m and self.if_ctrl():
-        #     self.toggle_message_notebook(None, _window)
-        # if event.keyval == keysyms.h and self.if_ctrl():
-        #     self.toggle_connections_tv(None, _window)
 
         if event.keyval == keysyms.Control_L:
             self.left_control_key_is_pressed = False
@@ -90,11 +98,3 @@ class KeyMap(gobject.GObject):
 
     def if_ctrl(self):
         return self.left_control_key_is_pressed or self.right_control_key_is_pressed
-
-    def toggle_connections_tv(self, item, window):
-        window.connections_tv_container.set_visible(
-            not window.connections_tv_container.get_visible())
-
-    def toggle_message_notebook(self, item, window):
-        window.message_notebook.set_visible(
-            not window.message_notebook.get_visible())

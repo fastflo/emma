@@ -10,12 +10,11 @@ from ExecuteQuery import ExecuteQuery
 
 
 class QueryToolbar(gtk.Toolbar):
-
+    """
+    @param query: QueryTab
+    @param emma: Emma
+    """
     def __init__(self, query, emma):
-        """
-        @param query: QueryTab
-        @param emma: Emma
-        """
         super(QueryToolbar, self).__init__()
         # self.emma = emma
         # self.query = query

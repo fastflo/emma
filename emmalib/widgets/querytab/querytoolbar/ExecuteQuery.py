@@ -9,11 +9,11 @@ from widgets import ResultCellRenders
 
 
 class ExecuteQuery(gtk.ToolButton):
+    """
+    @param query: QueryTab
+    @param emma: Emma
+    """
     def __init__(self, query, emma):
-        """
-        @param query: QueryTab
-        @param emma: Emma
-        """
         super(ExecuteQuery, self).__init__()
         self.emma = emma
         self.query = query
@@ -26,9 +26,21 @@ class ExecuteQuery(gtk.ToolButton):
         self.emma.events.connect('execute_query', self.on_event)
 
     def on_event(self, _, b, c):
+        """
+
+        @param _:
+        @param b:
+        @param c:
+        """
         self.on_clicked(b, c)
 
     def on_clicked(self, _, query=None):
+        """
+
+        @param _:
+        @param query:
+        @return:
+        """
         field_count = 0
         if not query:
             b = self.query.textview.get_buffer()

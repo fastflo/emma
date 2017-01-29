@@ -3,11 +3,11 @@ import gtk
 
 
 class ReExBox(gtk.ToolItem):
+    """
+    @param query: QueryTab
+    @param emma: Emma
+    """
     def __init__(self, query, emma):
-        """
-        @param query: QueryTab
-        @param emma: Emma
-        """
         super(ReExBox, self).__init__()
         self.emma = emma
         self.query = query

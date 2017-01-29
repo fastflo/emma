@@ -3,11 +3,11 @@ import dialogs
 
 
 class RenameQuery(gtk.ToolButton):
+    """
+    @param query: QueryTab
+    @param emma: Emma
+    """
     def __init__(self, query, emma):
-        """
-        @param query: QueryTab
-        @param emma: Emma
-        """
         super(RenameQuery, self).__init__()
         self.emma = emma
         self.query = query
@@ -19,6 +19,11 @@ class RenameQuery(gtk.ToolButton):
         self.connect('clicked', self.on_clicked)
 
     def on_clicked(self, _):
+        """
+
+        @param _:
+        @return:
+        """
         label = self.query.get_label()
         new_name = dialogs.input_dialog("Rename tab", "Please enter the new name of this tab:",
                                         label.get_text(),
@@ -33,5 +38,9 @@ class RenameQuery(gtk.ToolButton):
 
     def user_rename(self, new_name):
         # tab_widget = self.nb.get_tab_label(self.page)
+        """
+
+        @param new_name:
+        """
         self.query.get_label().set_text(new_name)
 

@@ -1,8 +1,17 @@
+"""
+Encoding event box
+"""
 import gtk
 from QueryTabPopupEncoding import QueryTabPopupEncoding
 
 
 class EncodingEventBox(gtk.EventBox):
+    """
+
+    @param query:
+    @param emma:
+    """
+
     def __init__(self, query, emma):
         """
         @param query: QueryTab
@@ -21,9 +30,18 @@ class EncodingEventBox(gtk.EventBox):
         self.add(self.label)
 
     def set_label(self, text):
+        """
+
+        @param text:
+        """
         self.label.set_label(text)
 
     def on_query_bottom_eventbox_button_press_event(self, _, event):
+        """
+
+        @param _:
+        @param event:
+        """
         if not self.query_encoding_menu:
             self.query_encoding_menu = QueryTabPopupEncoding(self)
         self.query_encoding_menu.popup(None, None, None, event.button, event.time)

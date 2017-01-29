@@ -5,11 +5,11 @@ import dialogs
 
 
 class SaveQuery(gtk.ToolButton):
+    """
+    @param query: QueryTab
+    @param emma: Emma
+    """
     def __init__(self, query, emma):
-        """
-        @param query: QueryTab
-        @param emma: Emma
-        """
         super(SaveQuery, self).__init__()
         self.emma = emma
         self.query = query
@@ -21,6 +21,11 @@ class SaveQuery(gtk.ToolButton):
         self.connect('clicked', self.on_clicked)
 
     def on_clicked(self, _):
+        """
+
+        @param _:
+        @return:
+        """
         d = self.emma.assign_once(
             "save dialog",
             gtk.FileChooserDialog, "Save query", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE,

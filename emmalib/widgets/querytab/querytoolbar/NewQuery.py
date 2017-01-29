@@ -2,11 +2,11 @@ import gtk
 
 
 class NewQuery(gtk.ToolButton):
+    """
+    @param query: QueryTab
+    @param emma: Emma
+    """
     def __init__(self, query, emma):
-        """
-        @param query: QueryTab
-        @param emma: Emma
-        """
         super(NewQuery, self).__init__()
         self.emma = emma
         self.query = query
@@ -18,4 +18,8 @@ class NewQuery(gtk.ToolButton):
         self.connect('clicked', self.on_clicked)
 
     def on_clicked(self, _):
+        """
+
+        @param _:
+        """
         self.emma.main_notebook.add_query_tab()

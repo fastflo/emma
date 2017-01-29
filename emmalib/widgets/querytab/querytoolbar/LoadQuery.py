@@ -6,11 +6,11 @@ import dialogs
 
 
 class LoadQuery(gtk.ToolButton):
+    """
+    @param query: QueryTab
+    @param emma: Emma
+    """
     def __init__(self, query, emma):
-        """
-        @param query: QueryTab
-        @param emma: Emma
-        """
         super(LoadQuery, self).__init__()
         self.emma = emma
         self.query = query
@@ -22,6 +22,11 @@ class LoadQuery(gtk.ToolButton):
         self.connect('clicked', self.on_clicked)
 
     def on_clicked(self, _):
+        """
+
+        @param _:
+        @return:
+        """
         d = self.emma.assign_once(
             "load dialog",
             gtk.FileChooserDialog, "Load query", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_OPEN,
