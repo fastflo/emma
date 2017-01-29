@@ -37,7 +37,7 @@ class RememberOrder(gtk.ToolButton):
         self.set_icon_name(gtk.STOCK_DIALOG_WARNING)
         self.set_tooltip_text('Remember order for this table!')
 
-    def on_remember_order_clicked(self, button):
+    def on_remember_order_clicked(self, _):
         query = self.query.last_source
         if not query:
             return None, None, None, None, None

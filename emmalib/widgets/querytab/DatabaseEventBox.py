@@ -22,6 +22,8 @@ class DatabaseEventBox(gtk.EventBox):
         self.label.set_label(text)
 
     def on_query_db_eventbox_button_press_event(self, ebox, event):
+        print ebox
+        print event
         q = self.query
         host = q.current_host
         db = q.current_db

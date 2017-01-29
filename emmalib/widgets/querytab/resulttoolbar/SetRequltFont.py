@@ -38,7 +38,7 @@ class SetResultFont(gtk.ToolButton):
 
         self.connect('clicked', self.on_query_result_font_clicked)
 
-    def on_query_result_font_clicked(self, button):
+    def on_query_result_font_clicked(self, _):
         d = self.emma.assign_once("query result font", gtk.FontSelectionDialog, "select result font")
         d.set_font_name(self.emma.config.get("query_result_font"))
         answer = d.run()

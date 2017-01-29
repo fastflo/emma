@@ -2,10 +2,10 @@ import gtk
 from CloseQuery import CloseQuery
 from RenameQuery import RenameQuery
 from NewQuery import NewQuery
-from SetFont import SetFont
-from LoadQuery import LoadQuery
-from SaveQuery import SaveQuery
-from ReExBox import ReExBox
+# from SetFont import SetFont
+# from LoadQuery import LoadQuery
+# from SaveQuery import SaveQuery
+# from ReExBox import ReExBox
 from ExecuteQuery import ExecuteQuery
 
 

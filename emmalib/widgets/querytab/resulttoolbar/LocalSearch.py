@@ -41,7 +41,7 @@ class LocalSearch(gtk.ToolButton):
 
         self.connect('clicked', self.on_local_search_button_clicked)
 
-    def on_local_search_button_clicked(self, button, again=False):
+    def on_local_search_button_clicked(self, _, again=False):
         if not self.get_property("sensitive"):
             return
 

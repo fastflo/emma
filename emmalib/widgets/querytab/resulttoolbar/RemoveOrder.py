@@ -38,7 +38,7 @@ class RemoveOrder(gtk.ToolButton):
 
         self.connect('clicked', self.on_remove_order_clicked)
 
-    def on_remove_order_clicked(self, button):
+    def on_remove_order_clicked(self, _):
         query = self.query.last_source
         try:
             r = self.emma.query_order_re

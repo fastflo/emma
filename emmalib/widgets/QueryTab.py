@@ -87,7 +87,7 @@ class QueryTab(BaseTab):
         self.label.set_alignment(0, 1)
         vbox3.pack_start(self.label, False, False)
         scrolledwindow6 = gtk.ScrolledWindow()
-        scrolledwindow6.set_policy(gtk.POLICY_AUTOMATIC,gtk.POLICY_AUTOMATIC)
+        scrolledwindow6.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.treeview = QueryTabTreeView(self.emma)
         scrolledwindow6.add(self.treeview)
         self.treeview.show()
@@ -138,6 +138,10 @@ class QueryTab(BaseTab):
         self.append_iter = None
         self.last_path = None
         self.encoding = None
+        self.query_order_re = None
+        self.kv_list = []
+        self.last_th = None
+
         if hasattr(self, "query"):
             self.textview.get_buffer().set_text(self.query)
         self.last_auto_name = None
@@ -393,7 +397,7 @@ class QueryTab(BaseTab):
 
     def on_query_column_sort(self, column, col_num):
         query = self.last_source
-        current_order = get_order_from_query(query)
+        current_order = Query.get_order_from_query(query)
         col = column.get_title().replace("__", "_")
         new_order = []
         for c, o in current_order:
@@ -408,14 +412,14 @@ class QueryTab(BaseTab):
         try:
             r = self.query_order_re
         except:
-            r = self.query_order_re = re.compile(re_src_query_order)
+            r = self.query_order_re = re.compile(Query.re_src_query_order)
         match = re.search(r, query)
         if match:
             before, order, after = match.groups()
             order = ""
             addition = ""
         else:
-            match = re.search(re_src_after_order, query)
+            match = re.search(Query.re_src_after_order, query)
             if not match:
                 before = query
                 after = ""

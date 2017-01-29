@@ -23,7 +23,7 @@ class EncodingEventBox(gtk.EventBox):
     def set_label(self, text):
         self.label.set_label(text)
 
-    def on_query_bottom_eventbox_button_press_event(self, ebox, event):
+    def on_query_bottom_eventbox_button_press_event(self, _, event):
         if not self.query_encoding_menu:
             self.query_encoding_menu = QueryTabPopupEncoding(self)
         self.query_encoding_menu.popup(None, None, None, event.button, event.time)

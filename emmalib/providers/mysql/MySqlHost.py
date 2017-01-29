@@ -27,8 +27,6 @@ import _mysql
 
 from MySqlDb import *
 
-
-
 # as of mysql 5.1: http://dev.mysql.com/doc/mysqld-version-reference/en/mysqld-version-reference-reservedwords-5-1.html
 mysql_reserved_words = """
 ACCESSIBLE[a]   ADD     ALL
