@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
+import os
 import gtk
 import gobject
 import dialogs
@@ -41,7 +42,7 @@ class ConnectionsTreeView(gtk.TreeView):
 
         self.connections_model = gtk.TreeStore(gobject.TYPE_PYOBJECT)
         super(ConnectionsTreeView, self).__init__(self.connections_model)
-        #self.set_model(self.connections_model)
+        # self.set_model(self.connections_model)
 
         col = gtk.TreeViewColumn("Hosts")
 
