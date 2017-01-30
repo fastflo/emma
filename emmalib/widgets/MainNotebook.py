@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+"""
+#
 # emma
 #
 # Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
@@ -17,7 +19,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
-
+#
+"""
 import gc
 import gtk
 from TabProcessList import TabProcessList
@@ -26,11 +29,10 @@ from QueryTab import QueryTab
 
 
 class MainNotebook(gtk.Notebook):
-
+    """
+    @param emma: Emma
+    """
     def __init__(self, emma):
-        """
-        @param emma: Emma
-        """
         super(MainNotebook, self).__init__()
         self.emma = emma
         self.queries = []

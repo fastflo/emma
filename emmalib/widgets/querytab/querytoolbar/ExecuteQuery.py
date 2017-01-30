@@ -1,3 +1,6 @@
+"""
+Execute Query
+"""
 import gobject
 import gtk
 import gc
@@ -272,6 +275,11 @@ class ExecuteQuery(gtk.ToolButton):
             last_display = start_display
             for row in result.fetch_row(0):
                 def to_string(f):
+                    """
+                    To string Value of field
+                    @param f:
+                    @return:
+                    """
                     if type(f) == str:
                         f = f.decode(self.query.encoding, "replace")
                     elif f is None:
