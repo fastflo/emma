@@ -21,7 +21,6 @@ import os
 import gobject
 import pprint
 import re
-import gc
 
 import gtk.glade
 import emmalib.dialogs
@@ -91,8 +90,13 @@ class table_editor:
         self.xml.signal_autoconnect(self)
 
         self.treeview = self.xml.get_widget("table_columns")
-        self.model = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_PYOBJECT,
-                                   gobject.TYPE_PYOBJECT)
+        self.model = gtk.ListStore(
+            gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
+            gobject.TYPE_STRING,
+            gobject.TYPE_PYOBJECT,
+            gobject.TYPE_PYOBJECT
+        )
         self.treeview.set_model(self.model)
         self.treeview.set_headers_clickable(False)
         self.treeview.set_reorderable(True)
@@ -442,7 +446,11 @@ class table_editor:
             self.table.create_table = None
             self.table.refresh()
             new_tables = self.table.db.refresh()
-            self.emma.connections_tv.redraw_db(self.table.db, self.emma.connections_tv.get_db_iter(self.table.db), new_tables)
+            self.emma.connections_tv.redraw_db(
+                self.table.db,
+                self.emma.connections_tv.get_db_iter(self.table.db),
+                new_tables
+            )
             self.window.hide()
             return
         emmalib.dialogs.show_message("edit table", "sorry, can't change table - sql error")

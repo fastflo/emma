@@ -415,7 +415,8 @@ class TableFieldDialog(gtk.Dialog):
         if self.field.name == '':
             sql += 'ALTER TABLE `%s` ADD COLUMN `%s`' % (table_name, self.tb_name.get_text(),)
         else:
-            sql += "ALTER TABLE `%s` CHANGE `%s` `%s`" % (table_name, self.field.name, self.tb_name.get_text(),)
+            sql += "ALTER TABLE `%s` CHANGE `%s` `%s`" % (table_name, self.field.name,
+                                                          self.tb_name.get_text(),)
 
         _values = self.tb_values.get_text()
         _type = self.cb_type.get_active_text()

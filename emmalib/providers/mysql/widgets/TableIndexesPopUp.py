@@ -51,4 +51,5 @@ class TableIndexesPopUp(gtk.Menu):
         self.show_all()
 
     def popup(self, parent_menu_shell, parent_menu_item, func, button, activate_time, data=None):
-        super(TableIndexesPopUp, self).popup(parent_menu_shell, parent_menu_item, func, button, activate_time, data)
+        super(TableIndexesPopUp, self).popup(parent_menu_shell,
+                                             parent_menu_item, func, button, activate_time, data)

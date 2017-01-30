@@ -118,7 +118,8 @@ class TabBlobView(gtk.VBox):
             query_text = fp.read().decode(self.emma.current_query.encoding, "ignore")
             fp.close()
         except:
-            show_message("load blob contents", "loading blob contents from file %s: %s" % (filename, sys.exc_value))
+            show_message("load blob contents", "loading blob contents from file %s: %s" %
+                         (filename, sys.exc_value))
             return
         self.tv.get_buffer().set_text(query_text)
 
@@ -139,18 +140,21 @@ class TabBlobView(gtk.VBox):
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
-                show_message("save blob contents", "%s already exists and is not a file!" % filename)
+                show_message("save blob contents", "%s already exists and is not a file!"
+                             % filename)
                 return
             if not confirm(
                     "overwrite file?", "%s already exists! do you want to overwrite it?" % filename,
                     self.emma.mainwindow):
                 return
         b = self.tv.get_buffer()
-        new_value = b.get_text(b.get_start_iter(), b.get_end_iter()).encode(self.emma.current_query.encoding, "ignore")
+        new_value = b.get_text(b.get_start_iter(), b.get_end_iter()).encode(
+            self.emma.current_query.encoding, "ignore")
         try:
             fp = file(filename, "wb")
             fp.write(new_value)
             fp.close()
         except:
-            show_message("save blob contents", "error writing query to file %s: %s" % (filename, sys.exc_value))
+            show_message("save blob contents",
+                         "error writing query to file %s: %s" % (filename, sys.exc_value))
 

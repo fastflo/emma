@@ -45,6 +45,7 @@ class OutputHandler:
                 # do not write empty lines to logfile
                 return 
             timestamp = str(datetime.datetime.now())[0:22]
-            self.log_fp.write("%s %s\n" % (timestamp, s.replace("\n", "\n " + (" " * len(timestamp)))))
+            self.log_fp.write(
+                "%s %s\n" % (timestamp, s.replace("\n", "\n " + (" " * len(timestamp)))))
             if self.log_flush:
                 self.log_fp.flush()

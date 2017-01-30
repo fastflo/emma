@@ -29,7 +29,8 @@ class ApplyRecord(gtk.ToolButton):
                 value = "'%s'" % self.query.current_host.escape(value)
             query += "%s=%s" % (self.query.current_host.escape_field(field), value)
         if query:
-            table, where, field, value, row_iter, fields = q.get_unique_where(q.last_source, return_fields=True)
+            table, where, field, value, row_iter, fields = q.get_unique_where(
+                q.last_source, return_fields=True)
             if self.query.last_th.host.__class__.__name__ == "sqlite_host":
                 print (table, where, field, value, row_iter, fields)
                 keys = []
@@ -40,7 +41,8 @@ class ApplyRecord(gtk.ToolButton):
                         values.append("'%s'" % value)
                     else:
                         values.append("%s" % value)
-                update_query = "insert into `%s` (%s) values (%s)" % (table, ", ".join(keys), ", ".join(values))
+                update_query = "insert into `%s` (%s) values (%s)" % (
+                    table, ", ".join(keys), ", ".join(values))
             else:
                 update_query = "insert into `%s` set %s" % (table, query)
             if not self.query.current_host.query(update_query, encoding=q.encoding):
@@ -71,7 +73,8 @@ class ApplyRecord(gtk.ToolButton):
                         else:
                             if field in q.filled_fields:
                                 # use filled value
-                                value = "'%s'" % self.query.current_host.escape(q.filled_fields[field])
+                                value = "'%s'" % self.query.current_host.escape(
+                                    q.filled_fields[field])
                             else:
                                 # use field default value (maybe none)
                                 value = props['Default']
@@ -84,7 +87,8 @@ class ApplyRecord(gtk.ToolButton):
                     field_selector = "*"
                 else:
                     field_selector = ", ".join(map(self.query.current_host.escape_field, fields))
-                self.query.current_host.query("select %s from `%s` where %s limit 1" % (field_selector, table, where))
+                self.query.current_host.query(
+                    "select %s from `%s` where %s limit 1" % (field_selector, table, where))
                 result = self.query.current_host.handle.store_result().fetch_row(0)
                 if len(result) < 1:
                     print "error: can't find modfied row!?"

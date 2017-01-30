@@ -169,7 +169,10 @@ class MySqlTable(gobject.GObject):
                 emma_instance.events.on_table_modified(self)
 
     def drop_field(self, field_name):
-        if self.host.query("ALTER TABLE `%s` DROP `%s`" % (self.host.escape_table(self.name), field_name)):
+        if self.host.query(
+                        "ALTER TABLE `%s` DROP `%s`" %
+                        (self.host.escape_table(self.name), field_name)
+        ):
             self.refresh()
             if emma_instance:
                 emma_instance.events.on_table_modified(self)

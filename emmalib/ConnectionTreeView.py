@@ -332,8 +332,13 @@ class ConnectionsTreeView(gtk.TreeView):
     def add_mysql_host(self, name, hostname, port, user, password, database):
         from providers.mysql.MySqlHost import MySqlHost
 
-        host = MySqlHost(self.emma.sql_log.log, self.emma.msg_log.log, name, hostname, port, user, password, database,
-                         self.emma.config.get("connect_timeout"))
+        host = MySqlHost(
+            self.emma.sql_log.log,
+            self.emma.msg_log.log,
+            name, hostname, port,
+            user, password, database,
+            self.emma.config.get("connect_timeout")
+        )
         _iter = self.connections_model.append(None, [host])
         host.set_update_ui(self.redraw_host, _iter)
 
@@ -359,8 +364,11 @@ class ConnectionsTreeView(gtk.TreeView):
         elif what == "truncate_table":
             if not dialogs.confirm("truncate table",
                                    "do you really want to truncate the <b>%s</b> "
-                                   "table in database <b>%s</b> on <b>%s</b>?" % (table.name, table.db.name,
-                                                                                  table.db.host.name),
+                                   "table in database <b>%s</b> on <b>%s</b>?" % (
+                                           table.name,
+                                           table.db.name,
+                                           table.db.host.name
+                                   ),
                                    self.emma.mainwindow):
                 return
             if table.db.query("truncate `%s`" % table.name):
@@ -369,7 +377,11 @@ class ConnectionsTreeView(gtk.TreeView):
         elif what == "drop_table":
             if not dialogs.confirm("drop table",
                                    "do you really want to DROP the <b>%s</b> table in database "
-                                   "<b>%s</b> on <b>%s</b>?" % (table.name, table.db.name, table.db.host.name),
+                                   "<b>%s</b> on <b>%s</b>?" % (
+                                           table.name,
+                                           table.db.name,
+                                           table.db.host.name
+                                   ),
                                    self.emma.mainwindow):
                 return
             db = table.db
@@ -395,8 +407,9 @@ class ConnectionsTreeView(gtk.TreeView):
             self.redraw_db(db, _iter, new_tables)
         elif what == "drop_database":
             if not dialogs.confirm("drop database",
-                                   "do you really want to drop the <b>%s</b> database on <b>%s</b>?" % (
-                                   db.name, db.host.name), self.emma.mainwindow):
+                                   "do you really want to drop the <b>%s</b> "
+                                   "database on <b>%s</b>?" % (
+                                           db.name, db.host.name), self.emma.mainwindow):
                 return
             host = db.host
             if host.query("drop database`%s`" % db.name):

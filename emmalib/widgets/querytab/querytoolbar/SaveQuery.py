@@ -1,7 +1,7 @@
 import gtk
 import os
 import sys
-import dialogs
+from emmalib import dialogs
 
 
 class SaveQuery(gtk.ToolButton):
@@ -39,11 +39,15 @@ class SaveQuery(gtk.ToolButton):
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
-                dialogs.show_message("save query", "%s already exists and is not a file!" % filename)
+                dialogs.show_message(
+                    "save query",
+                    "%s already exists and is not a file!" % filename
+                )
                 return
             if not dialogs.confirm(
                     "Overwrite file?",
-                    "%s already exists! Do you want to overwrite it?" % filename, self.emma.mainwindow):
+                    "%s already exists! Do you want to overwrite it?" % filename,
+                    self.emma.mainwindow):
                 return
         b = self.query.textview.get_buffer()
         query_text = b.get_text(b.get_start_iter(), b.get_end_iter())
@@ -52,4 +56,7 @@ class SaveQuery(gtk.ToolButton):
             fp.write(query_text)
             fp.close()
         except:
-            dialogs.show_message("Save Query", "Error writing query to file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message(
+                "Save Query",
+                "Error writing query to file %s: %s" % (filename, sys.exc_value)
+            )

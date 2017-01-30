@@ -57,7 +57,9 @@ class ExecuteQueryFromDisk:
                 exclude_regex = re.compile(exclude_regex, re.DOTALL)
             except:
                 show_message(
-                    "execute query from disk", "error compiling your regular expression: %s" % sys.exc_value)
+                    "execute query from disk",
+                    "error compiling your regular expression: %s" % sys.exc_value
+                )
                 return
 
         filename = fc.get_filename()
@@ -67,7 +69,10 @@ class ExecuteQueryFromDisk:
             show_message("execute query from disk", "%s does not exists!" % filename)
             return
         if not S_ISREG(sbuf.st_mode):
-            show_message("execute query from disk", "%s exists, but is not a regular file!" % filename)
+            show_message(
+                "execute query from disk",
+                "%s exists, but is not a regular file!" % filename
+            )
             return
 
         size = sbuf.st_size
@@ -111,8 +116,9 @@ class ExecuteQueryFromDisk:
         limit_db = self.glade.get_widget("eqfd_limit_db").get_active() and limit_dbname != ""
 
         if limit_db:
-            limit_re = re.compile("(?is)^use[ \r\n\t]+`?" + re.escape(limit_dbname) + "`?|^create database[^`]+`?" +
-                                  re.escape(limit_dbname) + "`?")
+            limit_re = re.compile(
+                "(?is)^use[ \r\n\t]+`?" + re.escape(limit_dbname) + "`?|^create database[^`]+`?" +
+                re.escape(limit_dbname) + "`?")
             limit_end_re = re.compile("(?is)^use[ \r\n\t]+`?.*`?|^create database")
 
         # last = 0
@@ -178,7 +184,9 @@ class ExecuteQueryFromDisk:
                 elif not host.query(query, True, append_to_log) and stop_on_error:
                     show_message(
                         "execute query from disk",
-                        "an error occoured. maybe remind the line number and press cancel to close this dialog!")
+                        "an error occoured. maybe remind the line number "
+                        "and press cancel to close this dialog!"
+                    )
                     self.query_from_disk = False
                     break
         query = ""
@@ -186,7 +194,7 @@ class ExecuteQueryFromDisk:
         fp.close()
         if not self.query_from_disk:
             show_message("execute query from disk",
-                                 "aborted by user whish - click cancel again to close window")
+                         "aborted by user whish - click cancel again to close window")
             return
         else:
             show_message("execute query from disk", "done!")
@@ -194,7 +202,11 @@ class ExecuteQueryFromDisk:
 
     def on_cancel_execute_from_disk_clicked(self, button):
         if not self.query_from_disk:
-            p = self.assign_once("execute_from_disk_progress", self.glade.get_widget, "execute_from_disk_progress")
+            p = self.assign_once(
+                "execute_from_disk_progress",
+                self.glade.get_widget,
+                "execute_from_disk_progress"
+            )
             p.hide()
             return
         self.read_one_query_started = False
@@ -211,8 +223,11 @@ class ExecuteQueryFromDisk:
     def on_abort_execute_from_disk_clicked(self, button):
         self.window.hide()
 
-    def read_one_query(self, fp, _start=None, count_lines=0, update_function=None, only_use_queries=False,
-                       start_line=1):
+    def read_one_query(
+            self, fp,
+            _start=None, count_lines=0,
+            update_function=None, only_use_queries=False,
+            start_line=1):
         current_query = []
         self.read_one_query_started = True
         while self.read_one_query_started:

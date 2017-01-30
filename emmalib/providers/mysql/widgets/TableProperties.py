@@ -54,7 +54,8 @@ class TableProperties(gtk.ScrolledWindow):
 
         hbox = gtk.HBox()
 
-        self.info_items_list = ['Update_time', 'Rows', 'Checksum', 'Check_time', 'Index_length', 'Data_length',
+        self.info_items_list = ['Update_time', 'Rows', 'Checksum', 'Check_time',
+                                'Index_length', 'Data_length',
                                 'Create_options', 'Avg_row_length', 'Data_free',
                                 'Version', 'Create_time', 'Max_data_length']
         self.info_items_entries = {}
@@ -120,7 +121,8 @@ class TableProperties(gtk.ScrolledWindow):
             if self.table.alter_row_format(self.cb_rowformat.get_active_text()):
                 do_update = True
         if self.cb_collation.get_active_text() != self.table.props_dict['Collation']:
-            if self.table.alter_collation(self.cb_charset.get_active_text(), self.cb_collation.get_active_text()):
+            if self.table.alter_collation(self.cb_charset.get_active_text(),
+                                          self.cb_collation.get_active_text()):
                 do_update = True
         if self.tb_comment.get_text() != self.table.props_dict['Comment']:
             if self.table.alter_comment(self.tb_comment.get_text()):

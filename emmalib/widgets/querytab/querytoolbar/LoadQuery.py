@@ -2,7 +2,7 @@ import gtk
 import os
 from stat import S_ISREG
 import sys
-import dialogs
+from emmalib import dialogs
 
 
 class LoadQuery(gtk.ToolButton):
@@ -64,6 +64,7 @@ syntax-highlighting, i can open this file using the <b>execute file from disk</b
             query_text = fp.read()
             fp.close()
         except:
-            dialogs.show_message("Load Query", "Error reading query from file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message(
+                "Load Query", "Error reading query from file %s: %s" % (filename, sys.exc_value))
             return
         self.query.textview.get_buffer().set_text(query_text)

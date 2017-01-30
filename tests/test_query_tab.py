@@ -20,13 +20,13 @@
 
 import gtk
 from emmalib.EventsManager import EventsManager
-import dialogs
+from emmalib import dialogs
 
 from emmalib.Config import Config
 from emmalib.KeyMap import KeyMap
 from emmalib.providers.mysql import MySqlHost
-from widgets import TabBlobView
-from widgets.QueryTab import QueryTab
+from emmalib.widgets import TabBlobView
+from emmalib.widgets.QueryTab import QueryTab
 
 
 class Win(gtk.Window):

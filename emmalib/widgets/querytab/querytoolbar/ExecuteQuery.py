@@ -3,9 +3,9 @@ import gtk
 import gc
 import re
 import time
-from Query import read_query, is_query_appendable, get_order_from_query
-from dialogs import show_message, confirm
-from widgets import ResultCellRenders
+from emmalib.Query import read_query, is_query_appendable, get_order_from_query
+from emmalib.dialogs import show_message, confirm
+from emmalib.widgets import ResultCellRenders
 
 
 class ExecuteQuery(gtk.ToolButton):
@@ -133,11 +133,13 @@ class ExecuteQuery(gtk.ToolButton):
                 print "mysql error: %r" % (host.last_error, )
                 message = "error at: %s" % host.last_error.replace(
                     "You have an error in your SQL syntax.  "
-                    "Check the manual that corresponds to your MySQL server version for the right syntax to use near ",
+                    "Check the manual that corresponds to your "
+                    "MySQL server version for the right syntax to use near ",
                     "")
-                message = "error at: %s" % message.replace("You have an error in your SQL syntax; "
-                                                           "check the manual that corresponds to your MySQL server "
-                                                           "version for the right syntax to use near ", "")
+                message = "error at: %s" % message.replace(
+                    "You have an error in your SQL syntax; "
+                    "check the manual that corresponds to your MySQL server "
+                    "version for the right syntax to use near ", "")
 
                 line_pos = 0
                 pos = message.find("at line ")
@@ -157,8 +159,12 @@ class ExecuteQuery(gtk.ToolButton):
                 match = re.search("error at: '(.*)'", message, re.DOTALL)
                 if match and match.group(1):
                     # set focus and cursor!
-                    #print "search for ->%s<-" % match.group(1)
-                    pos = text.find(match.group(1), query_start + line_pos, query_start + len(thisquery))
+                    # print "search for ->%s<-" % match.group(1)
+                    pos = text.find(
+                        match.group(1),
+                        query_start + line_pos,
+                        query_start + len(thisquery)
+                    )
                     if not pos == -1:
                         i.set_offset(pos)
                 else:

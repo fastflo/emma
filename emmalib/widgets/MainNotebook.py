@@ -22,7 +22,7 @@ import gc
 import gtk
 from TabProcessList import TabProcessList
 from TabTablesList import TabTablesList
-from widgets.QueryTab import QueryTab
+from QueryTab import QueryTab
 
 
 class MainNotebook(gtk.Notebook):

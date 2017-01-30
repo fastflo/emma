@@ -81,7 +81,8 @@ class SQLiteHost():
     def query(self, query, check_use=True, append_to_log=True, encoding=None):
         if not self.handle:
             if self.msg_log:
-                self.msg_log("not connected! can't execute %s, %s, %s" % (query, str(self.handle), str(self)))
+                self.msg_log("not connected! can't execute %s, %s, %s" %
+                             (query, str(self.handle), str(self)))
             return False
         if append_to_log:
             if self.sql_log:
@@ -91,7 +92,7 @@ class SQLiteHost():
             start = time.time()
             if encoding:
                 query = query.encode(encoding, "ignore")
-            #print "executing query (encoding: %s): %r" % (encoding, query)
+            # print "executing query (encoding: %s): %r" % (encoding, query)
             self.handle.execute(query)
             self.query_time = time.time() - start
         except:

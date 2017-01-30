@@ -21,7 +21,7 @@
 from emmalib.providers.sqlite.SQLiteTable import SQLiteTable
 
 
-class SQLiteDb():
+class SQLiteDb:
     def __init__(self, host, name=None):
         self.handle = host.handle
         self.host = host
@@ -32,7 +32,8 @@ class SQLiteDb():
         self.tables = {}
 
     def refresh(self):
-        if not self.host.query("SELECT * FROM sqlite_master WHERE type='table' OR type='view' ORDER BY name"):
+        if not self.host.query(
+                "SELECT * FROM sqlite_master WHERE type='table' OR type='view' ORDER BY name"):
             return
         new_tables = []
         result = self.handle.store_result()

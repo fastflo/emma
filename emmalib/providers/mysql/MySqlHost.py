@@ -27,7 +27,9 @@ import _mysql
 
 from MySqlDb import *
 
-# as of mysql 5.1: http://dev.mysql.com/doc/mysqld-version-reference/en/mysqld-version-reference-reservedwords-5-1.html
+# as of mysql 5.1:
+# http://dev.mysql.com/doc/mysqld-version-reference/en/
+# mysqld-version-reference-reservedwords-5-1.html
 mysql_reserved_words = """
 ACCESSIBLE[a]   ADD     ALL
 ALTER   ANALYZE     AND
@@ -240,7 +242,9 @@ class MySqlHost:
     def query(self, query, check_use=True, append_to_log=True, encoding=None):
         if not self.handle:
             if self.msg_log:
-                self.msg_log("Not connected! Can't execute %s, %s, %s" % (query, str(self.handle), str(self)))
+                self.msg_log(
+                    "Not connected! Can't execute %s, %s, %s" % (
+                        query, str(self.handle), str(self)))
             return
         if append_to_log:
             if self.sql_log:
@@ -264,7 +268,8 @@ class MySqlHost:
             #print "error:", [s]
             s = s.replace(
                 "You have an error in your SQL syntax.  " +
-                "Check the manual that corresponds to your MySQL server version for the right syntax to use near ",
+                "Check the manual that corresponds to your MySQL "
+                "server version for the right syntax to use near ",
                 "MySQL syntax error at ")
             if self.msg_log:
                 self.msg_log(s)
@@ -355,8 +360,9 @@ class MySqlHost:
             os.pathsep,
             os.linesep]))
         if set(table).intersection(set(not_allowed)):
-            raise Exception("before mysql 5.1.6 table names are not allowed to contain one of these chars: %r %r" % (
-                not_allowed, table))
+            raise Exception("before mysql 5.1.6 table names are not allowed "
+                            "to contain one of these chars: %r %r" % (not_allowed, table)
+                            )
         if len(table) > 64:
             raise Exception("table name too long: %r / %d" % (table, len(table)))
         return self.escape_field(table)

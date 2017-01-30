@@ -21,7 +21,7 @@
 import re
 import gtk
 
-import dialogs
+from emmalib import dialogs
 
 
 class LocalSearch(gtk.ToolButton):
@@ -88,4 +88,5 @@ class LocalSearch(gtk.ToolButton):
             _start = tm.iter_next(_start)
         dialogs.show_message(
             "local regex search",
-            "sorry, no match found!\ntry to search from the beginning or execute a less restrictive query...")
+            "sorry, no match found!\ntry to search from the beginning "
+            "or execute a less restrictive query...")

@@ -108,7 +108,9 @@ class TabProcessList(BaseTab):
         _iter = self.model.get_iter(path)
         process_id = self.model.get_value(_iter, 0)
         if not self.host.query("kill %s" % process_id):
-            dialogs.show_message("sorry", "there was an error while trying to kill process_id %s!" % process_id)
+            dialogs.show_message("sorry",
+                                 "there was an error while trying to "
+                                 "kill process_id %s!" % process_id)
 
     def on_processlist_button_release(self, tv, event):
         if not event.button == 3:

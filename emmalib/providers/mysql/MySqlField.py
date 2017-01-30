@@ -30,7 +30,8 @@ field_types = [
     'BINARY', 'VARBINARY',
     'ENUM', 'SET'
 ]
-field_types_int = ['bit', 'bool', 'boolean', 'tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'integer']
+field_types_int = ['bit', 'bool', 'boolean', 'tinyint',
+                   'smallint', 'mediumint', 'int', 'bigint', 'integer']
 field_types_float = ['decimal', 'double', 'float', 'real']
 field_types_str = [
     'date', 'datetime', 'timestamp', 'time', 'year',

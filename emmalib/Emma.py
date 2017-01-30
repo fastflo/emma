@@ -30,7 +30,6 @@ import widgets
 from Config import Config
 from KeyMap import KeyMap
 from Constants import *
-from query_regular_expression import *
 from ConnectionTreeView import ConnectionsTreeView
 from EventsManager import EventsManager
 
@@ -133,7 +132,10 @@ class Emma:
         # Local Search Window
         self.local_search_window = self.xml.get_widget("localsearch_window")
         self.local_search_entry = self.xml.get_widget("local_search_entry")
-        self.local_search_entry.connect("activate", lambda *a: self.local_search_window.response(gtk.RESPONSE_OK))
+        self.local_search_entry.connect(
+            "activate",
+            lambda *a: self.local_search_window.response(gtk.RESPONSE_OK)
+        )
         self.local_search_start_at_first_row = self.xml.get_widget("search_start_at_first_row")
         self.local_search_case_sensitive = self.xml.get_widget("search_case_sensitive")
 

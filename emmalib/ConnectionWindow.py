@@ -195,7 +195,8 @@ class ConnectionWindow:
                 handle = _mysql.connect(**data)
             except _mysql.DatabaseError as err:
                 dialogs.alert(
-                    "could not connect to host <b>%s</b> with user <b>%s</b> and password <b>%s</b>:\n<i>%s</i>" % (
+                    "could not connect to host <b>%s</b> with user <b>%s</b> "
+                    "and password <b>%s</b>:\n<i>%s</i>" % (
                         data["host"],
                         data["user"],
                         data["passwd"],

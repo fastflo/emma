@@ -28,17 +28,18 @@ import traceback
 from gtk import keysyms
 
 import pango
-from Constants import icons_path
-import Query
 
-import dialogs
-from widgets import BaseTab
-from QueryTabResultPopup import QueryTabResultPopup
-from QueryTabTreeView import QueryTabTreeView
-from widgets.querytab.DatabaseEventBox import DatabaseEventBox
-from widgets.querytab.EncodingEventBox import EncodingEventBox
-from widgets.querytab.ResultToolbar import ResultToolbar
-from widgets.querytab.querytoolbar.QueryToolbar import QueryToolbar
+from emmalib import Query
+from emmalib import dialogs
+from emmalib.Constants import icons_path
+
+from emmalib.widgets import BaseTab
+from querytab.QueryTabResultPopup import QueryTabResultPopup
+from querytab.QueryTabTreeView import QueryTabTreeView
+from emmalib.widgets.querytab.DatabaseEventBox import DatabaseEventBox
+from emmalib.widgets.querytab.EncodingEventBox import EncodingEventBox
+from emmalib.widgets.querytab.ResultToolbar import ResultToolbar
+from emmalib.widgets.querytab.querytoolbar.QueryToolbar import QueryToolbar
 
 
 class QueryTab(BaseTab):
@@ -73,9 +74,9 @@ class QueryTab(BaseTab):
 
         #
         #   INIT TOP PART
-        #---------------------------
+        # ---------------------------
 
-        #---------------------------
+        # ---------------------------
         #   INIT BOTTOM PART
         #
 
@@ -104,7 +105,7 @@ class QueryTab(BaseTab):
 
         #
         #   INIT BOTTOM PART
-        #---------------------------
+        # ---------------------------
 
         self.ui.pack1(vbox2)
         self.ui.pack2(hbox7)
@@ -267,7 +268,8 @@ class QueryTab(BaseTab):
 
         _iter = self.model.get_iter(path)
         if event.keyval == keysyms.Down and not self.model.iter_next(_iter):
-            if self.append_iter and not self.toolbar.apply_record.on_apply_record_tool_clicked(None):
+            if self.append_iter and not self.toolbar.apply_record.on_apply_record_tool_clicked(
+                    None):
                 return True
             self.toolbar.add_record.on_add_record_tool_clicked(None)
             return True
@@ -525,8 +527,8 @@ class QueryTab(BaseTab):
             except:
                 tries += 1
                 if tries > 1:
-                    print "query not editable, because table %r is not found in db %r" % (table,
-                                                                                          self.current_host.current_db)
+                    print "query not editable, because table %r is not found in db %r" % \
+                          (table, self.current_host.current_db)
                     return None, None, None, None, None
                 new_tables = self.current_host.current_db.refresh()
                 continue
@@ -553,7 +555,10 @@ class QueryTab(BaseTab):
         for db_field_object in th.fields:
             if (
                 (pri_okay >= 0 and db_field_object.row['Key'] == "PRI") or (
-                    th.host.__class__.__name__ == "sqlite_host" and db_field_object.name.endswith("_id"))):
+                    th.host.__class__.__name__ == "sqlite_host" and db_field_object.name.endswith(
+                                "_id")
+                    )
+            ):
                 if possible_primary:
                     possible_primary += ", "
                 possible_primary += db_field_object.name
@@ -601,7 +606,8 @@ class QueryTab(BaseTab):
                 possible_key = "e.g.'%s' would be useful!" % possible_primary
             elif possible_unique:
                 possible_key = "e.g.'%s' would be useful!" % possible_unique
-            print "no edit-key found. try to name a key-field in your select-clause. (%r)" % possible_key
+            print "no edit-key found. try to name a key-field in your select-clause. (%r)" % \
+                  possible_key
             return table, None, None, None, None
 
         value = ""
@@ -631,11 +637,13 @@ class QueryTab(BaseTab):
         if self.append_iter \
                 and self.model.iter_is_valid(self.append_iter) \
                 and self.model.get_path(self.append_iter) == self.model.get_path(row_iter):
-            self.filled_fields[self.treeview.get_column(col_num).get_title().replace("__", "_")] = new_value
+            self.filled_fields[self.treeview.get_column(col_num).get_title().replace("__", "_")] = \
+                new_value
             self.model.set_value(row_iter, col_num, new_value)
             return
 
-        table, where, field, value, row_iter = self.get_unique_where(self.last_source, path, col_num)
+        table, where, field, value, row_iter = self.get_unique_where(
+            self.last_source, path, col_num)
         if force_update is False and new_value == value:
             return
         if self.current_host.__class__.__name__ == "sqlite_host":

@@ -52,7 +52,8 @@ class SQLiteTable:
         self.indexes = []
         res = self.host.query_dict("PRAGMA index_list(`%s`)" % self.name, append_to_log=False)
         for row in res['rows']:
-            ires = self.host.query_dict("PRAGMA index_info(`%s`)" % row['name'], append_to_log=False)
+            ires = self.host.query_dict("PRAGMA index_info(`%s`)" % row['name'],
+                                        append_to_log=False)
             irow = ires['rows'][0]
             row['column_name'] = irow['name']
             self.indexes.append(SQLiteIndex(row))

@@ -19,8 +19,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 import gtk
-import dialogs
-from Query import *
+from emmalib import dialogs
+from emmalib.Query import *
 
 
 class SaveResultSql(gtk.ToolButton):
@@ -60,7 +60,8 @@ class SaveResultSql(gtk.ToolButton):
                 return
             if not dialogs.confirm(
                     "overwrite file?",
-                    "%s already exists! do you want to overwrite it?" % filename, self.emma.mainwindow):
+                    "%s already exists! "
+                    "do you want to overwrite it?" % filename, self.emma.mainwindow):
                 return
         q = self.query
         _iter = q.model.get_iter_first()
@@ -73,13 +74,18 @@ class SaveResultSql(gtk.ToolButton):
         if result:
             table_list = result.group(7)
             table_list = table_list.replace(" join ", ",")
-            table_list = re.sub("(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)", "",
-                                table_list)
+            table_list = re.sub(
+                "(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)",
+                "",
+                table_list)
             table_list = table_list.replace("`", "")
             tables = map(lambda s: s.strip(), table_list.split(","))
             table_name = "_".join(tables)
-        table_name = dialogs.input_dialog(title, "Please enter the name of the target table:", table_name,
-                                          self.emma.mainwindow)
+        table_name = dialogs.input_dialog(
+            title,
+            "Please enter the name of the target table:", table_name,
+            self.emma.mainwindow
+        )
         if table_name is None:
             return
         table_name = self.emma.current_host.escape_table(table_name)

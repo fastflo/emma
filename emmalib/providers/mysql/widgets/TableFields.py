@@ -111,7 +111,8 @@ class TableFields(gtk.ScrolledWindow):
         self.tv_fields.append_column(gtk.TreeViewColumn("#", gtk.CellRendererText(), text=1))
         self.tv_fields.append_column(gtk.TreeViewColumn("Name", gtk.CellRendererText(), text=2))
         self.tv_fields.append_column(gtk.TreeViewColumn("Type", gtk.CellRendererText(), text=3))
-        self.tv_fields.append_column(gtk.TreeViewColumn("Collation", gtk.CellRendererText(), text=4))
+        self.tv_fields.append_column(gtk.TreeViewColumn("Collation",
+                                                        gtk.CellRendererText(), text=4))
         self.tv_fields.append_column(gtk.TreeViewColumn("Null", gtk.CellRendererText(), text=5))
         self.tv_fields.append_column(gtk.TreeViewColumn("Default", gtk.CellRendererText(), text=6))
         self.tv_fields.append_column(gtk.TreeViewColumn("Extra", gtk.CellRendererText(), text=7))

@@ -66,9 +66,10 @@ def read_expression(query, _start=0, concat=True, update_function=None, update_o
                     if update_function is not None and icount >= 10:
                         icount = 0
                         update_function(False, update_offset + e)
-                    #print "at", [query[e:e+15]], "..."
-                    exp, end = read_expression(query, e, False, update_function, update_offset, icount)
-                    #print "got inner exp:", [exp]
+                    # print "at", [query[e:e+15]], "..."
+                    exp, end = read_expression(
+                        query, e, False, update_function, update_offset, icount)
+                    # print "got inner exp:", [exp]
                     if not exp:
                         break
                     e = end

@@ -27,7 +27,8 @@ our_module = None
 
 re_src_after_order_end = "(?:limit.*|procedure.*|for update.*|lock in share mode.*|[ \r\n\t]*$)"
 re_src_after_order = "(?:[ \r\n\t]" + re_src_after_order_end + ")"
-re_src_query_order = "(?is)(.*order[ \r\n\t]+by[ \r\n\t]+)(.*?)([ \r\n\t]*" + re_src_after_order_end + ")"
+re_src_query_order = "(?is)(.*order[ \r\n\t]+by[ \r\n\t]+)(.*?)([ \r\n\t]*" + \
+                     re_src_after_order_end + ")"
 
 emmalib_file = os.path.abspath(__file__)
 emma_path = os.path.dirname(emmalib_file)

@@ -176,14 +176,26 @@ class pretty_format:
         self.toolbar_items = []
         self.plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
-        self.install_toolbar_item("query_toolbar", gtk.STOCK_INDENT, "pretty format query", self.on_pretty_format)
-        self.install_toolbar_item("query_toolbar", gtk.STOCK_UNINDENT, "compress query", self.on_compress)
+        self.install_toolbar_item(
+            "query_toolbar",
+            gtk.STOCK_INDENT,
+            "pretty format query",
+            self.on_pretty_format
+        )
+        self.install_toolbar_item(
+            "query_toolbar",
+            gtk.STOCK_UNINDENT,
+            "compress query",
+            self.on_compress
+        )
         q = self.emma.current_query
         if False:
             # check if we are running with debug output - enable example text
             print "\n\n\n"
-            self.set_query_text(q, """# this is the pretty format test query. click the "pretty format" or "compress query" button in the query-toolbar.
-       \n      \t# comment before\n\n/* also before... */\n   \tselect date_format \n\t (\nnow(  \n"lalala"  ) , "%Y-%m-%d"  \n), ("%Y,((%m"), \', from ),here\', * from record_job 
+            self.set_query_text(q, """# this is the pretty format test query. click the
+            "pretty format" or "compress query" button in the query-toolbar.
+       \n      \t# comment before\n\n/* also before... */\n   \tselect date_format \n\t
+       (\nnow(  \n"lalala"  ) , "%Y-%m-%d"  \n), ("%Y,((%m"), \', from ),here\', * from record_job
 where some_field
 = 
 "a very interesting 'text'"
@@ -417,8 +429,9 @@ select * from user;
         text = self.get_query_text(q)
         print "input: %r" % text
 
-        #keywords = "select,from,left,join,right,inner,where,and,or,on,order,by,having,group,limit,union,distinct"
-        #if tt == "function call":
+        # keywords = "select,from,left,join,right,inner,where,and,or,on,order,
+        # by,having,group,limit,union,distinct"
+        # if tt == "function call":
         try:
             r = self.emma.sql.grammer.parseString(text)  # ???
         except:
@@ -427,7 +440,7 @@ select * from user;
 
         output = []
 
-    #self.set_query_text(q, output.getvalue())
+    # self.set_query_text(q, output.getvalue())
 
 
 plugin_instance = None

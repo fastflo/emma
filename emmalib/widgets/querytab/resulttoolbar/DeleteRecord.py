@@ -1,5 +1,6 @@
 import gtk
-import dialogs
+
+from emmalib import dialogs
 
 
 class DeleteRecord(gtk.ToolButton):

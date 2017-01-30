@@ -65,7 +65,8 @@ class QueryTabResultPopup(gtk.Menu):
             'copy_column_names',
             'Copy Column Names'
         )
-        #self.set_field_value = self.add_imi(gtk.STOCK_COPY, 'set_field_value', 'Set Field Value to...')
+        # self.set_field_value = self.add_imi(
+        #     gtk.STOCK_COPY, 'set_field_value', 'Set Field Value to...')
         self.add_sep()
 
         self.add_record = self.add_imi(
@@ -206,7 +207,8 @@ class QueryTabResultPopup(gtk.Menu):
             update_query = "update `%s` set `%s`=now() where %s limit 1" % (table, field, where)
             if not self.query.current_host.query(update_query, encoding=q.encoding):
                 return
-            self.query.current_host.query("select `%s` from `%s` where %s limit 1" % (field, table, where))
+            self.query.current_host.query(
+                "select `%s` from `%s` where %s limit 1" % (field, table, where))
             result = self.query.current_host.handle.store_result().fetch_row(0)
             if len(result) < 1:
                 print "error: can't find modfied row!?"
@@ -221,10 +223,12 @@ class QueryTabResultPopup(gtk.Menu):
                 print "column not found!"
                 return
             table, where, field, value, row_iter = q.get_unique_where(q.last_source, path, col_num)
-            update_query = "update `%s` set `%s`=unix_timestamp(now()) where %s limit 1" % (table, field, where)
+            update_query = "update `%s` set `%s`=unix_timestamp(now()) where %s limit 1" \
+                           % (table, field, where)
             if not self.query.current_host.query(update_query, encoding=q.encoding):
                 return
-            self.query.current_host.query("select `%s` from `%s` where %s limit 1" % (field, table, where))
+            self.query.current_host.query(
+                "select `%s` from `%s` where %s limit 1" % (field, table, where))
             result = self.query.current_host.handle.store_result().fetch_row(0)
             if len(result) < 1:
                 print "error: can't find modfied row!?"
@@ -239,13 +243,17 @@ class QueryTabResultPopup(gtk.Menu):
                 print "column not found!"
                 return
             table, where, field, value, row_iter = q.get_unique_where(q.last_source, path, col_num)
-            update_query = "update `%s` set `%s`=password('%s') where %s limit 1" % (table, field,
-                                                                                     self.query.current_host.escape(
-                                                                                         value),
-                                                                                     where)
+            update_query = "update `%s` set `%s`=password('%s') where %s limit 1" % \
+                           (
+                               table,
+                               field,
+                               self.query.current_host.escape(value),
+                               where
+                           )
             if not self.query.current_host.query(update_query, encoding=q.encoding):
                 return
-            self.query.current_host.query("select `%s` from `%s` where %s limit 1" % (field, table, where))
+            self.query.current_host.query(
+                "select `%s` from `%s` where %s limit 1" % (field, table, where))
             result = self.query.current_host.handle.store_result().fetch_row(0)
             if len(result) < 1:
                 print "error: can't find modfied row!?"
@@ -260,12 +268,18 @@ class QueryTabResultPopup(gtk.Menu):
                 print "column not found!"
                 return
             table, where, field, value, row_iter = q.get_unique_where(q.last_source, path, col_num)
-            update_query = "update `%s` set `%s`=sha1('%s') where %s limit 1" % (table, field,
-                                                                                 self.query.current_host.escape(value),
-                                                                                 where)
+            update_query = "update `%s` set `%s`=sha1('%s') where %s limit 1" % \
+                           (
+                               table,
+                               field,
+                               self.query.current_host.escape(value),
+                               where
+                           )
             if not self.query.current_host.query(update_query, encoding=q.encoding):
                 return
-            self.query.current_host.query("select `%s` from `%s` where %s limit 1" % (field, table, where))
+            self.query.current_host.query(
+                "select `%s` from `%s` where %s limit 1" % (field, table, where)
+            )
             result = self.query.current_host.handle.store_result().fetch_row(0)
             if len(result) < 1:
                 print "error: can't find modfied row!?"

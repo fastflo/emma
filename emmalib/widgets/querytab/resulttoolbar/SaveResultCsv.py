@@ -22,7 +22,7 @@ import os
 import gtk
 import sys
 
-import dialogs
+from emmalib import dialogs
 
 
 class SaveResultCsv(gtk.ToolButton):
@@ -46,7 +46,9 @@ class SaveResultCsv(gtk.ToolButton):
     def on_save_result_clicked(self, _):
         d = self.emma.assign_once(
             "save results dialog",
-            gtk.FileChooserDialog, "save results", self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE,
+            gtk.FileChooserDialog,
+            "save results",
+            self.emma.mainwindow, gtk.FILE_CHOOSER_ACTION_SAVE,
             (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
 
         d.set_default_response(gtk.RESPONSE_ACCEPT)
@@ -57,11 +59,15 @@ class SaveResultCsv(gtk.ToolButton):
         filename = d.get_filename()
         if os.path.exists(filename):
             if not os.path.isfile(filename):
-                dialogs.show_message("save results", "%s already exists and is not a file!" % filename)
+                dialogs.show_message(
+                    "save results",
+                    "%s already exists and is not a file!" % filename
+                )
                 return
             if not dialogs.confirm(
                     "overwrite file?",
-                    "%s already exists! do you want to overwrite it?" % filename, self.emma.mainwindow):
+                    "%s already exists! do you want to overwrite it?" % filename,
+                    self.emma.mainwindow):
                 return
         q = self.query
         _iter = q.model.get_iter_first()
@@ -85,4 +91,7 @@ class SaveResultCsv(gtk.ToolButton):
                 _iter = q.model.iter_next(_iter)
             fp.close()
         except:
-            dialogs.show_message("save results", "error writing query to file %s: %s" % (filename, sys.exc_value))
+            dialogs.show_message(
+                "save results",
+                "error writing query to file %s: %s" % (filename, sys.exc_value)
+            )

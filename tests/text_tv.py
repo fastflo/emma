@@ -54,7 +54,8 @@ class Win(gtk.Window):
         self.table = self.host.databases[_db].tables[_tb]
 
     def load_data(self):
-        result = self.table.db.host.query_dict('SELECT * FROM %s' % self.table.name, append_to_log=False, encoding='utf8')
+        result = self.table.db.host.query_dict('SELECT * FROM %s' % self.table.name,
+                                               append_to_log=False, encoding='utf8')
         if not result:
             return
         #

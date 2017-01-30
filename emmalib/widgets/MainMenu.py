@@ -94,16 +94,20 @@ class MainMenu(gtk.MenuBar):
 
         self.show_connections_tree = gtk.CheckMenuItem('Show Connections')
         key, mod = gtk.accelerator_parse("<Control>H")
-        self.show_connections_tree.add_accelerator("activate", mainwindow.accel_group, key, mod, gtk.ACCEL_VISIBLE)
-        self.show_connections_tree.connect("activate", self.emma.toggle_connections_tv, mainwindow)
+        self.show_connections_tree.add_accelerator(
+            "activate", mainwindow.accel_group, key, mod, gtk.ACCEL_VISIBLE)
+        self.show_connections_tree.connect(
+            "activate", self.emma.toggle_connections_tv, mainwindow)
         self.show_connections_tree.set_active(True)
         self.show_connections_tree.show()
         view_menu_submenu.append(self.show_connections_tree)
 
         self.show_message_notebook = gtk.CheckMenuItem('Show Messages Bar')
         key, mod = gtk.accelerator_parse("<Control>M")
-        self.show_message_notebook.add_accelerator("activate", mainwindow.accel_group, key, mod, gtk.ACCEL_VISIBLE)
-        self.show_message_notebook.connect("activate", self.emma.toggle_message_notebook, mainwindow)
+        self.show_message_notebook.add_accelerator(
+            "activate", mainwindow.accel_group, key, mod, gtk.ACCEL_VISIBLE)
+        self.show_message_notebook.connect(
+            "activate", self.emma.toggle_message_notebook, mainwindow)
         self.show_message_notebook.set_active(True)
         self.show_message_notebook.show()
         view_menu_submenu.append(self.show_message_notebook)
@@ -136,12 +140,16 @@ class MainMenu(gtk.MenuBar):
 
         self.show()
 
-        self.execute_query_from_disk.connect('activate', self.emma.on_execute_query_from_disk_activate)
-        self.reload_plugins.connect('activate', self.on_reload_plugins_activate)
-        self.reread_config.connect('activate', self.on_reread_config_activate)
-        #self.save_workspace.connect('activate', self.on_save_workspace_activate)
-        #self.restore_workspace.connect('activate', self.on_restore_workspace_activate)
-        self.quit_button.connect('activate', self.on_quit_activate)
+        self.execute_query_from_disk.connect(
+            'activate', self.emma.on_execute_query_from_disk_activate)
+        self.reload_plugins.connect(
+            'activate', self.on_reload_plugins_activate)
+        self.reread_config.connect(
+            'activate', self.on_reread_config_activate)
+        # self.save_workspace.connect('activate', self.on_save_workspace_activate)
+        # self.restore_workspace.connect('activate', self.on_restore_workspace_activate)
+        self.quit_button.connect(
+            'activate', self.on_quit_activate)
 
         self.changelog.connect('activate', self.on_changelog_activate)
         self.about.connect('activate', self.on_about_activate)

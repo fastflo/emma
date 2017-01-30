@@ -20,7 +20,8 @@ def show_message(title, message, window=None):
 
 
 def confirm(title, message, window=None):
-    dialog = gtk.MessageDialog(window, gtk.DIALOG_MODAL, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, message)
+    dialog = gtk.MessageDialog(
+        window, gtk.DIALOG_MODAL, gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO, message)
     dialog.set_border_width(5)
     dialog.label.set_property("use-markup", True)
     dialog.set_title(title)
