@@ -554,10 +554,7 @@ class QueryTab(BaseTab):
         field_pos = 0
         for db_field_object in th.fields:
             if (
-                (pri_okay >= 0 and db_field_object.row['Key'] == "PRI") or (
-                    th.host.__class__.__name__ == "sqlite_host" and db_field_object.name.endswith(
-                                "_id")
-                    )
+                (pri_okay >= 0 and db_field_object.row['Key'] == "PRI") or (th.host.__class__.__name__ == "sqlite_host" and db_field_object.name.endswith("_id"))
             ):
                 if possible_primary:
                     possible_primary += ", "
@@ -612,20 +609,25 @@ class QueryTab(BaseTab):
 
         value = ""
         db_field_object = None
-        if path:
-            where = primary
-            if not where:
-                where = unique
-            if not where:
-                where = None
-            if not col_num is None:
-                value = self.model.get_value(row_iter, col_num)
-                if wildcard:
-                    db_field_object = th.field_order[col_num]
-                else:
-                    db_field_object = fields[col_num]
-        else:
-            where = possible_primary + possible_unique
+
+        where = ""
+
+        # TODO: rework
+
+        # if path:
+        #     where = primary
+        #     if not where:
+        #         where = unique
+        #     if not where:
+        #         where = None
+        #     if not col_num is None:
+        #         value = self.model.get_value(row_iter, col_num)
+        #         if wildcard:
+        #             db_field_object = th.field_order[col_num]
+        #         else:
+        #             db_field_object = fields[col_num]
+        # else:
+        #     where = possible_primary + possible_unique
 
         # get current edited field and value by col_num
         if return_fields:

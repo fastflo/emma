@@ -34,7 +34,7 @@ class RenameQuery(gtk.ToolButton):
             self.query.last_auto_name = None
             self.query.update_db_label()
             return
-        self.query.user_rename(new_name)
+        self.user_rename(new_name)
 
     def user_rename(self, new_name):
         # tab_widget = self.nb.get_tab_label(self.page)

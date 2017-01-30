@@ -35,27 +35,23 @@ from EventsManager import EventsManager
 
 
 class Emma:
-
+    """
+    Main Emma Class
+    """
     def __init__(self):
 
-        self.emma_path = emma_path
         self.created_once = {}
-        self.queries = []
         self.stored_orders = {}
-        self.query_count = 0
-        self.glade_path = glade_path
-        self.icons_path = icons_path
         self.tooltips = gtk.Tooltips()
         self.sort_timer_running = False
         self.execution_timer_running = False
-        self.field_conditions_initialized = False
+        # self.field_conditions_initialized = False
         self.current_host = None
 
         self.plugin_pathes = []
         self.plugins = {}
 
         self.hosts = {}
-        self.queries = []
 
         self.clipboard = gtk.Clipboard(gtk.gdk.display_get_default(), "CLIPBOARD")
         self.pri_clipboard = gtk.Clipboard(gtk.gdk.display_get_default(), "PRIMARY")
@@ -94,6 +90,9 @@ class Emma:
         self.events = EventsManager(self)
 
     def start(self):
+        """
+        Start Emma process
+        """
         self.glade_file = os.path.join(glade_path, "emma.glade")
         if not os.access(self.glade_file, os.R_OK):
             print self.glade_file, "not found!"
@@ -156,6 +155,11 @@ class Emma:
         self.init_plugins()
 
     def init_plugin(self, plugin):
+        """
+        Init Plugin
+        @param plugin: module
+        @return: bool
+        """
         try:
             plugin_init = getattr(plugin, "plugin_init")
         except:
@@ -163,6 +167,10 @@ class Emma:
         plugin_init(self)
 
     def unload_plugin(self, plugin):
+        """
+        @param plugin: module
+        @return: bool
+        """
         try:
             plugin_unload = getattr(plugin, "plugin_unload")
             return plugin_unload()
@@ -170,12 +178,17 @@ class Emma:
             return True
 
     def load_plugins(self):
+        """
+        Load plugins
+        """
         def _load(_plugin_name):
             print "loading plugin %r" % _plugin_name
             if _plugin_name in self.plugins:
                 plugin = reload(self.plugins[_plugin_name])
             else:
                 plugin = __import__(_plugin_name)
+
+            print "PLUGIN:", plugin
             self.plugins[_plugin_name] = plugin
             self.init_plugin(plugin)
         for path in self.plugin_pathes:
@@ -189,13 +202,16 @@ class Emma:
                 #    print "!!!could not load plugin %r" % plugin_name, e.message
 
     def unload_plugins(self):
-        """ not really an unload - i just asks the module to cleanup """
+        """
+        not really an unload - i just asks the module to cleanup
+        """
         for plugin_name, plugin in self.plugins.iteritems():
-            #print "unloading plugin", plugin_name, "...",
             self.unload_plugin(plugin)
-            #print "done"
 
     def init_plugins(self):
+        """
+        Init plugins
+        """
         plugins_pathes = [
             # os.path.join(self.config.config_path, "plugins"),
             os.path.join(emma_path, "plugins")
@@ -211,7 +227,12 @@ class Emma:
             self.plugin_pathes.append(path)
         self.load_plugins()
 
+    # TODO: move to providers
     def on_connection_ping(self):
+        """
+        Ping connection
+        @return: bool
+        """
         _iter = self.connections_tv.connections_model.get_iter_root()
         while _iter:
             host = self.connections_tv.connections_model.get_value(_iter, 0)
@@ -221,15 +242,28 @@ class Emma:
             _iter = self.connections_tv.connections_model.iter_next(_iter)
         return True
 
-    def toggle_connections_tv(self, item, window):
+    def toggle_connections_tv(self, _, window):
+        """
+        @param _: gtk.CheckMenuItem
+        @param window: MainWindow
+        """
         window.connections_tv_container.get_parent().set_visible(
             not window.connections_tv_container.get_parent().get_visible())
 
-    def toggle_message_notebook(self, item, window):
+    def toggle_message_notebook(self, _, window):
+        """
+        @param _: gtk.CheckMenuItem
+        @param window: MainWindow
+        """
         window.message_notebook.set_visible(
             not window.message_notebook.get_visible())
 
     def on_execute_query_from_disk_activate(self, button, filename=None):
+        """
+        @param button: gtk.Button
+        @param filename: str
+        @return:
+        """
         if not self.connections_tv.current_host:
             dialogs.show_message("execute query from disk", "no host selected!")
             return
@@ -237,10 +271,14 @@ class Emma:
             self.execute_query_from_disk_dialog = dialogs.ExecuteQueryFromDisk(self)
         self.execute_query_from_disk_dialog.show()
 
-    def get_widget(self, name):
-        return self.assign_once("widget_%s" % name, self.xml.get_widget, name)
-
     def assign_once(self, name, creator, *args):
+        """
+        Singletone maker
+        @param name: string
+        @param creator: type
+        @param args: []
+        @return:
+        """
         try:
             return self.created_once[name]
         except:
@@ -526,15 +564,17 @@ class Emma:
     #         pass
     #     self.events.emit('execute_query')
 
+    # def get_selected_table(self):
+    #     path, column = self.connections_tv.get_cursor()
+    #     depth = len(path)
+    #     _iter = self.connections_tv.connections_model.get_iter(path)
+    #     if depth == 3:
+    #         return self.connections_tv.connections_model.get_value(_iter, 0)
+    #     return None
+
     def process_events(self):
+        """
+        Process GTK events
+        """
         while gtk.events_pending():
             gtk.main_iteration(False)
-
-    def get_selected_table(self):
-        path, column = self.connections_tv.get_cursor()
-        depth = len(path)
-        _iter = self.connections_tv.connections_model.get_iter(path)
-        if depth == 3:
-            return self.connections_tv.connections_model.get_value(_iter, 0)
-        return None
-

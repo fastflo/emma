@@ -33,6 +33,8 @@ class MainNotebook(gtk.Notebook):
         """
         super(MainNotebook, self).__init__()
         self.emma = emma
+        self.queries = []
+        self.query_count = 0
         self.tabs = []
         self.connect('switch_page', self.main_notebook_on_change_page)
         self.set_scrollable(True)
@@ -44,7 +46,7 @@ class MainNotebook(gtk.Notebook):
 
     def main_notebook_on_change_page(self, np, pointer, page):
         page_ui = self.get_nth_page(page)
-        for q in self.emma.queries:
+        for q in self.queries:
             if q.ui == page_ui:
                 self.emma.current_query = q
                 q.database_event_box.on_click(None, None)
@@ -56,9 +58,9 @@ class MainNotebook(gtk.Notebook):
 
     def add_query_tab(self):
         q = QueryTab(self.emma)
-        self.emma.query_count += 1
+        self.query_count += 1
         self.emma.current_query = q
-        self.emma.queries.append(q)
+        self.queries.append(q)
         new_page_index = self.append_page(q.get_ui(), q.get_label_ui())
         self.set_tab_reorderable(q.get_ui(), True)
         q.get_tab_close_button().connect('clicked', self.close_query_tab, q)
@@ -69,12 +71,12 @@ class MainNotebook(gtk.Notebook):
     def close_query_tab(self, button, tab_class):
         if not tab_class:
             return False
-        if len(self.emma.queries) == 1:
+        if len(self.queries) == 1:
             return False
-        for q in self.emma.queries:
+        for q in self.queries:
             if q == tab_class:
-                i = self.emma.queries.index(q)
-                del self.emma.queries[i]
+                i = self.queries.index(q)
+                del self.queries[i]
                 i = self.tabs.index(q)
                 del self.tabs[i]
                 q.destroy()

@@ -28,6 +28,12 @@ from emmalib.providers.sqlite.SQLiteHandle import SQLiteHandle
 
 
 class SQLiteHost():
+    """
+    @param sql_log:
+    @param msg_log:
+    @param filename: str
+    @param args: []
+    """
     def __init__(self, sql_log, msg_log, filename, *args):
         self.sql_log, self.msg_log, self.filename = sql_log, msg_log, filename
         self.name = self.filename
@@ -46,6 +52,9 @@ class SQLiteHost():
         self.update_ui_args = None
 
     def get_connection_string(self):
+        """
+        @return: str
+        """
         return "::sqlite::"
 
     def set_update_ui(self, update_ui, *args):
@@ -96,7 +105,7 @@ class SQLiteHost():
             self.handle.execute(query)
             self.query_time = time.time() - start
         except:
-            print "error executing query:\n%s" % traceback.format_exc()
+            # print "error executing query:\n%s" % traceback.format_exc()
             s = str(sys.exc_value)
             self.last_error = s
             if self.msg_log:
