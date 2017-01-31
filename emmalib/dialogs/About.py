@@ -1,9 +1,15 @@
+"""
+Emma's about dialog
+"""
 import gtk
 
 from emmalib.Constants import *
 
 
 class About(gtk.AboutDialog):
+    """
+    Emma's about dialog
+    """
     def __init__(self):
         super(About, self).__init__()
         self.set_authors((

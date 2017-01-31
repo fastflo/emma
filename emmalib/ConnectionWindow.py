@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import os
+# import os
 import gtk
 import gtk.glade
 import dialogs
@@ -26,10 +26,10 @@ from Constants import *
 
 
 class ConnectionWindow:
+    """
+    @param emma: Emma
+    """
     def __init__(self, emma=None):
-        """
-        @param emma: Emma
-        """
         self.host = None
         self.emma = emma
         self.cw_mode = None
@@ -51,14 +51,25 @@ class ConnectionWindow:
             self.window.show()
 
     def on_window_delete(self, *args):
+        """
+        :param args: []
+        :return: bool
+        """
         self.on_window_close(args)
         return True
 
-    def on_window_close(self, obj):
+    def on_window_close(self, _):
+        """
+        :param _: gtk.Window
+        :return: bool
+        """
         self.window.hide()
         return False
 
     def show_mysql(self):
+        """
+        Display MySQL settings
+        """
         self.lb_provider_name.set_text('MySQL')
         self.cmb_connection_type.set_active(0)
         for n in ['host', 'port', 'user', 'password', 'database']:
@@ -71,6 +82,9 @@ class ConnectionWindow:
         self.cw_test_button.show()
 
     def show_sqlite(self):
+        """
+        Display SQLite settings
+        """
         self.lb_provider_name.set_text('SQLite')
         self.cmb_connection_type.set_active(1)
         for n in ['host', 'port', 'user', 'password', 'database']:
@@ -89,17 +103,27 @@ class ConnectionWindow:
         self.cw_test_button.hide()
 
     def cleanup(self):
+        """
+        Empty text fields
+        """
         self.lb_provider_name.set_text('')
         for n in self.text_fields:
             self.glade.get_widget("tb_%s" % n).set_text('')
 
     def on_connection_type_changed(self, cmb):
+        """
+        :param cmb: gtk.ComboBox
+        """
         if cmb.get_active() == 0:
             self.show_mysql()
         else:
             self.show_sqlite()
 
     def show(self, mode):
+        """
+        Show controls depending on mode
+        :param mode: str
+        """
         self.cleanup()
         if mode == "edit":
             self.cmb_connection_type.hide()
@@ -132,14 +156,20 @@ class ConnectionWindow:
         self.window.show()
 
     def validate_mysql(self):
+        """
+        Validate MySQL settings
+        :return: bool
+        """
         if not self.glade.get_widget('tb_name').get_text():
             dialogs.alert('Please enter connection name!')
             return False
-
-        #all is fine
         return True
 
-    def on_apply_button_clicked(self, *args):
+    def on_apply_button_clicked(self, *_):
+        """
+        :param _: []
+        :return:
+        """
         if self.cmb_connection_type.get_active() == 0:
             if not self.validate_mysql():
                 return
@@ -171,7 +201,11 @@ class ConnectionWindow:
         if self.emma:
             self.emma.config.save()
 
-    def on_test_button_clicked(self, *args):
+    def on_test_button_clicked(self, *_):
+        """
+        :param _: []
+        :return: None
+        """
         if self.cmb_connection_type.get_active() == 0:
             if not self.validate_mysql():
                 return
@@ -193,13 +227,15 @@ class ConnectionWindow:
             try:
                 handle = _mysql.connect(**data)
             except _mysql.DatabaseError as err:
+                print "_mysql.DatabaseError:", err.message
                 dialogs.alert(
                     "could not connect to host <b>%s</b> with user <b>%s</b> "
-                    "and password <b>%s</b>:\n<i>%s</i>" % (
+                    "and password <b>%s</b>:\n<i>%s</i>\nMySQL error message:\n%s" % (
                         data["host"],
                         data["user"],
                         data["passwd"],
-                        sys.exc_value
+                        sys.exc_value,
+                        err.message
                     )
                 )
                 return

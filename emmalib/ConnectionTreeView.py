@@ -18,7 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import os
 import gtk
 import gobject
 import dialogs
@@ -29,10 +28,10 @@ from Constants import *
 
 
 class ConnectionsTreeView(gtk.TreeView):
+    """
+    @param emma: Emma
+    """
     def __init__(self, emma=None):
-        """
-        @param emma: Emma
-        """
         self.emma = emma
 
         self.current_host = None
@@ -73,6 +72,9 @@ class ConnectionsTreeView(gtk.TreeView):
         self.load_from_config()
 
     def load_from_config(self):
+        """
+        Load config data
+        """
         keys = self.emma.config.config.keys()
         for name in keys:
             value = self.emma.config.config[name]
@@ -93,6 +95,12 @@ class ConnectionsTreeView(gtk.TreeView):
                     pass
 
     def on_connections_row_activated(self, tv, path, col):
+        """
+        :param tv: gtk.TreeView
+        :param path: str
+        :param col: int
+        :return:
+        """
         depth = len(path)
         _iter = self.connections_model.get_iter(path)
         o = self.connections_model.get_value(_iter, 0)
@@ -112,6 +120,9 @@ class ConnectionsTreeView(gtk.TreeView):
         elif depth == 2:
 
             def rfrs(arg):
+                """
+                :param arg: type
+                """
                 ctv, obj = arg
                 new_tables = obj.refresh()
                 ctv.redraw_db(obj, _iter, new_tables, True)
@@ -140,12 +151,24 @@ class ConnectionsTreeView(gtk.TreeView):
         return
 
     def on_row_expanded(self, tv, _iter, path):
+        """
+        :param tv: gtk.TreeView
+        :param _iter:
+        :param path: str
+        :return:
+        """
         o = tv.get_model().get_value(_iter, 0)
         if len(path) > 3:
             return
         o.expanded = True
 
     def on_row_collapsed(self, tv, _iter, path):
+        """
+        :param tv: gtk.TreeView
+        :param _iter:
+        :param path: str
+        :return:
+        """
         o = tv.get_model().get_value(_iter, 0)
         if len(path) > 3:
             return
@@ -221,7 +244,7 @@ class ConnectionsTreeView(gtk.TreeView):
             self.redraw_db(db, i)
 
     def redraw_db(self, db, _iter, new_tables=None, force_expand=False):
-        #print "redraw db", db.name
+        # print "redraw db", db.name
         if not _iter:
             print "Error: invalid db-iterator:", _iter
             return

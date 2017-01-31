@@ -1,9 +1,13 @@
+"""
+Execute Query From Disk Dialog
+"""
 import gc
 import bz2
 import time
 import datetime
 from stat import *
 
+import gtk
 import gtk.glade
 
 from emmalib.Query import *
@@ -11,10 +15,10 @@ from emmalib.dialogs import show_message
 
 
 class ExecuteQueryFromDisk:
+    """
+    @param emma: Emma
+    """
     def __init__(self, emma):
-        """
-        @param emma: Emma
-        """
         self.emma = emma
         #
         # PATHS
@@ -36,6 +40,9 @@ class ExecuteQueryFromDisk:
         self.read_one_query_started = False
 
     def show(self):
+        """
+        Show dialog
+        """
         self.glade = gtk.glade.XML(self.glade_file)
         self.glade.signal_autoconnect(self)
         self.window = self.glade.get_widget('execute_query_from_disk1')
@@ -43,9 +50,16 @@ class ExecuteQueryFromDisk:
         self.window.show()
 
     def hide(self):
+        """
+        Hide dialog
+        """
         self.window.hide()
 
-    def on_start_execute_from_disk_clicked(self, button):
+    def on_start_execute_from_disk_clicked(self, _):
+        """
+        :param _: gtk.Button
+        :return:
+        """
         host = self.emma.connections_tv.current_host
         fc = self.glade.get_widget("eqfd_file_chooser")
 
@@ -125,6 +139,11 @@ class ExecuteQueryFromDisk:
         _start = time.time()
 
         def update_ui(force=False, offset=0):
+            """
+            :param force: bool
+            :param offset: int
+            :return:
+            """
             global last_update
             now = time.time()
             if not force and now - last_update < update_interval:
@@ -171,7 +190,8 @@ class ExecuteQueryFromDisk:
             if limit_db:
                 if not found_db:
                     first = query.lstrip("\r\n\t ")[0:15].lower()
-                    if (first[0:3] == "use" or first == "create database") and limit_re.search(query):
+                    if (first[0:3] == "use" or first == "create database") and \
+                            limit_re.search(query):
                         found_db = True
                 else:
                     if limit_end_re.search(query) and not limit_re.search(query):
@@ -200,7 +220,11 @@ class ExecuteQueryFromDisk:
             show_message("execute query from disk", "done!")
         p.hide()
 
-    def on_cancel_execute_from_disk_clicked(self, button):
+    def on_cancel_execute_from_disk_clicked(self, _):
+        """
+        :param _: gtk.Button
+        :return:
+        """
         if not self.query_from_disk:
             p = self.assign_once(
                 "execute_from_disk_progress",
@@ -213,14 +237,23 @@ class ExecuteQueryFromDisk:
         self.query_from_disk = False
 
     def on_eqfd_exclude_toggled(self, button):
+        """
+        :param button: gtk.Button
+        """
         entry = self.glade.get_widget("eqfd_exclude_entry")
         entry.set_sensitive(button.get_active())
 
     def on_eqfd_limit_db_toggled(self, button):
+        """
+        :param button: gtk.Button
+        """
         entry = self.glade.get_widget("eqfd_db_entry")
         entry.set_sensitive(button.get_active())
 
-    def on_abort_execute_from_disk_clicked(self, button):
+    def on_abort_execute_from_disk_clicked(self, _):
+        """
+        :param _: gtk.Button
+        """
         self.window.hide()
 
     def read_one_query(
@@ -228,6 +261,15 @@ class ExecuteQueryFromDisk:
             _start=None, count_lines=0,
             update_function=None, only_use_queries=False,
             start_line=1):
+        """
+        :param fp:
+        :param _start:
+        :param count_lines: int
+        :param update_function:
+        :param only_use_queries: bool
+        :param start_line: int
+        :return:
+        """
         current_query = []
         self.read_one_query_started = True
         while self.read_one_query_started:
@@ -247,23 +289,23 @@ class ExecuteQueryFromDisk:
                         update_function(False, lb)
 
                     if count_lines is not None and count_lines <= start_line:
-                        #print count_lines
+                        # print count_lines
                         continue
                     first = line.lstrip("\r\n\t ")[0:15].lower()
                     if only_use_queries and first[0:3] != "use" and first != "create database":
                         continue
                     if line.lstrip(" \t")[0:2] != "--":
                         break
-                        #print "skipping line", [line]
+                        # print "skipping line", [line]
                 self.last_query_line = line
                 _start = 0
             else:
                 line = self.last_query_line
             _start, end = read_query(line, _start)
             _next = line[end:end + 1]
-            #print "next: '%s'" % next
+            # print "next: '%s'" % next
             if _start is not None:
-                #print "append query", [line[start:end]]
+                # print "append query", [line[start:end]]
                 current_query.append(line[_start:end])
             if _next == ";":
                 return ''.join(current_query), end + 1, count_lines
@@ -271,12 +313,19 @@ class ExecuteQueryFromDisk:
         return None, None, None
 
     def assign_once(self, name, creator, *args):
+        """
+        :param name: str
+        :param creator: str
+        :param args: []
+        :return:
+        """
         try:
             return self.created_once[name]
         except:
             obj = creator(*args)
             self.created_once[name] = obj
             return obj
+
 
 if __name__ == '__main__':
     print 'Self run'

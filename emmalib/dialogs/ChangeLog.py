@@ -1,9 +1,15 @@
+"""
+Emma's Changelog dialog
+"""
 import os
 import gtk
 from emmalib.Constants import emma_path
 
 
 class ChangeLog(gtk.Window):
+    """
+    Emma's Changelog dialog
+    """
     def __init__(self):
         super(ChangeLog, self).__init__()
 
@@ -27,7 +33,13 @@ class ChangeLog(gtk.Window):
         tv.show()
         sw.show()
 
-    def on_changelog_delete(self, window, event):
+    @staticmethod
+    def on_changelog_delete(window, _):
+        """
+        :param window: gtk.Window
+        :param _:
+        :return: bool
+        """
         window.hide()
         return True
 
