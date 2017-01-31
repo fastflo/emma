@@ -27,7 +27,7 @@ from emmalib.providers.sqlite.SQLiteDb import SQLiteDb
 from emmalib.providers.sqlite.SQLiteHandle import SQLiteHandle
 
 
-class SQLiteHost():
+class SQLiteHost:
     """
     @param sql_log:
     @param msg_log:
