@@ -11,7 +11,7 @@ import gtk
 import gtk.glade
 
 from emmalib.Query import *
-from emmalib.dialogs import show_message
+from emmalib.dialogs import *
 
 
 class ExecuteQueryFromDisk:
