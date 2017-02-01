@@ -41,8 +41,6 @@ from emmalib.widgets.querytab.EncodingEventBox import EncodingEventBox
 from emmalib.widgets.querytab.ResultToolbar import ResultToolbar
 from emmalib.widgets.querytab.querytoolbar.QueryToolbar import QueryToolbar
 
-import objgraph
-
 
 class QueryTab(BaseTab):
     """
@@ -151,10 +149,6 @@ class QueryTab(BaseTab):
         self.last_auto_name = None
 
         self.init_from_config()
-        objgraph.show_refs([self],
-                           max_depth=5,
-                           refcounts=True,
-                           filename='/home/nkarnaukhov/Desktop/query-tab.png')
 
     def init_gtk_sourceview(self):
         """
