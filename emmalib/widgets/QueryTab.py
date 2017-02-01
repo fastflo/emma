@@ -41,12 +41,15 @@ from emmalib.widgets.querytab.EncodingEventBox import EncodingEventBox
 from emmalib.widgets.querytab.ResultToolbar import ResultToolbar
 from emmalib.widgets.querytab.querytoolbar.QueryToolbar import QueryToolbar
 
+import objgraph
+
 
 class QueryTab(BaseTab):
+    """
+    @param emma: Emma
+    """
+
     def __init__(self, emma):
-        """
-        @param emma: Emma
-        """
         super(QueryTab, self).__init__()
 
         self.tab_label.set_text('Query')
@@ -56,7 +59,7 @@ class QueryTab(BaseTab):
 
         self.ui = gtk.VPaned()
 
-        #---------------------------
+        # ---------------------------
         #   INIT TOP PART
         #
 
@@ -147,11 +150,16 @@ class QueryTab(BaseTab):
             self.textview.get_buffer().set_text(self.query)
         self.last_auto_name = None
 
-        self.emma.key_map.connect('key-release', self.key_release)
         self.init_from_config()
+        objgraph.show_refs([self],
+                           max_depth=5,
+                           refcounts=True,
+                           filename='/home/nkarnaukhov/Desktop/query-tab.png')
 
     def init_gtk_sourceview(self):
-        # replace textview with gtksourcevice
+        """
+        replace textview with gtksourcevice
+        """
         try:
             org_tv = self.textview
             manager = gtksourceview2.language_manager_get_default()
@@ -219,6 +227,9 @@ class QueryTab(BaseTab):
             dialogs.alert(traceback.format_exc())
 
     def init_from_config(self):
+        """
+        Init from config file
+        """
         self.set_query_encoding(self.emma.config.get("db_encoding"))
         self.set_query_font(self.emma.config.get("query_text_font"))
         self.set_result_font(self.emma.config.get("query_result_font"))
@@ -228,10 +239,11 @@ class QueryTab(BaseTab):
             self.set_wrap_mode(gtk.WRAP_NONE)
         self.set_current_host(self.emma.current_host)
 
-    def key_release(self, key_map, event):
-        pass
-
     def on_query_view_cursor_changed(self, tv):
+        """
+        :param tv: gtk.TreeView
+        :return: None
+        """
         self.emma.blob_view.encoding = self.encoding
         path, column = self.treeview.get_cursor()
 
@@ -258,6 +270,11 @@ class QueryTab(BaseTab):
 
     # todo: move to keymap
     def on_query_view_key_press_event(self, tv, event):
+        """
+        :param tv: gtk.TreeView
+        :param event:
+        :return:
+        """
         path, column = self.treeview.get_cursor()
         if event.keyval == keysyms.F2:
             self.treeview.set_cursor(path, column, True)
@@ -275,6 +292,11 @@ class QueryTab(BaseTab):
             return True
 
     def on_query_view_button_press_event(self, tv, event):
+        """
+        :param tv: gtk.TreeView
+        :param event:
+        :return:
+        """
         selection = tv.get_selection()
 
         print selection.get_selected_rows()
@@ -296,6 +318,10 @@ class QueryTab(BaseTab):
             return True
 
     def auto_rename(self, new_auto_name):
+        """
+        :param new_auto_name: str
+        :return: str
+        """
         label = self.get_label()
         if label is None:
             return
@@ -315,7 +341,9 @@ class QueryTab(BaseTab):
         return
 
     def destroy(self):
-        # try to free some memory
+        """
+        try to free some memory
+        """
         if self.model:
             self.model.clear()
         self.textview.get_buffer().set_text("")
@@ -328,10 +356,16 @@ class QueryTab(BaseTab):
         self.update_db_label()
 
     def set(self, text):
+        """
+        :param text: str
+        """
         self.last_source = text
         self.textview.get_buffer().set_text(text)
 
     def update_db_label(self):
+        """
+        :return: None
+        """
         h = self.current_host
         d = self.current_db
         if not h:
@@ -356,6 +390,10 @@ class QueryTab(BaseTab):
         self.auto_rename("%s%s" % (h.name, dname))
 
     def set_current_host(self, host):
+        """
+        :param host:
+        :return:
+        """
         if self.current_host == host and host is not None and self.current_db == host.current_db:
             return
         self.current_host = host
@@ -366,38 +404,66 @@ class QueryTab(BaseTab):
         self.update_db_label()
 
     def set_current_db(self, db):
+        """
+        :param db:
+        """
         self.current_host = db.host
         self.current_db = db
         self.update_db_label()
 
     def set_query_encoding(self, encoding):
+        """
+        :param encoding: str
+        """
         self.encoding = encoding
         self.encoding_event_box.set_label("encoding: %s" % self.encoding)
 
     def set_query_font(self, font_name):
+        """
+        :param font_name: str
+        """
         self.textview.get_pango_context()
         fd = pango.FontDescription(font_name)
         self.textview.modify_font(fd)
 
     def set_result_font(self, font_name):
+        """
+        :param font_name: str
+        """
         self.treeview.get_pango_context()
         fd = pango.FontDescription(font_name)
         self.treeview.modify_font(fd)
 
     def set_wrap_mode(self, wrap):
+        """
+        :param wrap: bool
+        """
         self.textview.set_wrap_mode(wrap)
 
     def on_query_tab_label_close_button_clicked(self, button, page_index):
+        """
+        :param button: gtk.Button
+        :param page_index: str
+        """
         print button, page_index
         self.emma.main_notebook.close_query_tab(page_index)
 
     def is_query_editable(self, query, result=None):
+        """
+        :param query: str
+        :param result:
+        :return:
+        """
         table, where, field, value, row_iter = self.get_unique_where(query)
         if not table or not where:
             return False
         return True
 
     def on_query_column_sort(self, column, col_num):
+        """
+        :param column:
+        :param col_num: int
+        """
         query = self.last_source
         current_order = Query.get_order_from_query(query)
         col = column.get_title().replace("__", "_")
@@ -418,7 +484,6 @@ class QueryTab(BaseTab):
         match = re.search(r, query)
         if match:
             before, order, after = match.groups()
-            order = ""
             addition = ""
         else:
             match = re.search(Query.re_src_after_order, query)
@@ -465,10 +530,18 @@ class QueryTab(BaseTab):
                 100 + int(self.emma.config.get("result_view_column_sort_timeout")),
                 self.on_sort_timer
             )
-        self.sort_timer_execute = time.time() + int(self.emma.config.get("result_view_column_sort_timeout")) / 1000.
+        self.sort_timer_execute = time.time() + int(
+            self.emma.config.get("result_view_column_sort_timeout")) / 1000.
 
     def get_unique_where(self, query, path=None, col_num=None, return_fields=False):
         # call is_query_appendable before!
+        """
+        :param query: str
+        :param path:
+        :param col_num: int
+        :param return_fields: bool
+        :return:
+        """
         result = Query.is_query_appendable(query)
         if not result:
             return None, None, None, None, None
@@ -478,8 +551,9 @@ class QueryTab(BaseTab):
 
         # check tables
         table_list = table_list.replace(" join ", ",")
-        table_list = re.sub("(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)",
-                            "", table_list)
+        table_list = re.sub(
+            "(?i)(?:order[ \t\r\n]by.*|limit.*|group[ \r\n\t]by.*|order[ \r\n\t]by.*|where.*)",
+            "", table_list)
         table_list = table_list.replace("`", "")
         tables = table_list.split(",")
 
@@ -553,9 +627,11 @@ class QueryTab(BaseTab):
         self.last_th = th
         field_pos = 0
         for db_field_object in th.fields:
-            if (
-                (pri_okay >= 0 and db_field_object.row['Key'] == "PRI") or (th.host.__class__.__name__ == "sqlite_host" and db_field_object.name.endswith("_id"))
-            ):
+            has_mysql_primary = (pri_okay >= 0 and db_field_object.row['Key'] == "PRI")
+            has_sqlite_id = (
+                th.host.__class__.__name__ == "sqlite_host" and db_field_object.name.endswith("_id")
+            )
+            if has_mysql_primary or has_sqlite_id:
                 if possible_primary:
                     possible_primary += ", "
                 possible_primary += db_field_object.name
@@ -635,6 +711,14 @@ class QueryTab(BaseTab):
         return table, where, db_field_object, value, row_iter
 
     def on_query_change_data(self, cellrenderer, path, new_value, col_num, force_update=False):
+        """
+        :param cellrenderer:
+        :param path:
+        :param new_value:
+        :param col_num:
+        :param force_update:
+        :return:
+        """
         row_iter = self.model.get_iter(path)
         if self.append_iter \
                 and self.model.iter_is_valid(self.append_iter) \
@@ -666,6 +750,9 @@ class QueryTab(BaseTab):
         return False
 
     def on_sort_timer(self):
+        """
+        :return:
+        """
         if not self.sort_timer_running:
             return False
         if self.sort_timer_execute > time.time():
@@ -675,4 +762,7 @@ class QueryTab(BaseTab):
         return False
 
     def get_ui(self):
+        """
+        :return:
+        """
         return self.ui

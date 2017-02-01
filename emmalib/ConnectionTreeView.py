@@ -1,3 +1,4 @@
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -17,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
-
+"""
 import gtk
 import gobject
 import dialogs
@@ -175,6 +176,10 @@ class ConnectionsTreeView(gtk.TreeView):
         o.expanded = False
 
     def on_connections_tv_cursor_changed(self, tv):
+        """
+        :param tv:
+        :return:
+        """
         path, column = tv.get_cursor()
         nb = self.emma.main_notebook
         if path is None:
@@ -200,6 +205,11 @@ class ConnectionsTreeView(gtk.TreeView):
             q.set_current_db(o)
 
     def on_connections_button_release(self, tv, event):
+        """
+        :param tv:
+        :param event:
+        :return:
+        """
         if not event.button == 3:
             return False
         res = tv.get_path_at_pos(int(event.x), int(event.y))
@@ -223,6 +233,11 @@ class ConnectionsTreeView(gtk.TreeView):
         return True
 
     def redraw_host(self, host, _iter, expand=False):
+        """
+        :param host:
+        :param _iter:
+        :param expand:
+        """
         print "redraw host", host.name
         if host.expanded:
             expand = True
@@ -245,6 +260,13 @@ class ConnectionsTreeView(gtk.TreeView):
 
     def redraw_db(self, db, _iter, new_tables=None, force_expand=False):
         # print "redraw db", db.name
+        """
+        :param db:
+        :param _iter:
+        :param new_tables:
+        :param force_expand:
+        :return:
+        """
         if not _iter:
             print "Error: invalid db-iterator:", _iter
             return
@@ -274,6 +296,10 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.process_events()
 
     def redraw_table(self, table, _iter):
+        """
+        :param table:
+        :param _iter:
+        """
         if table.expanded:
             self.expand_row(self.connections_model.get_path(_iter), False)
         i = self.connections_model.iter_children(_iter)
@@ -283,6 +309,13 @@ class ConnectionsTreeView(gtk.TreeView):
             self.connections_model.append(_iter, ((field.name, field.type),))
 
     def render_connections_pixbuf(self, column, cell, model, itr):
+        """
+        :param column:
+        :param cell:
+        :param model:
+        :param itr:
+        :return:
+        """
         d = model.iter_depth(itr)
         o = model.get_value(itr, 0)
         if isinstance(o, str):
@@ -303,6 +336,13 @@ class ConnectionsTreeView(gtk.TreeView):
             cell.set_property("pixbuf", self.icons["field"])
 
     def render_connections_text(self, column, cell, model, itr):
+        """
+        :param column:
+        :param cell:
+        :param model:
+        :param itr:
+        :return:
+        """
         d = model.iter_depth(itr)
         o = model.get_value(itr, 0)
         if isinstance(o, str):
@@ -346,6 +386,9 @@ class ConnectionsTreeView(gtk.TreeView):
             cell.set_property("weight", 400)
 
     def load_icons(self):
+        """
+        Loads all needed icons
+        """
         for icon in ["offline_host", "host", "db", "table", "table_lightning", "field"]:
             filename = os.path.join(icons_path, icon + ".png")
             try:
@@ -354,6 +397,14 @@ class ConnectionsTreeView(gtk.TreeView):
                 print "could not load %r" % filename
 
     def add_mysql_host(self, name, hostname, port, user, password, database):
+        """
+        :param name: str
+        :param hostname: str
+        :param port: str
+        :param user: str
+        :param password: str
+        :param database: str
+        """
         from providers.mysql.MySqlHost import MySqlHost
 
         host = MySqlHost(
@@ -367,6 +418,9 @@ class ConnectionsTreeView(gtk.TreeView):
         host.set_update_ui(self.redraw_host, _iter)
 
     def add_sqlite(self, filename):
+        """
+        :param filename: str
+        """
         from providers.sqlite.SQLiteHost import SQLiteHost
 
         host = SQLiteHost(self.emma.sql_log.log, self.emma.msg_log.log, filename)
@@ -374,11 +428,19 @@ class ConnectionsTreeView(gtk.TreeView):
         host.set_update_ui(self.redraw_host, _iter)
 
     def get_current_table(self):
+        """
+        :return: ()
+        """
         path, column = self.get_cursor()
         _iter = self.connections_model.get_iter(path)
         return path, column, _iter, self.connections_model.get_value(_iter, 0)
 
     def on_table_popup(self, popup, item):
+        """
+        :param popup:
+        :param item:
+        :return:
+        """
         path, column, _iter, table = self.get_current_table()
         what = item.name
 
@@ -421,6 +483,11 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.events.emit('execute_query', None, "repair table `%s`" % table.name)
 
     def on_db_popup(self, popup, item):
+        """
+        :param popup:
+        :param item:
+        :return:
+        """
         path, column = self.get_cursor()
         _iter = self.connections_model.get_iter(path)
         what = item.name
@@ -467,6 +534,11 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.main_notebook.add_tables_list_tab()
 
     def on_host_popup(self, popup, item):
+        """
+        :param popup:
+        :param item:
+        :return:
+        """
         path, column = self.get_cursor()
         if path:
             _iter = self.connections_model.get_iter(path)
@@ -507,6 +579,11 @@ class ConnectionsTreeView(gtk.TreeView):
             self.emma.main_notebook.add_process_list_tab(host)
 
     def get_connections_object_at_depth(self, obj, depth):
+        """
+        :param obj:
+        :param depth:
+        :return:
+        """
         d = 0
         model = self.connections_model
         _iter = model.get_iter_first()
@@ -527,8 +604,16 @@ class ConnectionsTreeView(gtk.TreeView):
         return None
 
     def get_db_iter(self, db):
+        """
+        :param db:
+        :return:
+        """
         return self.get_connections_object_at_depth(db, 1)
 
     def get_host_iter(self, host):
+        """
+        :param host:
+        :return:
+        """
         return self.get_connections_object_at_depth(host, 0)
 
