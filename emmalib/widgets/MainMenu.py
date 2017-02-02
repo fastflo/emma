@@ -107,7 +107,9 @@ class MainMenu(gtk.MenuBar):
         self.show_message_notebook.add_accelerator(
             "activate", mainwindow.accel_group, key, mod, gtk.ACCEL_VISIBLE)
         self.show_message_notebook.connect(
-            "activate", self.emma.toggle_message_notebook, mainwindow)
+            "activate",
+            lambda event: self.emma.events.emit('toggle_message_notebook_visible', event)
+        )
         self.show_message_notebook.set_active(True)
         self.show_message_notebook.show()
         view_menu_submenu.append(self.show_message_notebook)

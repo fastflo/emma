@@ -552,8 +552,10 @@ class ConnectionsTreeView(gtk.TreeView):
             host.refresh()
             self.redraw_host(host, _iter)
         elif what == "new_database":
-            name = dialogs.input_dialog("New database", "Please enter the name of the new database:",
-                                        window=self.emma.mainwindow)
+            name = dialogs.input_dialog(
+                "New database",
+                "Please enter the name of the new database:",
+                window=self.emma.mainwindow)
             if not name:
                 return
             if host.query("Create database `%s`" % name):
@@ -563,8 +565,9 @@ class ConnectionsTreeView(gtk.TreeView):
             self.connection_window.host = host
             self.connection_window.show("edit")
         elif what == "delete_connection":
-            if not dialogs.confirm("Delete host", "Do you really want to drop the host <b>%s</b>?" % host.name,
-                                   self.emma.mainwindow):
+            if not dialogs.confirm(
+                    "Delete host", "Do you really want to drop the host <b>%s</b>?" % host.name,
+                    self.emma.mainwindow):
                 return
             host.close()
             self.connections_model.remove(_iter)

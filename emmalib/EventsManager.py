@@ -5,7 +5,10 @@ from widgets import TabTable
 
 class EventsManager(gobject.GObject):
     __gsignals__ = {
-        'execute_query': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.Object, str))
+        'execute_query': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.Object, str)),
+
+        'toggle_message_notebook_visible': (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.Object,))
     }
 
     def __init__(self, emma):

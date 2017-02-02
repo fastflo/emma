@@ -41,6 +41,13 @@ class MainWindow(gtk.Window):
         self.message_notebook = gtk.Notebook()
         self.message_notebook.show()
 
+        emma.events.connect(
+            'toggle_message_notebook_visible',
+            lambda a, b: self.message_notebook.set_visible(
+                    not self.message_notebook.get_visible()
+                )
+        )
+
         convbox = gtk.VBox(True, 0)
         self.connections_tv_container = gtk.ScrolledWindow()
         self.connections_tv_container.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
