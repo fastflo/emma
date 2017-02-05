@@ -20,6 +20,18 @@ def alert(message):
     dialog.destroy()
 
 
+def error(message):
+    """
+    :param message: str
+    """
+    dialog = gtk.MessageDialog(None, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE, message)
+    dialog.set_border_width(5)
+    dialog.set_title("Error")
+    dialog.label.set_property("use-markup", True)
+    dialog.run()
+    dialog.destroy()
+
+
 def show_message(title, message, window=None):
     """
     :param title: str

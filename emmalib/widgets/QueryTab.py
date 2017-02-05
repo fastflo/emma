@@ -557,7 +557,7 @@ class QueryTab(BaseTab):
 
         # get table_name
         table = tables[0].strip(" \r\n\t").strip("`'\"")
-        print "table:", table
+        # print "table:", table
 
         # check for valid fields
         field_list = re.sub("[\r\n\t ]+", " ", field_list)
@@ -569,7 +569,7 @@ class QueryTab(BaseTab):
         fields = []
         for f in temp_fields:
             fields.append(f.strip("` \r\n\t"))
-        print "fields:", fields
+        # print "fields:", fields
 
         wildcard = False
         for db_field_object in fields:

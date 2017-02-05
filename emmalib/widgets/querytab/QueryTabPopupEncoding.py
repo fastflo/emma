@@ -22,16 +22,13 @@ import gtk
 
 
 class QueryTabPopupEncoding(gtk.Menu):
-
+    """
+    @param query: QueryTab
+    """
     def __init__(self, query):
-        """
-        @param query: QueryTab
-        """
         self.query = query
 
         super(QueryTabPopupEncoding, self).__init__()
-
-        print self.query.emma.config.codings
 
         for key in self.query.emma.config.codings.keys():
             index, description = self.query.emma.config.codings[key]
@@ -42,6 +39,10 @@ class QueryTabPopupEncoding(gtk.Menu):
 
         self.show_all()
 
-    def on_query_encoding_changed(self, menuitem, data):
+    def on_query_encoding_changed(self, _, data):
+        """
+        @param _:
+        @param data:
+        """
         self.query.set_query_encoding(data[0])
 

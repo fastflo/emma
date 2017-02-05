@@ -43,7 +43,7 @@ class EncodingEventBox(gtk.EventBox):
         @param event:
         """
         if not self.query_encoding_menu:
-            self.query_encoding_menu = QueryTabPopupEncoding(self)
+            self.query_encoding_menu = QueryTabPopupEncoding(self.query)
         self.query_encoding_menu.popup(None, None, None, event.button, event.time)
 
 

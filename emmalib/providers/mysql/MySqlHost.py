@@ -119,7 +119,7 @@ class MySqlHost:
         if len(args) == 2:
             # unpickle
             self.sql_log, self.msg_log = args
-            #print "unpickle host!"
+            # print "unpickle host!"
             db_name = ''
             if self.connected:
                 db_name = self.current_db.name
@@ -154,7 +154,7 @@ class MySqlHost:
         d = dict(self.__dict__)
         for i in ["sql_log", "msg_log", "handle", "processlist", "update_ui", "update_ui_args"]:
             del d[i]
-            #print "host will pickle:", d
+            # print "host will pickle:", d
         return d
 
     def get_connection_string(self):
@@ -190,8 +190,8 @@ class MySqlHost:
             return
         self.connected = True
         self.version = self.handle.get_server_info()
-        #if self.is_at_least_version("4.1.0"):
-        #    self.query("set names 'utf8'") # request utf8 encoded names and result!
+        # if self.is_at_least_version("4.1.0"):
+        #     self.query("set names 'utf8'") # request utf8 encoded names and result!
         self.query("show variables")  # get server variables
         result = self.handle.store_result()
         self.variables = dict(result.fetch_row(0))
@@ -199,10 +199,10 @@ class MySqlHost:
             self.charset = self.variables["character_set_server"]
         else:
             self.charset = "latin1"  # use config default_charset as fallback!
-            print "using default_charset %r for this database" % self.charset
-            #print "server variables:"
-            #import pprint
-        #pprint.pprint(self.variables)
+            # print "using default_charset %r for this database" % self.charset
+            # print "server variables:"
+            # import pprint
+        # pprint.pprint(self.variables)
         self.refresh()
         if self.database:
             self.use_db(self.database)
@@ -254,7 +254,7 @@ class MySqlHost:
             start = time.time()
             if encoding:
                 query = query.encode(encoding, "ignore")
-            #print "executing query (encoding: %s): %r" % (encoding, query)
+            # print "executing query (encoding: %s): %r" % (encoding, query)
             self.handle.query('SET NAMES utf8')
             self.handle.query(query)
             self.query_time = time.time() - start
@@ -265,7 +265,7 @@ class MySqlHost:
             except:
                 self.last_error = str(sys.exc_value)
             s = sys.exc_value[1]
-            #print "error:", [s]
+            # print "error:", [s]
             s = s.replace(
                 "You have an error in your SQL syntax.  " +
                 "Check the manual that corresponds to your MySQL "
@@ -283,7 +283,7 @@ class MySqlHost:
         match = re.match("(?is)^([ \r\n\t]*|#[^\n]*)*(use[ \r\n\t]*).*", query)
         if match:
             dbname = query[match.end(2):].strip("`; \t\r\n")
-            print "use db: '%s'" % dbname
+            # print "use db: '%s'" % dbname
             self.use_db(dbname, False)
             # reexecute to reset field_count and so on...
             self.handle.query(query)
@@ -347,7 +347,7 @@ class MySqlHost:
             rv = "`%s`" % field.replace("`", r"``")
         else:
             rv = field
-        #print "escape field %r to %r" % (field, rv)
+        # print "escape field %r to %r" % (field, rv)
         return rv
 
     def escape_table(self, table):

@@ -6,6 +6,8 @@ import gtk
 import gc
 import re
 import time
+
+import dialogs
 from emmalib.Query import read_query, is_query_appendable, get_order_from_query
 from emmalib.dialogs import show_message, confirm
 from emmalib.widgets import ResultCellRenders
@@ -110,7 +112,7 @@ class ExecuteQuery(gtk.ToolButton):
             if query_start is None:
                 break
             thisquery = text[query_start:end]
-            print "about to execute query %r" % thisquery
+            # print "about to execute query %r" % thisquery
             _start = end + 1
 
             thisquery.strip(" \r\n\t;")
@@ -126,62 +128,62 @@ class ExecuteQuery(gtk.ToolButton):
             if appendable_result:
                 appendable = True
                 self.query.editable = self.query.is_query_editable(thisquery, appendable_result)
-            print "appendable: %s, editable: %s" % (appendable, self.query.editable)
+            # print "appendable: %s, editable: %s" % (appendable, self.query.editable)
 
             ret = host.query(thisquery, encoding=self.query.encoding)
             query_time += host.query_time
 
-            # if stop on error is enabled
             if not ret:
                 print "mysql error: %r" % (host.last_error, )
-                message = "error at: %s" % host.last_error.replace(
-                    "You have an error in your SQL syntax.  "
-                    "Check the manual that corresponds to your "
-                    "MySQL server version for the right syntax to use near ",
-                    "")
-                message = "error at: %s" % message.replace(
-                    "You have an error in your SQL syntax; "
-                    "check the manual that corresponds to your MySQL server "
-                    "version for the right syntax to use near ", "")
-
-                line_pos = 0
-                pos = message.find("at line ")
-                if pos != -1:
-                    line_no = int(message[pos + 8:])
-                    while 1:
-                        line_no -= 1
-                        if line_no < 1:
-                            break
-                        p = thisquery.find("\n", line_pos)
-                        if p == -1:
-                            break
-                        line_pos = p + 1
-
-                i = self.query.textview.get_buffer().get_iter_at_offset(query_start + line_pos)
-
-                match = re.search("error at: '(.*)'", message, re.DOTALL)
-                if match and match.group(1):
-                    # set focus and cursor!
-                    # print "search for ->%s<-" % match.group(1)
-                    pos = text.find(
-                        match.group(1),
-                        query_start + line_pos,
-                        query_start + len(thisquery)
-                    )
-                    if not pos == -1:
-                        i.set_offset(pos)
-                else:
-                    match = re.match("Unknown column '(.*?')", message)
-                    if match:
-                        # set focus and cursor!
-                        pos = thisquery.find(match.group(1))
-                        if not pos == 1:
-                            i.set_offset(query_start + pos)
-
-                self.query.textview.get_buffer().place_cursor(i)
-                self.query.textview.scroll_to_iter(i, 0.0)
-                self.query.textview.grab_focus()
-                self.query.label.set_text(re.sub("[\r\n\t ]+", " ", message))
+                dialogs.error(host.last_error)
+                # message = "error at: %s" % host.last_error.replace(
+                #     "You have an error in your SQL syntax.  "
+                #     "Check the manual that corresponds to your "
+                #     "MySQL server version for the right syntax to use near ",
+                #     "")
+                # message = "error at: %s" % message.replace(
+                #     "You have an error in your SQL syntax; "
+                #     "check the manual that corresponds to your MySQL server "
+                #     "version for the right syntax to use near ", "")
+                #
+                # line_pos = 0
+                # pos = message.find("at line ")
+                # if pos != -1:
+                #     line_no = int(message[pos + 8:])
+                #     while 1:
+                #         line_no -= 1
+                #         if line_no < 1:
+                #             break
+                #         p = thisquery.find("\n", line_pos)
+                #         if p == -1:
+                #             break
+                #         line_pos = p + 1
+                #
+                # i = self.query.textview.get_buffer().get_iter_at_offset(query_start + line_pos)
+                #
+                # match = re.search("error at: '(.*)'", message, re.DOTALL)
+                # if match and match.group(1):
+                #     # set focus and cursor!
+                #     # print "search for ->%s<-" % match.group(1)
+                #     pos = text.find(
+                #         match.group(1),
+                #         query_start + line_pos,
+                #         query_start + len(thisquery)
+                #     )
+                #     if not pos == -1:
+                #         i.set_offset(pos)
+                # else:
+                #     match = re.match("Unknown column '(.*?')", message)
+                #     if match:
+                #         # set focus and cursor!
+                #         pos = thisquery.find(match.group(1))
+                #         if not pos == 1:
+                #             i.set_offset(query_start + pos)
+                #
+                # self.query.textview.get_buffer().place_cursor(i)
+                # self.query.textview.scroll_to_iter(i, 0.0)
+                # self.query.textview.grab_focus()
+                # self.query.label.set_text(re.sub("[\r\n\t ]+", " ", message))
                 return
 
             field_count = host.handle.field_count()
@@ -191,6 +193,9 @@ class ExecuteQuery(gtk.ToolButton):
                 affected_rows += host.handle.affected_rows()
                 last_insert_id = host.handle.insert_id()
                 continue
+
+            print 'host.handle.affected_rows():'
+            print host.handle.affected_rows()
 
             # query with result
             self.query.append_iter = None

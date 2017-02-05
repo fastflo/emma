@@ -52,7 +52,7 @@ def read_expression(query, _start=0, concat=True, update_function=None, update_o
 
     # print "read expr in", query
     match = r.search(query, _start)
-    #if match: print match.groups()
+    # if match: print match.groups()
     if not match:
         return None, None
     for i in range(1, match.lastindex + 1):
@@ -89,8 +89,8 @@ def get_order_from_query(query):
     # get current order by clause
     match = re.search(r, query)
     if not match:
-        print "no order found in", [query]
-        print "re:", [re_src_query_order]
+        # print "no order found in", [query]
+        # print "re:", [re_src_query_order]
         return current_order
     before, order, after = match.groups()
     order.lower()
