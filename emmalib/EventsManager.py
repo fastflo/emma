@@ -1,28 +1,57 @@
 import gobject
 import gtk
+
+from emmalib import emma_instance
 from widgets import TabTable
 
 
-class EventsManager(gobject.GObject):
-    __gsignals__ = {
-        'execute_query': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.Object, str)),
+class EventsManager:
+    """
+    Emma's global event manager
+    """
 
-        'toggle_message_notebook_visible': (
-            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.Object,))
-    }
+    def __init__(self):
+        self.__handlers__ = {}
 
-    def __init__(self, emma):
-        gobject.GObject.__init__(self)
-        self.emma = emma
+    def on(self, event_name, event_callback):
+        """
+        :param event_name: str
+        :param event_callback: function
+        """
+        if event_name not in self.__handlers__:
+            self.__handlers__[event_name] = []
+        self.__handlers__[event_name].append(event_callback)
 
-    def on_table_modified(self, table):
+    def trigger(self, event_name, *args):
+        """
+        :param event_name: str
+        :param args: []
+        """
+        if event_name in self.__handlers__:
+            for event in self.__handlers__[event_name]:
+                if len(args) > 0:
+                    event(args)
+                else:
+                    event()
+
+    # TODO: rewrite to normal events
+    @staticmethod
+    def on_table_modified(table):
+        """
+        :param table:
+        """
         new_tables = table.db.refresh()
-        _iter = self.emma.connections_tv.get_db_iter(table.db)
-        self.emma.connections_tv.redraw_db(table.db, _iter, new_tables)
+        _iter = emma_instance.connections_tv.get_db_iter(table.db)
+        emma_instance.connections_tv.redraw_db(table.db, _iter, new_tables)
 
-    def on_table_dropped(self, table):
-        self.on_table_modified(table)
-        for tab in self.emma.main_notebook.tabs:
+    # TODO: rewrite to normal events
+    @staticmethod
+    def on_table_dropped(table):
+        """
+        :param table:
+        """
+        EventsManager.on_table_modified(table)
+        for tab in emma_instance.main_notebook.tabs:
             if type(tab) == TabTable:
                 if tab.table == table:
-                    self.emma.main_notebook.close_generic_tab(None, tab)
+                    emma_instance.main_notebook.close_generic_tab(None, tab)

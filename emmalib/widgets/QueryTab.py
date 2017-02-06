@@ -502,7 +502,7 @@ class QueryTab(BaseTab):
         self.set(new_query)
 
         if self.emma.config.get("result_view_column_sort_timeout") <= 0:
-            self.emma.events.emit('execute_query')
+            self.emma.events.trigger('execute_query')
 
         new_order = dict(new_order)
 
@@ -752,7 +752,7 @@ class QueryTab(BaseTab):
         if self.sort_timer_execute > time.time():
             return True
         self.sort_timer_running = False
-        self.emma.events.emit('execute_query')
+        self.emma.events.trigger('execute_query')
         return False
 
     def get_ui(self):

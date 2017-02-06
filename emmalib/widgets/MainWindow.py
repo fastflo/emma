@@ -24,11 +24,11 @@ from MainMenu import MainMenu
 
 
 class MainWindow(gtk.Window):
+    """
+    @param emma: Emma
+    """
 
     def __init__(self, emma):
-        """
-        @param emma: Emma
-        """
         super(MainWindow, self).__init__()
 
         self.emma = emma
@@ -41,11 +41,9 @@ class MainWindow(gtk.Window):
         self.message_notebook = gtk.Notebook()
         self.message_notebook.show()
 
-        emma.events.connect(
+        emma.events.on(
             'toggle_message_notebook_visible',
-            lambda a, b: self.message_notebook.set_visible(
-                    not self.message_notebook.get_visible()
-                )
+            self.on_toggle_message_notebook_visible
         )
 
         convbox = gtk.VBox(True, 0)
@@ -88,3 +86,11 @@ class MainWindow(gtk.Window):
 
         self.show_all()
         self.connections_tv_spinner.hide()
+
+    def on_toggle_message_notebook_visible(self):
+        """
+        Handle event of visibility toggle
+        """
+        self.message_notebook.set_visible(
+            not self.message_notebook.get_visible()
+        )

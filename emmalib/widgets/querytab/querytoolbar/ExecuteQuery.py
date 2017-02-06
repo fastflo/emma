@@ -7,7 +7,7 @@ import gc
 import re
 import time
 
-import dialogs
+from emmalib.dialogs import error
 from emmalib.Query import read_query, is_query_appendable, get_order_from_query
 from emmalib.dialogs import show_message, confirm
 from emmalib.widgets import ResultCellRenders
@@ -28,16 +28,14 @@ class ExecuteQuery(gtk.ToolButton):
         self.set_tooltip_text('Execute Query (F9, Ctrl+Enter)')
 
         self.connect('clicked', self.on_clicked)
-        self.emma.events.connect('execute_query', self.on_event)
+        self.emma.events.on('execute_query', self.on_event)
 
-    def on_event(self, _, b, c):
+    def on_event(self, *args):
         """
-
-        @param _:
-        @param b:
-        @param c:
+        @param args:
         """
-        self.on_clicked(b, c)
+        print args
+        self.on_clicked(None, None)
 
     def on_clicked(self, _, query=None):
         """
@@ -135,7 +133,7 @@ class ExecuteQuery(gtk.ToolButton):
 
             if not ret:
                 print "mysql error: %r" % (host.last_error, )
-                dialogs.error(host.last_error)
+                error(host.last_error)
                 # message = "error at: %s" % host.last_error.replace(
                 #     "You have an error in your SQL syntax.  "
                 #     "Check the manual that corresponds to your "

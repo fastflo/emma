@@ -23,15 +23,15 @@ import gobject
 
 
 class MainMenu(gtk.MenuBar):
+    """
+    @param emma: Emma
+    """
 
     __gsignals__ = {
         'item-selected': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_OBJECT,))
     }
 
     def __init__(self, emma, mainwindow):
-        """
-        @param emma: Emma
-        """
         super(MainMenu, self).__init__()
 
         self.emma = emma
@@ -107,8 +107,7 @@ class MainMenu(gtk.MenuBar):
         self.show_message_notebook.add_accelerator(
             "activate", mainwindow.accel_group, key, mod, gtk.ACCEL_VISIBLE)
         self.show_message_notebook.connect(
-            "activate",
-            lambda event: self.emma.events.emit('toggle_message_notebook_visible', event)
+            "activate", self.on_toggle_message_notebook_visible
         )
         self.show_message_notebook.set_active(True)
         self.show_message_notebook.show()
@@ -156,29 +155,53 @@ class MainMenu(gtk.MenuBar):
         self.changelog.connect('activate', self.on_changelog_activate)
         self.about.connect('activate', self.on_about_activate)
 
+    def on_toggle_message_notebook_visible(self, _):
+        """
+        :param _:
+        """
+        self.emma.events.trigger('toggle_message_notebook_visible')
+
     def activated(self, item):
+        """
+        :param item:
+        """
         self.emit('item-selected', item)
         pass
 
     def on_reload_plugins_activate(self, item):
+        """
+        :param item:
+        """
         self.emit('item-selected', item)
         self.emma.unload_plugins()
         self.emma.load_plugins()
 
     def on_reread_config_activate(self, item):
+        """
+        :param item:
+        """
         self.emit('item-selected', item)
         self.emma.config.load()
 
     def on_about_activate(self, item):
+        """
+        :param item:
+        """
         self.emit('item-selected', item)
         self.emma.about_dialog.run()
         self.emma.about_dialog.hide()
 
     def on_changelog_activate(self, item):
+        """
+        :param item:
+        """
         self.emit('item-selected', item)
         self.emma.changelog_dialog.show()
 
     def on_quit_activate(self, item):
+        """
+        :param item:
+        """
         self.emit('item-selected', item)
         gtk.main_quit()
 

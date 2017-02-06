@@ -71,10 +71,10 @@ class KeyMap(gobject.GObject):
         #   QueryTab stuff
         #
         if event.keyval == keysyms.F9:
-            self.emma.events.emit('execute_query', None, None)
+            self.emma.events.trigger('execute_query')
 
         if event.keyval == keysyms.Return and self.if_ctrl():
-            self.emma.events.emit('execute_query')
+            self.emma.events.trigger('execute_query')
             return False
 
         if event.keyval == keysyms.t and self.if_ctrl():
@@ -97,4 +97,8 @@ class KeyMap(gobject.GObject):
         return True
 
     def if_ctrl(self):
+        """
+        Detects if CTRL button were pressed
+        :return: bool
+        """
         return self.left_control_key_is_pressed or self.right_control_key_is_pressed

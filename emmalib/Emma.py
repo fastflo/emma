@@ -87,7 +87,7 @@ class Emma:
         #
         # init event manager
         #
-        self.events = EventsManager(self)
+        self.events = EventsManager()
 
     def start(self):
         """
@@ -562,7 +562,7 @@ class Emma:
     #         t = new_query
     #     except:
     #         pass
-    #     self.events.emit('execute_query')
+    #     self.events.trigger('execute_query')
 
     # def get_selected_table(self):
     #     path, column = self.connections_tv.get_cursor()

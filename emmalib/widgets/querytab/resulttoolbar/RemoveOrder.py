@@ -23,11 +23,11 @@ import re
 
 
 class RemoveOrder(gtk.ToolButton):
+    """
+    @param query: QueryTab
+    @param emma: Emma
+    """
     def __init__(self, query, emma):
-        """
-        @param query: QueryTab
-        @param emma: Emma
-        """
         self.emma = emma
         self.query = query
         super(RemoveOrder, self).__init__()
@@ -39,6 +39,10 @@ class RemoveOrder(gtk.ToolButton):
         self.connect('clicked', self.on_remove_order_clicked)
 
     def on_remove_order_clicked(self, _):
+        """
+        :param _:
+        :return: None
+        """
         query = self.query.last_source
         try:
             r = self.emma.query_order_re
@@ -51,5 +55,5 @@ class RemoveOrder(gtk.ToolButton):
         new_query = re.sub("(?i)order[ \r\n\t]+by[ \r\n\t]+", "", before + after)
         self.query.set(new_query)
         self.emma.sort_timer_running = False
-        self.emma.events.emit('execute_query')
+        self.emma.events.trigger('execute_query')
 
