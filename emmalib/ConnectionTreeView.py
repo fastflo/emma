@@ -482,7 +482,7 @@ class ConnectionsTreeView(gtk.TreeView):
                 return
             db = table.db
             if db.query("drop table `%s`" % table.name):
-                self.emma.events.on_table_dropped(table)
+                self.emma.events.trigger('on_table_dropped', table)
         elif what == "check_table":
             self.current_host = table.db.host
             self.current_host.select_database(table.db)
@@ -517,7 +517,8 @@ class ConnectionsTreeView(gtk.TreeView):
                 host.refresh()
                 self.redraw_host(host, self.emma.connections_tv.get_host_iter(host))
         elif what == "new_table":
-            name = dialogs.input_dialog("New table", "Please enter the name of the new table:",
+            name = dialogs.input_dialog("New table",
+                                        "Please enter the name of the new table:",
                                         window=self.emma.mainwindow)
             if not name:
                 return

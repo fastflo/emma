@@ -28,6 +28,6 @@ class EventsManager:
         if event_name in self.__handlers__:
             for event in self.__handlers__[event_name]:
                 if len(args) > 0:
-                    event(args)
+                    event(*args)
                 else:
                     event()

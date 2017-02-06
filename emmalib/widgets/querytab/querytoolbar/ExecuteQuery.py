@@ -34,8 +34,7 @@ class ExecuteQuery(gtk.ToolButton):
         """
         @param args:
         """
-        print args
-        self.on_clicked(None, None)
+        self.on_clicked(*args)
 
     def on_clicked(self, _, query=None):
         """
@@ -191,9 +190,6 @@ class ExecuteQuery(gtk.ToolButton):
                 affected_rows += host.handle.affected_rows()
                 last_insert_id = host.handle.insert_id()
                 continue
-
-            print 'host.handle.affected_rows():'
-            print host.handle.affected_rows()
 
             # query with result
             self.query.append_iter = None
