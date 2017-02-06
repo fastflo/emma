@@ -70,7 +70,17 @@ class ConnectionsTreeView(gtk.TreeView):
 
         self.connection_window = ConnectionWindow(emma)
 
+        self.emma.events.on('on_table_modified', self.on_table_modified)
+
         self.load_from_config()
+
+    def on_table_modified(self, table):
+        """
+        :param table: MySqlTable
+        """
+        new_tables = table.db.refresh()
+        _iter = self.get_db_iter(table.db)
+        self.redraw_db(table.db, _iter, new_tables)
 
     def load_from_config(self):
         """

@@ -120,7 +120,7 @@ class MySqlTable(gobject.GObject):
             self.name = new_name
             self.refresh_properties()
             if emma_instance:
-                emma_instance.events.on_table_modified(self)
+                emma_instance.events.trigger('on_table_modified', self)
             return True
 
     def alter_engine(self, new_engine):
@@ -130,7 +130,7 @@ class MySqlTable(gobject.GObject):
         )):
             self.refresh_properties()
             if emma_instance:
-                emma_instance.events.on_table_modified(self)
+                emma_instance.events.trigger('on_table_modified', self)
 
     def alter_row_format(self, new_row_format):
         if self.host.query('ALTER TABLE `%s` ROW_FORMAT=%s' % (
@@ -139,7 +139,7 @@ class MySqlTable(gobject.GObject):
         )):
             self.refresh_properties()
             if emma_instance:
-                emma_instance.events.on_table_modified(self)
+                emma_instance.events.trigger('on_table_modified', self)
 
     def alter_comment(self, new_comment):
         if self.host.query("ALTER TABLE %s COMMENT='%s'" % (
@@ -148,7 +148,7 @@ class MySqlTable(gobject.GObject):
         )):
             self.refresh_properties()
             if emma_instance:
-                emma_instance.events.on_table_modified(self)
+                emma_instance.events.trigger('on_table_modified', self)
 
     def alter_auto_increment(self, new_ai):
         if self.host.query("ALTER TABLE %s AUTO_INCREMENT=%s" % (
@@ -157,7 +157,7 @@ class MySqlTable(gobject.GObject):
         )):
             self.refresh_properties()
             if emma_instance:
-                emma_instance.events.on_table_modified(self)
+                emma_instance.events.trigger('on_table_modified', self)
 
     def alter_collation(self, charset, collation):
         if self.host.query("ALTER TABLE %s DEFAULT CHARACTER SET %s COLLATE %s" % (
@@ -166,7 +166,7 @@ class MySqlTable(gobject.GObject):
         )):
             self.refresh_properties()
             if emma_instance:
-                emma_instance.events.on_table_modified(self)
+                emma_instance.events.trigger('on_table_modified', self)
 
     def drop_field(self, field_name):
         if self.host.query(
@@ -175,7 +175,7 @@ class MySqlTable(gobject.GObject):
         ):
             self.refresh()
             if emma_instance:
-                emma_instance.events.on_table_modified(self)
+                emma_instance.events.trigger('on_table_modified', self)
 
     #
     #   WIDGETS
@@ -225,7 +225,8 @@ class MySqlTable(gobject.GObject):
             return
         if self.db.query("drop table `%s`" % self.name):
             if emma_instance:
-                emma_instance.events.on_table_dropped(self)
+                emma_instance.events.trigger('on_table_modified', self)
+                emma_instance.events.trigger('on_table_dropped', self)
 
     def on_toolbar_truncate_table(self, *args):
         if not confirm(
@@ -236,4 +237,4 @@ class MySqlTable(gobject.GObject):
             return
         if self.db.query("truncate table `%s`" % self.name):
             if emma_instance:
-                emma_instance.events.on_table_modified(self)
+                emma_instance.events.trigger('on_table_modified', self)

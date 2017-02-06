@@ -26,6 +26,7 @@ import gtk
 from TabProcessList import TabProcessList
 from TabTablesList import TabTablesList
 from QueryTab import QueryTab
+from emmalib.widgets import TabTable
 
 
 class MainNotebook(gtk.Notebook):
@@ -40,6 +41,16 @@ class MainNotebook(gtk.Notebook):
         self.tabs = []
         self.connect('switch_page', self.main_notebook_on_change_page)
         self.set_scrollable(True)
+        self.emma.events.on('on_table_dropped', self.on_table_dropped)
+
+    def on_table_dropped(self, table):
+        """
+        :param table:
+        """
+        for tab in self.tabs:
+            if type(tab) == TabTable:
+                if tab.table == table:
+                    self.close_generic_tab(None, tab)
 
     #
     #   Set emma.current_query properly
