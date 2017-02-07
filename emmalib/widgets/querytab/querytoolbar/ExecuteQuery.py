@@ -1,5 +1,17 @@
 """
 Execute Query
+
+Handle events:
+    execute_query
+
+Emit events:
+    before_execute_query
+    after_execute_query
+    execute_query_error
+    execute_query_success
+    execute_query_no_result
+    execute_query_empty
+    execute_query_not_empty
 """
 import gobject
 import gtk
@@ -15,8 +27,9 @@ from emmalib.widgets import ResultCellRenders
 
 class ExecuteQuery(gtk.ToolButton):
     """
-    @param query: QueryTab
-    @param emma: Emma
+    :param query: QueryTab
+    :param emma: Emma
+    :type self.emma: Emma
     """
     def __init__(self, query, emma):
         super(ExecuteQuery, self).__init__()
@@ -34,7 +47,7 @@ class ExecuteQuery(gtk.ToolButton):
         """
         @param args:
         """
-        self.on_clicked(*args)
+        self.on_clicked(None, None)
 
     def on_clicked(self, _, query=None):
         """
@@ -131,8 +144,10 @@ class ExecuteQuery(gtk.ToolButton):
             query_time += host.query_time
 
             if not ret:
-                print "mysql error: %r" % (host.last_error, )
-                error(host.last_error)
+                message = host.last_error
+                self.emma.events.trigger('execute_query_error')
+                # print "mysql error: %r" % (message, )
+                error(message)
                 # message = "error at: %s" % host.last_error.replace(
                 #     "You have an error in your SQL syntax.  "
                 #     "Check the manual that corresponds to your "
@@ -180,15 +195,17 @@ class ExecuteQuery(gtk.ToolButton):
                 # self.query.textview.get_buffer().place_cursor(i)
                 # self.query.textview.scroll_to_iter(i, 0.0)
                 # self.query.textview.grab_focus()
-                # self.query.label.set_text(re.sub("[\r\n\t ]+", " ", message))
+                self.query.label.set_text(re.sub("[\r\n\t ]+", " ", message))
                 return
 
+            self.emma.events.trigger('execute_query_success')
             field_count = host.handle.field_count()
             if field_count == 0:
                 # query without result
                 update = True
                 affected_rows += host.handle.affected_rows()
                 last_insert_id = host.handle.insert_id()
+                self.emma.events.trigger('execute_query_no_result')
                 continue
 
             # query with result
@@ -224,6 +241,11 @@ class ExecuteQuery(gtk.ToolButton):
             # store field info
             self.query.result_info = result.describe()
             num_rows = result.num_rows()
+
+            if num_rows == 0:
+                self.emma.events.trigger('execute_query_empty')
+            else:
+                self.emma.events.trigger('execute_query_not_empty')
 
             for col in self.query.treeview.get_columns():
                 self.query.treeview.remove_column(col)

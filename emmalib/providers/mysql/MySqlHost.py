@@ -115,6 +115,9 @@ mysql_reserved_words = re.split("[ \r\n\t]+", mysql_reserved_words.lower())
 
 
 class MySqlHost:
+    """
+    MySQL Host class
+    """
     def __init__(self, *args):
         if len(args) == 2:
             # unpickle
@@ -158,6 +161,9 @@ class MySqlHost:
         return d
 
     def get_connection_string(self):
+        """
+        :return: str
+        """
         if self.port != "":
             output = "%s:%s" % (self.host, self.port)
         else:
@@ -166,10 +172,17 @@ class MySqlHost:
         return output
 
     def set_update_ui(self, update_ui, *args):
+        """
+        :param update_ui:
+        :param args:
+        """
         self.update_ui = update_ui
         self.update_ui_args = args
 
     def connect(self):
+        """
+        :return: None
+        """
         c = {
             "host": self.host,
             "user": self.user,
@@ -208,6 +221,10 @@ class MySqlHost:
             self.use_db(self.database)
 
     def is_at_least_version(self, requested):
+        """
+        :param requested: str
+        :return: bool
+        """
         requested = map(int, requested.split("."))
         real = self.version.replace("-", "_").split("_", 1)[0].split(".")
         real = map(lambda f: int(re.sub("[^0-9]", "", f)), real)
@@ -219,6 +236,9 @@ class MySqlHost:
         return True
 
     def ping(self):
+        """
+        :return: bool
+        """
         try:
             self.handle.ping()
             return True
@@ -229,6 +249,9 @@ class MySqlHost:
             return False
 
     def close(self):
+        """
+        Close connection
+        """
         self.databases = {}
         self.processlist = None
         if self.handle:
@@ -240,6 +263,13 @@ class MySqlHost:
             self.update_ui(self, *self.update_ui_args)
 
     def query(self, query, check_use=True, append_to_log=True, encoding=None):
+        """
+        :param query: str
+        :param check_use: bool
+        :param append_to_log: bool
+        :param encoding: str
+        :return:
+        """
         if not self.handle:
             if self.msg_log:
                 self.msg_log(
@@ -290,10 +320,22 @@ class MySqlHost:
         return True
 
     def query_dict(self, query, check_use=False, append_to_log=True, encoding=None):
+        """
+        :param query: str
+        :param check_use: bool
+        :param append_to_log: bool
+        :param encoding: str
+        :return:
+        """
         if self.query(query, check_use, append_to_log, encoding):
             return result2hash(self.handle)
 
     def use_db(self, name, do_query=True):
+        """
+        :param name: str
+        :param do_query: bool
+        :return:
+        """
         if self.current_db and name == self.current_db.name:
             return
         if do_query:
@@ -305,9 +347,15 @@ class MySqlHost:
                 name, "".join(traceback.format_stack()))
 
     def select_database(self, db):
+        """
+        :param db: MySqlDb
+        """
         self.use_db(db.name)
 
     def refresh(self):
+        """
+        Refresh host's databases list
+        """
         self.query("show databases")
         result = self.handle.store_result()
         old = dict(self.databases)
@@ -321,20 +369,35 @@ class MySqlHost:
             del self.databases[db]
 
     def refresh_processlist(self):
+        """
+        :return: None
+        """
         if not self.query("show processlist"):
             return
         result = self.handle.store_result()
         self.processlist = (result.describe(), result.fetch_row(0))
 
     def insert_id(self):
+        """
+        :return: int
+        """
         return self.handle.insert_id()
 
     def escape(self, s):
+        """
+        :param s: str
+        :return: str
+        """
         if s is None:
             return s
         return self.handle.escape_string(s)
 
-    def escape_field(self, field):
+    @staticmethod
+    def escape_field(field):
+        """
+        :param field: str
+        :return: str
+        """
         # todo encode unicode strings here!
         # if already encoded:
         if "\x00" in field or "\0xff" in field:
@@ -351,6 +414,10 @@ class MySqlHost:
         return rv
 
     def escape_table(self, table):
+        """
+        :param table: str
+        :return:
+        """
         not_allowed = "".join(filter(lambda s: s, [
             os.curdir,
             os.pardir,
@@ -360,15 +427,21 @@ class MySqlHost:
             os.pathsep,
             os.linesep]))
         if set(table).intersection(set(not_allowed)):
-            raise Exception("before mysql 5.1.6 table names are not allowed "
-                            "to contain one of these chars: %r %r" % (not_allowed, table)
-                            )
+            raise Exception(
+                "before mysql 5.1.6 table names are not allowed "
+                "to contain one of these chars: %r %r" % (not_allowed, table)
+            )
         if len(table) > 64:
             raise Exception("table name too long: %r / %d" % (table, len(table)))
         return self.escape_field(table)
 
 
 def result2hash(h, cols=True):
+    """
+    :param h:
+    :param cols:
+    :return:
+    """
     res = h.store_result()
     ret = {"rows": []}
     if res is not None:
@@ -386,6 +459,10 @@ def result2hash(h, cols=True):
 
 
 def mysql2gobject(typecode):
+    """
+    :param typecode: int
+    :return: type
+    """
     d = {
         16: gobject.TYPE_INT,
         252: gobject.TYPE_STRING,
@@ -419,6 +496,10 @@ def mysql2gobject(typecode):
 
 
 def mysql2py(typecode):
+    """
+    :param typecode: int
+    :return: type
+    """
     d = {
         16: int,
         252: str,
