@@ -22,6 +22,9 @@ from MySqlTable import *
 
 
 class MySqlDb:
+    """
+    Class wraps MySQL Database logic
+    """
     def __init__(self, host, name=None):
         self.handle = host.handle
         self.host = host
@@ -38,6 +41,9 @@ class MySqlDb:
                 # self.id = id
 
     def refresh(self):
+        """
+        :return:
+        """
         self.host.select_database(self)
         if self.host.is_at_least_version("4.1.1"):
             self.host.query("show variables like 'character_set_database'")
@@ -73,5 +79,11 @@ class MySqlDb:
         return new_tables
 
     def query(self, query, check_use=True, append_to_log=True):
+        """
+        :param query:
+        :param check_use:
+        :param append_to_log:
+        :return:
+        """
         self.host.select_database(self)
         return self.host.query(query, check_use, append_to_log)

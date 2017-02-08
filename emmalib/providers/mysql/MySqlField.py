@@ -44,6 +44,9 @@ field_types_str = [
 
 
 class MySqlField:
+    """
+    Class which wraps MySQL field logic
+    """
     def __init__(self, row):
         self.row = row
         # print row
@@ -77,6 +80,10 @@ class MySqlField:
             self.comment = ''
 
     def get_py_type(self):
+        """
+        Get Python type from MySQL type
+        :return: type
+        """
         _t_type, _t_size, _t_scale, _t_unsigned, _t_values = self.parse_type()
         if _t_type in field_types_int:
             return long
@@ -86,6 +93,9 @@ class MySqlField:
             return str
 
     def parse_type(self):
+        """
+        :return: ()
+        """
         m = re.match(r'(.+)\((\d+),(\d+)\)\s(unsigned)', self.row['Type'])
         if m is not None:
             return m.group(1), int(m.group(2)), m.group(3), True, ''

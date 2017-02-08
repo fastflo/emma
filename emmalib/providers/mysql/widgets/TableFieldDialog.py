@@ -232,6 +232,9 @@ field_types_conf = {
 
 
 class TableFieldDialog(gtk.Dialog):
+    """
+    Dialog to edit MySQL field
+    """
     def __init__(self, field):
 
         self.field = field
@@ -365,6 +368,9 @@ class TableFieldDialog(gtk.Dialog):
         self.show_all()
 
     def on_cb_type_changed(self, cb):
+        """
+        :param cb: gtk.ComboBox
+        """
         at = cb.get_active_text()
         conf = field_types_conf[at]
         self.sp_size.set_sensitive(conf['size'])
@@ -381,6 +387,9 @@ class TableFieldDialog(gtk.Dialog):
         self.tb_values.set_sensitive(conf['values'])
 
     def on_cb_charset_changed(self, cb):
+        """
+        :param cb: gtk.ComboBox
+        """
         at = cb.get_active_text()
         self.cb_collation.get_model().clear()
         for i in sorted(collations[at]):
@@ -390,19 +399,38 @@ class TableFieldDialog(gtk.Dialog):
             self.cb_collation.set_active(0)
 
     def mkrow(self, tbl, child, label, r, o=0):
+        """
+        :param tbl:
+        :param child:
+        :param label:
+        :param r:
+        :param o:
+        """
         tbl.attach(self.mklbl(label), 0 + o, 1 + o, r, r + 1, gtk.FILL, 0)
         tbl.attach(child, 1 + o, 2 + o, r, r + 1, gtk.FILL, 0)
 
     def mksep(self, tbl, r):
+        """
+        :param tbl:
+        :param r: int
+        """
         tbl.attach(gtk.HSeparator(), 0, 4, r, r + 1, gtk.FILL, 0)
 
     def mklbl(self, text):
+        """
+        :param text: str
+        :return: gtk.Label
+        """
         lbl = gtk.Label(text + ':')
         lbl.set_justify(gtk.JUSTIFY_RIGHT)
         lbl.set_alignment(1, 0)
         return lbl
 
     def selcb(self, cb, text):
+        """
+        :param cb: gtk.ComboBox
+        :param text: str
+        """
         ix = 0
         for i in cb.get_model():
             if i[0] == text:
@@ -410,6 +438,10 @@ class TableFieldDialog(gtk.Dialog):
             ix += 1
 
     def get_sql(self, table_name):
+        """
+        :param table_name: str
+        :return: str
+        """
         sql = ''
         if self.field.name == '':
             sql += 'ALTER TABLE `%s` ADD COLUMN `%s`' % (table_name, self.tb_name.get_text(),)

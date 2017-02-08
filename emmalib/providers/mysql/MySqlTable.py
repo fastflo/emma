@@ -150,6 +150,9 @@ class MySqlTable(gobject.GObject):
             return True
 
     def alter_engine(self, new_engine):
+        """
+        :param new_engine:
+        """
         if self.host.query('ALTER TABLE `%s` ENGINE=%s' % (
                 self.host.escape_table(self.name),
                 new_engine.upper()
@@ -159,6 +162,9 @@ class MySqlTable(gobject.GObject):
                 emma_instance.events.trigger('on_table_modified', self)
 
     def alter_row_format(self, new_row_format):
+        """
+        :param new_row_format:
+        """
         if self.host.query('ALTER TABLE `%s` ROW_FORMAT=%s' % (
                 self.host.escape_table(self.name),
                 new_row_format.upper()
@@ -168,6 +174,9 @@ class MySqlTable(gobject.GObject):
                 emma_instance.events.trigger('on_table_modified', self)
 
     def alter_comment(self, new_comment):
+        """
+        :param new_comment:
+        """
         if self.host.query("ALTER TABLE %s COMMENT='%s'" % (
                 self.host.escape_table(self.name),
                 new_comment
@@ -177,6 +186,9 @@ class MySqlTable(gobject.GObject):
                 emma_instance.events.trigger('on_table_modified', self)
 
     def alter_auto_increment(self, new_ai):
+        """
+        :param new_ai:
+        """
         if self.host.query("ALTER TABLE %s AUTO_INCREMENT=%s" % (
                 self.host.escape_table(self.name),
                 new_ai
@@ -186,6 +198,10 @@ class MySqlTable(gobject.GObject):
                 emma_instance.events.trigger('on_table_modified', self)
 
     def alter_collation(self, charset, collation):
+        """
+        :param charset:
+        :param collation:
+        """
         if self.host.query("ALTER TABLE %s DEFAULT CHARACTER SET %s COLLATE %s" % (
                 self.host.escape_table(self.name),
                 charset, collation
@@ -195,6 +211,9 @@ class MySqlTable(gobject.GObject):
                 emma_instance.events.trigger('on_table_modified', self)
 
     def drop_field(self, field_name):
+        """
+        :param field_name:
+        """
         if self.host.query(
                         "ALTER TABLE `%s` DROP `%s`" %
                         (self.host.escape_table(self.name), field_name)
@@ -208,24 +227,37 @@ class MySqlTable(gobject.GObject):
     #
 
     def get_table_properties_widget(self):
+        """
+        :return:
+        """
         if self.is_table:
             return widgets.TableProperties(self)
         else:
             return False
 
     def get_table_fields_widget(self):
+        """
+        :return:
+        """
         if self.is_table:
             return widgets.TableFields(self)
         else:
             return False
 
     def get_table_indexes_widget(self):
+        """
+        :return:
+        """
         if self.is_table:
             return widgets.TableIndexes(self)
         else:
             return False
 
     def get_table_toolbar(self, tab_table):
+        """
+        :param tab_table:
+        :return:
+        """
         if self.is_table:
             toolbar = widgets.TableToolbar(tab_table)
             toolbar.refresh.connect('clicked', self.on_toolbar_refresh_table)
@@ -236,13 +268,23 @@ class MySqlTable(gobject.GObject):
             return False
 
     def get_table_status_string(self):
+        """
+        :return:
+        """
         return 'Engine: %s, Rows: %s, Collation: %s, Comment: %s' % \
                (self.props[1], self.props[4], self.props[14], self.props[17])
 
     def on_toolbar_refresh_table(self, *args):
+        """
+        :param args:
+        """
         self.refresh(True)
 
     def on_toolbar_drop_table(self, *args):
+        """
+        :param args:
+        :return:
+        """
         if not confirm(
                 "Drop table",
                 "do you really want to DROP the <b>%s</b> table in database "
@@ -255,6 +297,10 @@ class MySqlTable(gobject.GObject):
                 emma_instance.events.trigger('on_table_dropped', self)
 
     def on_toolbar_truncate_table(self, *args):
+        """
+        :param args:
+        :return:
+        """
         if not confirm(
                 "Truncate table",
                 "Do You really want to TRUNCATE the <b>%s</b> table in database "

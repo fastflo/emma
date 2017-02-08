@@ -20,6 +20,9 @@
 
 
 class MySqlIndex:
+    """
+    Class which wraps mysql index
+    """
     def __init__(self, row):
         self.name = row['Key_name']
         if row['Non_unique'] == '0':
