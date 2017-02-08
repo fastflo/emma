@@ -22,4 +22,3 @@ class About(gtk.AboutDialog):
                            "(c) Nickolay 'mr.electronick' Karnaukhov 2014")
         self.set_comments("Extendable Database Managing Assistant\n\nsuccessor of yamysqlfront")
         self.set_website('http://emma-assistant.org')
-

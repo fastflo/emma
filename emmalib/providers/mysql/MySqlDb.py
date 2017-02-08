@@ -35,7 +35,7 @@ class MySqlDb:
             print "unpickling tables!", self.handle
             for name, table in self.tables.iteritems():
                 table.handle = self.handle
-                #self.id = id
+                # self.id = id
 
     def refresh(self):
         self.host.select_database(self)
@@ -59,11 +59,11 @@ class MySqlDb:
         old = dict(zip(self.tables.keys(), range(len(self.tables))))
         for row in result.fetch_row(0):
             if not row[0] in old:
-                #print "new table", row[0]
+                # print "new table", row[0]
                 self.tables[row[0]] = MySqlTable(self, row, result.describe())
                 new_tables.append(row[0])
             else:
-                #print "known table", row[0]
+                # print "known table", row[0]
                 # todo update self.tables[row[0]] with row!
                 del old[row[0]]
 

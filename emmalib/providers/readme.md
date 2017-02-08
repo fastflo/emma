@@ -1,5 +1,5 @@
 # Emma database providers technical description
-Emma Database provider is a set of classes which handle all work between Emma UI and database itself.
+Emma Database provider is a set of classes which handle all work between Emma UI and database.
 
 ## Host class
 Host class provides a main connection to DB and should support following methods:

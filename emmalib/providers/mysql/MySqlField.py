@@ -46,7 +46,7 @@ field_types_str = [
 class MySqlField:
     def __init__(self, row):
         self.row = row
-        #print row
+        # print row
         if len(row) > 0:
             self.name = row['Field']
             self.default = row['Default']
@@ -55,7 +55,7 @@ class MySqlField:
             else:
                 self.is_null = False
 
-            #print self.parse_type()
+            # print self.parse_type()
             _t_type, self.size, self.precission, self.unsigned, self.values = self.parse_type()
             self.type = _t_type.upper()
             self.type_string = self.row['Type']
@@ -109,4 +109,3 @@ class MySqlField:
         m = re.match(r'(.+)', self.row['Type'])
         if m is not None:
             return m.group(1), 0, 0, False, ''
-

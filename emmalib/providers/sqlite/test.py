@@ -29,31 +29,27 @@ res = cur.fetchall()
 for row in res:
     print row
 
-
-
-
-
-# from SQLiteHost import SQLiteHost
-#
-# host = SQLiteHost(None, None, '/home/nick/test.sqlite')
-# host.connect()
-#
-# host.databases['dummydb'].refresh()
-# print host.databases['dummydb'].tables
-#
-# table = host.databases['dummydb'].tables['aaa']
-# table.refresh()
-#
-# print "---------------------------"
-# print "Table:"
-# print table.__dict__
-#
-# print "---------------------------"
-# print "Table fields:"
-# for f in table.fields:
-#     print f.__dict__
-#
-# print "---------------------------"
-# print "Table indexes:"
-# for i in table.indexes:
-#     print i.__dict__
+    # from SQLiteHost import SQLiteHost
+    #
+    # host = SQLiteHost(None, None, '/home/nick/test.sqlite')
+    # host.connect()
+    #
+    # host.databases['dummydb'].refresh()
+    # print host.databases['dummydb'].tables
+    #
+    # table = host.databases['dummydb'].tables['aaa']
+    # table.refresh()
+    #
+    # print "---------------------------"
+    # print "Table:"
+    # print table.__dict__
+    #
+    # print "---------------------------"
+    # print "Table fields:"
+    # for f in table.fields:
+    #     print f.__dict__
+    #
+    # print "---------------------------"
+    # print "Table indexes:"
+    # for i in table.indexes:
+    #     print i.__dict__

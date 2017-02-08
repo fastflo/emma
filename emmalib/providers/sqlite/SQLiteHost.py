@@ -22,7 +22,6 @@ import sys
 import time
 import gobject
 import sqlite3
-import traceback
 from emmalib.providers.sqlite.SQLiteDb import SQLiteDb
 from emmalib.providers.sqlite.SQLiteHandle import SQLiteHandle
 

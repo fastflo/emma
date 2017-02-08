@@ -25,12 +25,11 @@ from emmalib import dialogs
 
 
 class LocalSearch(gtk.ToolButton):
-
+    """
+    @param query: QueryTab
+    @param emma: Emma
+    """
     def __init__(self, query, emma):
-        """
-        @param query: QueryTab
-        @param emma: Emma
-        """
         super(LocalSearch, self).__init__()
         self.emma = emma
         self.query = query
@@ -42,6 +41,11 @@ class LocalSearch(gtk.ToolButton):
         self.connect('clicked', self.on_local_search_button_clicked)
 
     def on_local_search_button_clicked(self, _, again=False):
+        """
+        :param _:
+        :param again:
+        :return:
+        """
         if not self.get_property("sensitive"):
             return
         self.emma.local_search_dialog.run(self.query, again)

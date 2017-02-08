@@ -11,10 +11,14 @@ class FieldConditions(gtk.Window):
     """
     Field Conditions Dialog
     """
+
     def __init__(self):
         super(FieldConditions, self).__init__()
 
     def get_selected_table(self):
+        """
+        :return:
+        """
         path, column = self.connections_tv.get_cursor()
         depth = len(path)
         _iter = self.connections_tv.connections_model.get_iter(path)
@@ -23,6 +27,9 @@ class FieldConditions(gtk.Window):
         return None
 
     def on_fc_reset_clicked(self, button):
+        """
+        :param button:
+        """
         for i in range(self.fc_count):
             self.fc_entry[i].set_text("")
             if i == 0:
@@ -35,8 +42,12 @@ class FieldConditions(gtk.Window):
                 self.fc_logic_combobox[i - 1].set_active(0)
 
     def on_template(self, button, t):
+        """
+        :param button:
+        :param t:
+        :return:
+        """
         current_table = self.get_selected_table()
-        current_fc_table = current_table
 
         if t.find("$table$") != -1:
             if not current_table:
@@ -58,7 +69,8 @@ class FieldConditions(gtk.Window):
             if not current_table.fields:
                 dialogs.show_message(
                     "info",
-                    "sorry, can't execute this template, because table '%s' has no fields!" % current_table.name)
+                    "sorry, can't execute this template, because table '%s' has no fields!" %
+                    current_table.name)
                 return
             # is the next token desc or asc?
             result = re.search("(?i)[ \t\r\n]*(de|a)sc", t[pos:])
@@ -111,7 +123,10 @@ class FieldConditions(gtk.Window):
                 self.fc_logic_combobox = []
                 for i in range(self.fc_count):
                     self.fc_entry.append(gtk.Entry())
-                    self.fc_entry[i].connect("activate", lambda *e: self.fc_window.response(gtk.RESPONSE_OK))
+                    self.fc_entry[i].connect(
+                        "activate",
+                        lambda *e: self.fc_window.response(gtk.RESPONSE_OK)
+                    )
                     self.fc_combobox.append(gtk.combo_box_new_text())
                     self.fc_op_combobox.append(gtk.combo_box_new_text())
                     self.fc_op_combobox[i].append_text("=")
@@ -166,6 +181,12 @@ class FieldConditions(gtk.Window):
                 return
 
             def field_operator_value(field, op, value):
+                """
+                :param field:
+                :param op:
+                :param value:
+                :return:
+                """
                 if op == "ISNULL":
                     return "isnull(`%s`)" % field
                 if op == "NOT ISNULL":
@@ -173,7 +194,9 @@ class FieldConditions(gtk.Window):
                 eval_kw = "eval: "
                 if value.startswith(eval_kw):
                     return "`%s` %s %s" % (field, op, value[len(eval_kw):])
-                return "%s %s '%s'" % (self.current_host.escape_field(field), op, self.current_host.escape(value))
+                return "%s %s '%s'" % (
+                    self.current_host.escape_field(field), op, self.current_host.escape(value)
+                )
 
             conditions = "%s" % (
                 field_operator_value(
@@ -199,7 +222,7 @@ class FieldConditions(gtk.Window):
 
         try:
             new_order = self.stored_orders[self.current_host.current_db.name][current_table.name]
-            print "found stored order: %r" % (new_order, )
+            print "found stored order: %r" % (new_order,)
             query = t
             try:
                 r = self.query_order_re
@@ -235,4 +258,3 @@ class FieldConditions(gtk.Window):
         except:
             pass
         self.events.trigger('execute_query')
-

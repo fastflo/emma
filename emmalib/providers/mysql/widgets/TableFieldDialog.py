@@ -232,7 +232,6 @@ field_types_conf = {
 
 
 class TableFieldDialog(gtk.Dialog):
-    
     def __init__(self, field):
 
         self.field = field
@@ -310,20 +309,20 @@ class TableFieldDialog(gtk.Dialog):
                 if co == field.collation:
                     self.selcb(self.cb_charset, ch)
                     self.selcb(self.cb_collation, co)
-                    #print co
+                    # print co
 
         tbl = gtk.Table(4, 4)
         tbl.set_col_spacings(8)
         tbl.set_row_spacings(8)
 
         r = 0
-        tbl.attach(self.mklbl('Name'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.tb_name, 1, 4, r, r+1, gtk.FILL, 0)
+        tbl.attach(self.mklbl('Name'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(self.tb_name, 1, 4, r, r + 1, gtk.FILL, 0)
         r += 1
         self.mksep(tbl, r)
         r += 1
-        tbl.attach(self.mklbl('Type'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.cb_type, 1, 4, r, r+1, gtk.FILL, 0)
+        tbl.attach(self.mklbl('Type'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(self.cb_type, 1, 4, r, r + 1, gtk.FILL, 0)
         r += 1
         self.mkrow(tbl, self.sp_size, 'Size', r)
         self.mkrow(tbl, self.sp_prec, 'Precission', r, 2)
@@ -340,26 +339,26 @@ class TableFieldDialog(gtk.Dialog):
         r += 1
         self.mksep(tbl, r)
         r += 1
-        tbl.attach(self.mklbl('Default'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.tb_default, 1, 4, r, r+1, gtk.FILL, 0)
+        tbl.attach(self.mklbl('Default'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(self.tb_default, 1, 4, r, r + 1, gtk.FILL, 0)
         r += 1
         self.mksep(tbl, r)
         r += 1
-        tbl.attach(self.mklbl('Charset'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.cb_charset, 1, 4, r, r+1, gtk.FILL, 0)
+        tbl.attach(self.mklbl('Charset'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(self.cb_charset, 1, 4, r, r + 1, gtk.FILL, 0)
         r += 1
-        tbl.attach(self.mklbl('Collation'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.cb_collation, 1, 4, r, r+1, gtk.FILL, 0)
-        r += 1
-        self.mksep(tbl, r)
-        r += 1
-        tbl.attach(self.mklbl('Values'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.tb_values, 1, 4, r, r+1, gtk.FILL, 0)
+        tbl.attach(self.mklbl('Collation'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(self.cb_collation, 1, 4, r, r + 1, gtk.FILL, 0)
         r += 1
         self.mksep(tbl, r)
         r += 1
-        tbl.attach(self.mklbl('Comment'), 0, 1, r, r+1, gtk.FILL, 0)
-        tbl.attach(self.tb_comment, 1, 4, r, r+1, gtk.FILL, 0)
+        tbl.attach(self.mklbl('Values'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(self.tb_values, 1, 4, r, r + 1, gtk.FILL, 0)
+        r += 1
+        self.mksep(tbl, r)
+        r += 1
+        tbl.attach(self.mklbl('Comment'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(self.tb_comment, 1, 4, r, r + 1, gtk.FILL, 0)
 
         self.vbox.pack_start(tbl)
 
@@ -386,19 +385,19 @@ class TableFieldDialog(gtk.Dialog):
         self.cb_collation.get_model().clear()
         for i in sorted(collations[at]):
             self.cb_collation.append_text(i)
-        self.selcb(self.cb_collation, at+'_general_ci')
+        self.selcb(self.cb_collation, at + '_general_ci')
         if self.cb_collation.get_active_text() is None:
             self.cb_collation.set_active(0)
 
     def mkrow(self, tbl, child, label, r, o=0):
-        tbl.attach(self.mklbl(label), 0+o, 1+o, r, r+1, gtk.FILL, 0)
-        tbl.attach(child, 1+o, 2+o, r, r+1, gtk.FILL, 0)
+        tbl.attach(self.mklbl(label), 0 + o, 1 + o, r, r + 1, gtk.FILL, 0)
+        tbl.attach(child, 1 + o, 2 + o, r, r + 1, gtk.FILL, 0)
 
     def mksep(self, tbl, r):
-        tbl.attach(gtk.HSeparator(), 0, 4, r, r+1, gtk.FILL, 0)
+        tbl.attach(gtk.HSeparator(), 0, 4, r, r + 1, gtk.FILL, 0)
 
     def mklbl(self, text):
-        lbl = gtk.Label(text+':')
+        lbl = gtk.Label(text + ':')
         lbl.set_justify(gtk.JUSTIFY_RIGHT)
         lbl.set_alignment(1, 0)
         return lbl

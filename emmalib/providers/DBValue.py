@@ -22,7 +22,6 @@ import gobject
 
 
 class DBValue(gobject.GObject):
-
     def __init__(self, value):
         super(DBValue, self).__init__()
         self.value = value
