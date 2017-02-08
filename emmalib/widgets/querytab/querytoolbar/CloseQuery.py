@@ -27,4 +27,4 @@ class CloseQuery(gtk.ToolButton):
 
         @param _:
         """
-        self.emma.main_notebook.close_query_tab()
+        self.emma.main_notebook.close_query_tab(self, self.query)

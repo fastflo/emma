@@ -6,6 +6,7 @@ import gtk
 from About import About
 from ChangeLog import ChangeLog
 from ExecuteQueryFromDisk import ExecuteQueryFromDisk
+# from LocalSearch import LocalSearch
 
 
 def alert(message):
