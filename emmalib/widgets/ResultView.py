@@ -24,7 +24,9 @@ from ResultCellRenders import *
 
 
 class ResultView(gtk.ScrolledWindow):
-
+    """
+    Common Widged to display DB results
+    """
     def __init__(self):
         super(ResultView, self).__init__()
 
@@ -38,6 +40,9 @@ class ResultView(gtk.ScrolledWindow):
         self.show_all()
 
     def load_data(self, result):
+        """
+        :param result:
+        """
         for col in self.tv_data.get_columns():
             self.tv_data.remove_column(col)
         if self.tv_data_model:
@@ -149,6 +154,11 @@ class ResultView(gtk.ScrolledWindow):
                 pass
 
     def column_insert(self, title, sort_column_index, display_column_index):
+        """
+        :param title: str
+        :param sort_column_index: int
+        :param display_column_index: int
+        """
         text_renderer = gtk.CellRendererText()
         ci = self.tv_data.insert_column_with_data_func(
             -1,
@@ -162,6 +172,9 @@ class ResultView(gtk.ScrolledWindow):
             col.set_sort_column_id(sort_column_index)
 
     def cleanup(self):
+        """
+        Cleanup controls
+        """
         for col in self.tv_data.get_columns():
             self.tv_data.remove_column(col)
         if self.tv_data_model:

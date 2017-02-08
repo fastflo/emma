@@ -24,10 +24,11 @@ from ResultView import ResultView
 
 
 class TabTable(BaseTab):
+    """
+    @param emma: Emma
+    """
+
     def __init__(self, emma, table):
-        """
-        @param emma: Emma
-        """
         super(TabTable, self).__init__()
 
         self.notebook = gtk.Notebook()

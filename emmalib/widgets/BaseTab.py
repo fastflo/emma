@@ -23,6 +23,9 @@ from emmalib.Constants import *
 
 
 class BaseTab(object):
+    """
+    Base tab - used as parent for all Emma tabs
+    """
     def __init__(self):
         self.tab_label = gtk.Label('Tab Name')
         self.tab_label.show()
@@ -58,13 +61,25 @@ class BaseTab(object):
         self.tab_label_hbox.pack_end(self.tab_label_close_button)
 
     def get_label(self):
+        """
+        :return: gtk.Label
+        """
         return self.tab_label
 
     def get_ui(self):
+        """
+        :return:
+        """
         return self.ui
 
     def get_label_ui(self):
+        """
+        :return: gtk.HBox
+        """
         return self.tab_label_hbox
 
     def get_tab_close_button(self):
+        """
+        :return: gtk.Button
+        """
         return self.tab_label_close_button

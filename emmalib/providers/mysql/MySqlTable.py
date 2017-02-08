@@ -57,6 +57,9 @@ class MySqlTable(gobject.GObject):
             self.is_view = True
 
     def refresh(self, refresh_props=True):
+        """
+        :param refresh_props: bool
+        """
         self.db.host.select_database(self.db)
         if refresh_props:
             self.refresh_properties()
@@ -65,6 +68,9 @@ class MySqlTable(gobject.GObject):
         self.emit('changed')
 
     def refresh_properties(self):
+        """
+        Refresh table properties
+        """
         self.host.query("show table status like '%s'" % self.name)
         result = self.handle.store_result()
         rows = result.fetch_row(0)
@@ -73,6 +79,9 @@ class MySqlTable(gobject.GObject):
         self.name = self.props[0]
 
     def refresh_fields(self):
+        """
+        :return: None
+        """
         self.fields = []
         res = self.host.query_dict("show full columns from %s" % self.host.escape_table(self.name))
         if not res:
@@ -81,6 +90,9 @@ class MySqlTable(gobject.GObject):
             self.fields.append(MySqlField(row))
 
     def refresh_indexes(self):
+        """
+        :return: None
+        """
         self.indexes = []
         res = self.host.query_dict('SHOW INDEX FROM %s' % self.host.escape_table(self.name))
         if not res:
@@ -89,6 +101,9 @@ class MySqlTable(gobject.GObject):
             self.indexes.append(MySqlIndex(row))
 
     def get_create_table(self):
+        """
+        :return: str
+        """
         if not self.create_table:
             self.db.host.select_database(self.db)
             self.host.query("show create table `%s`" % self.name)
@@ -101,9 +116,16 @@ class MySqlTable(gobject.GObject):
         return self.create_table
 
     def get_tree_row(self, field_name):
+        """
+        :param field_name: str
+        :return:
+        """
         return (self.fields[field_name][0], self.fields[field_name][1]),
 
     def get_all_records(self):
+        """
+        :return: dict
+        """
         return self.host.query_dict('SELECT * FROM `%s`' % self.name)
 
     #
@@ -111,6 +133,10 @@ class MySqlTable(gobject.GObject):
     #
 
     def rename(self, new_name):
+        """
+        :param new_name: str
+        :return: bool
+        """
         if self.host.query('RENAME TABLE `%s` TO `%s`' % (
                 self.host.escape_table(self.name),
                 self.host.escape_table(new_name)
