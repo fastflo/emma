@@ -25,10 +25,10 @@ from ResultCellRenders import *
 
 
 class TabTablesList(BaseTab):
+    """
+    @param emma: Emma
+    """
     def __init__(self, emma):
-        """
-        @param emma: Emma
-        """
         super(TabTablesList, self).__init__()
         self.emma = emma
 
@@ -59,6 +59,10 @@ class TabTablesList(BaseTab):
         self.ui.show_all()
 
     def redraw(self, *args):
+        """
+        :param args:
+        :return:
+        """
         if not self.emma.current_query:
             return
         elif self.emma.current_query.current_host:
@@ -103,4 +107,7 @@ class TabTablesList(BaseTab):
             self.model.append(table.props)
 
     def get_ui(self):
+        """
+        :return:
+        """
         return self.ui

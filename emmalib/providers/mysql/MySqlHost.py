@@ -325,7 +325,7 @@ class MySqlHost:
         :param check_use: bool
         :param append_to_log: bool
         :param encoding: str
-        :return:
+        :return: {}
         """
         if self.query(query, check_use, append_to_log, encoding):
             return result2hash(self.handle)

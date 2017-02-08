@@ -75,6 +75,7 @@ class MySqlTable(gobject.GObject):
         result = self.handle.store_result()
         rows = result.fetch_row(0)
         self.props = rows[0]
+        # TODO - Fix incompatibility with method used to fill it in constructor
         self.props_dict = dict(zip(map(lambda v: v[0], result.describe()), rows[0]))
         self.name = self.props[0]
 
