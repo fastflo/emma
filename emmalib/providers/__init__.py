@@ -1,3 +1,6 @@
+"""
+Providers module
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -18,16 +21,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-emma_registered_providers = []
+from emmalib import emma_registered_providers
 
-import mysql
-import sqlite
-
-from Connection import Connection
-from Connections import Connections
+import emmalib.providers.mysql
+import emmalib.providers.sqlite
 
 
 def check_provider(provider_name):
+    """
+    :param provider_name: str
+    :return: bool
+    """
     return provider_name in emma_registered_providers
-
-

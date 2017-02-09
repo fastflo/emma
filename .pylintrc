@@ -1,3 +1,20 @@
 [MASTER]
-extension-pkg-whitelist=gtk
+# Add gtk to whitelist
+extension-pkg-whitelist=gtk, gobject, _mysql
+
+# Emma has classes with constructor only - so 0 public methods should be allowed
 min-public-methods=0
+
+disable = locally-disabled
+
+# Maximum number of attributes for a class (see R0902).
+max-attributes=16
+
+[REPORTS]
+
+# Set the output format. Available formats are text, parseable, colorized, msvs
+# (visual studio) and html
+output-format=colorized
+
+# Tells whether to display a full report or only the messages
+reports=no

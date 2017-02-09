@@ -1,3 +1,6 @@
+"""
+MySQL Host class container
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -8,12 +11,12 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Library General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
@@ -24,13 +27,14 @@ import sys
 import time
 import traceback
 import _mysql
+import gobject
 
-from MySqlDb import *
+from MySqlDb import MySqlDb
 
 # as of mysql 5.1:
 # http://dev.mysql.com/doc/mysqld-version-reference/en/
 # mysqld-version-reference-reservedwords-5-1.html
-mysql_reserved_words = """
+MYSQL_RESERVED_WORDS = """
 ACCESSIBLE[a]   ADD     ALL
 ALTER   ANALYZE     AND
 AS  ASC     ASENSITIVE
@@ -110,14 +114,15 @@ XOR     YEAR_MONTH  ZEROFILL
 ACCESSIBLE  LINEAR  MASTER_SSL_VERIFY_SERVER_CERT
 RANGE   READ_ONLY   READ_WRITE
 """
-mysql_reserved_words = re.sub("\[.*?\]", "", mysql_reserved_words.strip())
-mysql_reserved_words = re.split("[ \r\n\t]+", mysql_reserved_words.lower())
+MYSQL_RESERVED_WORDS = re.sub(r"\[.*?\]", "", MYSQL_RESERVED_WORDS.strip())
+MYSQL_RESERVED_WORDS = re.split(r"[ \r\n\t]+", MYSQL_RESERVED_WORDS.lower())
 
 
-class MySqlHost:
+class MySqlHost(object):
     """
     MySQL Host class
     """
+
     def __init__(self, *args):
         if len(args) == 2:
             # unpickle
@@ -132,8 +137,8 @@ class MySqlHost:
                 print "resulting handle:", self.handle
             if self.connected:
                 print "unpickling databases!", self.handle
-                for name, db in self.databases.iteritems():
-                    db.__init__(self)
+                for _, database in self.databases.iteritems():
+                    database.__init__(self)
                 self.use_db(db_name, True)
         else:
             self.sql_log, self.msg_log, self.name, self.host, self.port, self.user, self.password, \
@@ -154,11 +159,11 @@ class MySqlHost:
         self.version = ""
 
     def __getstate__(self):
-        d = dict(self.__dict__)
+        statedict = dict(self.__dict__)
         for i in ["sql_log", "msg_log", "handle", "processlist", "update_ui", "update_ui_args"]:
-            del d[i]
+            del statedict[i]
             # print "host will pickle:", d
-        return d
+        return statedict
 
     def get_connection_string(self):
         """
@@ -183,19 +188,19 @@ class MySqlHost:
         """
         :return: None
         """
-        c = {
+        conn = {
             "host": self.host,
             "user": self.user,
             "passwd": self.password,
             "connect_timeout": int(self.connect_timeout)
         }
         if self.port:
-            c["port"] = int(self.port)
+            conn["port"] = int(self.port)
         if self.database:
-            c["db"] = self.database
+            conn["db"] = self.database
 
         try:
-            self.handle = _mysql.connect(**c)
+            self.handle = _mysql.connect(**conn)
         except:  # mysql_exceptions.OperationalError:
             self.connected = False
             msg = "%s: %s" % (sys.exc_type, sys.exc_value)
@@ -230,10 +235,10 @@ class MySqlHost:
         requested = map(int, requested.split("."))
         real = self.version.replace("-", "_").split("_", 1)[0].split(".")
         real = map(lambda f: int(re.sub("[^0-9]", "", f)), real)
-        for a, b in zip(requested, real):
-            if b > a:
+        for frst, scnd in zip(requested, real):
+            if scnd > frst:
                 return True
-            if b < a:
+            if scnd < frst:
                 return False
         return True
 
@@ -296,17 +301,17 @@ class MySqlHost:
                 self.last_error = sys.exc_value[1]
             except:
                 self.last_error = str(sys.exc_value)
-            s = sys.exc_value[1]
+            message = sys.exc_value[1]
             # print "error:", [s]
-            s = s.replace(
+            message = message.replace(
                 "You have an error in your SQL syntax.  " +
                 "Check the manual that corresponds to your MySQL "
                 "server version for the right syntax to use near ",
                 "MySQL syntax error at ")
             if self.msg_log:
-                self.msg_log(s)
+                self.msg_log(message)
             else:
-                print s
+                print message
             if sys.exc_value[0] == 2013:
                 # lost connection
                 self.close()
@@ -350,11 +355,11 @@ class MySqlHost:
             print "Warning: used an unknown database %r! please refresh host!\n%s" % (
                 name, "".join(traceback.format_stack()))
 
-    def select_database(self, db):
+    def select_database(self, database):
         """
-        :param db: MySqlDb
+        :param database: MySqlDb
         """
-        self.use_db(db.name)
+        self.use_db(database.name)
 
     def refresh(self):
         """
@@ -368,9 +373,9 @@ class MySqlHost:
                 self.databases[row[0]] = MySqlDb(self, row[0])
             else:
                 del old[row[0]]
-        for db in old.keys():
-            print "remove database", db
-            del self.databases[db]
+        for database in old.keys():
+            print "remove database", database
+            del self.databases[database]
 
     def refresh_processlist(self):
         """
@@ -387,14 +392,14 @@ class MySqlHost:
         """
         return self.handle.insert_id()
 
-    def escape(self, s):
+    def escape(self, strtoescape):
         """
-        :param s: str
+        :param strtoescape: str
         :return: str
         """
-        if s is None:
-            return s
-        return self.handle.escape_string(s)
+        if strtoescape is None:
+            return strtoescape
+        return self.handle.escape_string(strtoescape)
 
     @staticmethod
     def escape_field(field):
@@ -410,12 +415,12 @@ class MySqlHost:
             raise Exception("identifiers should not end in space chars! %r" % field)
         if len(field) > 64:
             raise Exception("field name too long: %r / %d" % (field, len(field)))
-        if field.lower() in mysql_reserved_words or re.search("[` ]", field) or field.isdigit():
-            rv = "`%s`" % field.replace("`", r"``")
+        if field.lower() in MYSQL_RESERVED_WORDS or re.search("[` ]", field) or field.isdigit():
+            retval = "`%s`" % field.replace("`", r"``")
         else:
-            rv = field
-        # print "escape field %r to %r" % (field, rv)
-        return rv
+            retval = field
+        # print "escape field %r to %r" % (field, retval)
+        return retval
 
     def escape_table(self, table):
         """
@@ -440,20 +445,20 @@ class MySqlHost:
         return self.escape_field(table)
 
 
-def result2hash(h, cols=True):
+def result2hash(host, cols=True):
     """
-    :param h:
+    :param host:
     :param cols:
     :return:
     """
-    res = h.store_result()
+    res = host.store_result()
     ret = {"rows": []}
     if res is not None:
         _cols = []
         _types = []
-        for h in res.describe():
-            _cols.append(h[0])
-            _types.append(mysql2gobject(h[1]))
+        for host in res.describe():
+            _cols.append(host[0])
+            _types.append(mysql2gobject(host[1]))
         for row in res.fetch_row(0):
             ret['rows'].append(dict(zip(_cols, row)))
         if cols:
@@ -467,7 +472,7 @@ def mysql2gobject(typecode):
     :param typecode: int
     :return: type
     """
-    d = {
+    array = {
         16: gobject.TYPE_INT,
         252: gobject.TYPE_STRING,
         1: gobject.TYPE_STRING,
@@ -496,7 +501,7 @@ def mysql2gobject(typecode):
         15: gobject.TYPE_STRING,
         13: gobject.TYPE_STRING
     }
-    return d[typecode]
+    return array[typecode]
 
 
 def mysql2py(typecode):

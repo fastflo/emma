@@ -18,14 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
-from emmalib.providers import emma_registered_providers
-
-try:
-    import sqlite3
-    emma_registered_providers.append('sqlite')
-except:
-    pass
-
+from emmalib import emma_registered_providers
 from emmalib.providers.sqlite.SQLiteHost import *
 from SQLiteDb import SQLiteDb
 from SQLiteHandle import SQLiteHandle
@@ -33,3 +26,10 @@ from SQLiteHost import SQLiteHost
 from SQLiteIndex import SQLiteIndex
 from SQLiteResult import SQLiteResult
 from SQLiteTable import SQLiteTable
+
+try:
+    import sqlite3
+    emma_registered_providers.append('sqlite')
+except ImportError:
+    pass
+

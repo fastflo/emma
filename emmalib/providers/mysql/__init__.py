@@ -1,3 +1,6 @@
+"""
+MySQL provider
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -18,16 +21,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
-from emmalib.providers import emma_registered_providers
+from emmalib import emma_registered_providers
+from emmalib.providers.mysql import MySqlDb
+from emmalib.providers.mysql import MySqlHost
+from emmalib.providers.mysql import MySqlIndex
+from emmalib.providers.mysql import MySqlTable
 
 try:
     import _mysql
     import _mysql_exceptions
-    emma_registered_providers.append('mysql')
-except:
-    pass
 
-from MySqlDb import MySqlDb
-from MySqlHost import MySqlHost
-from MySqlIndex import MySqlIndex
-from MySqlTable import MySqlTable
+    emma_registered_providers.append('mysql')
+except ImportError:
+    pass

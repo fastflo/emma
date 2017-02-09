@@ -35,7 +35,7 @@ class BaseTab(object):
         self.tab_label = gtk.Label('Tab Name')
         self.tab_label.show()
 
-        self.my_ui = None
+        self.ui = None
 
         self.tab_label_hbox = gtk.HBox(False, 4)
 
@@ -75,7 +75,7 @@ class BaseTab(object):
         """
         :return:
         """
-        return self.my_ui
+        return self.ui
 
     def get_label_ui(self):
         """

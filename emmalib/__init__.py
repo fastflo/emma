@@ -21,6 +21,7 @@
 import sys
 
 emma_instance = None
+emma_registered_providers = []
 
 if __name__ != 'emmalib':
     print "Don't run __init__.py - run ../emma instead"

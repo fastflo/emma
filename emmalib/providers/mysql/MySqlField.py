@@ -1,3 +1,6 @@
+"""
+MySQL field class handler
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -20,7 +23,7 @@
 
 import re
 
-field_types = [
+FIELD_TYPES = [
     'TINYINT', 'SMALLINT', 'MEDIUMINT', 'INT', 'BIGINT',
     'DECIMAL', 'DOUBLE', 'FLOAT', 'REAL',
     'DATE', 'DATETIME', 'TIMESTAMP', 'TIME', 'YEAR',
@@ -30,10 +33,10 @@ field_types = [
     'BINARY', 'VARBINARY',
     'ENUM', 'SET'
 ]
-field_types_int = ['bit', 'bool', 'boolean', 'tinyint',
+FIELD_TYPES_INT = ['bit', 'bool', 'boolean', 'tinyint',
                    'smallint', 'mediumint', 'int', 'bigint', 'integer']
-field_types_float = ['decimal', 'double', 'float', 'real']
-field_types_str = [
+FIELD_TYPES_FLOAT = ['decimal', 'double', 'float', 'real']
+FIELD_TYPES_STR = [
     'date', 'datetime', 'timestamp', 'time', 'year',
     'char', 'varchar',
     'blob', 'tinyblob', 'mediumblob', 'longblob',
@@ -43,7 +46,7 @@ field_types_str = [
 ]
 
 
-class MySqlField:
+class MySqlField(object):
     """
     Class which wraps MySQL field logic
     """
@@ -53,10 +56,7 @@ class MySqlField:
         if len(row) > 0:
             self.name = row['Field']
             self.default = row['Default']
-            if row['Null'] != 'NO':
-                self.is_null = True
-            else:
-                self.is_null = False
+            self.is_null = row['Null'] != 'NO'
 
             # print self.parse_type()
             _t_type, self.size, self.precission, self.unsigned, self.values = self.parse_type()
@@ -84,38 +84,38 @@ class MySqlField:
         Get Python type from MySQL type
         :return: type
         """
-        _t_type, _t_size, _t_scale, _t_unsigned, _t_values = self.parse_type()
-        if _t_type in field_types_int:
+        _t_type = self.parse_type()[:1]
+        if _t_type in FIELD_TYPES_INT:
             return long
-        if _t_type in field_types_float:
+        if _t_type in FIELD_TYPES_FLOAT:
             return float
-        if _t_type in field_types_str:
+        if _t_type in FIELD_TYPES_STR:
             return str
 
     def parse_type(self):
         """
         :return: ()
         """
-        m = re.match(r'(.+)\((\d+),(\d+)\)\s(unsigned)', self.row['Type'])
-        if m is not None:
-            return m.group(1), int(m.group(2)), m.group(3), True, ''
+        match = re.match(r'(.+)\((\d+),(\d+)\)\s(unsigned)', self.row['Type'])
+        if match is not None:
+            return match.group(1), int(match.group(2)), match.group(3), True, ''
 
-        m = re.match(r'(.+)\((\d+),(\d+)\)', self.row['Type'])
-        if m is not None:
-            return m.group(1), int(m.group(2)), m.group(3), False, ''
+        match = re.match(r'(.+)\((\d+),(\d+)\)', self.row['Type'])
+        if match is not None:
+            return match.group(1), int(match.group(2)), match.group(3), False, ''
 
-        m = re.match(r'(.+)\((\d+)\)\s(unsigned)', self.row['Type'])
-        if m is not None:
-            return m.group(1), int(m.group(2)), 0, True, ''
+        match = re.match(r'(.+)\((\d+)\)\s(unsigned)', self.row['Type'])
+        if match is not None:
+            return match.group(1), int(match.group(2)), 0, True, ''
 
-        m = re.match(r'(.+)\((\d+)\)', self.row['Type'])
-        if m is not None:
-            return m.group(1), int(m.group(2)), 0, False, ''
+        match = re.match(r'(.+)\((\d+)\)', self.row['Type'])
+        if match is not None:
+            return match.group(1), int(match.group(2)), 0, False, ''
 
-        m = re.match(r'(.+)\((.+)\)', self.row['Type'])
-        if m is not None:
-            return m.group(1), 0, 0, False, m.group(2)
+        match = re.match(r'(.+)\((.+)\)', self.row['Type'])
+        if match is not None:
+            return match.group(1), 0, 0, False, match.group(2)
 
-        m = re.match(r'(.+)', self.row['Type'])
-        if m is not None:
-            return m.group(1), 0, 0, False, ''
+        match = re.match(r'(.+)', self.row['Type'])
+        if match is not None:
+            return match.group(1), 0, 0, False, ''
