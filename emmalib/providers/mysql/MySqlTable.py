@@ -48,7 +48,7 @@ class MySqlTable(gobject.GObject):
         self.is_view = False
         self.props = props
 
-        self.props_dict = dict(zip(props_description, props))
+        self.props_dict = dict(zip(map(lambda v: v[0], props_description), props))
         self.props_description = props_description
 
         if self.engine:

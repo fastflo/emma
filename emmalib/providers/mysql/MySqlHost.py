@@ -198,8 +198,10 @@ class MySqlHost:
             self.handle = _mysql.connect(**c)
         except:  # mysql_exceptions.OperationalError:
             self.connected = False
+            msg = "%s: %s" % (sys.exc_type, sys.exc_value)
+            print msg
             if self.msg_log:
-                self.msg_log("%s: %s" % (sys.exc_type, sys.exc_value))
+                self.msg_log(msg)
             return
         self.connected = True
         self.version = self.handle.get_server_info()
@@ -303,6 +305,8 @@ class MySqlHost:
                 "MySQL syntax error at ")
             if self.msg_log:
                 self.msg_log(s)
+            else:
+                print s
             if sys.exc_value[0] == 2013:
                 # lost connection
                 self.close()
