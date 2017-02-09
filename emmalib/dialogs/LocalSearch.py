@@ -1,30 +1,33 @@
+"""
+Emma's Local Search dialog
+"""
 import os
 import sys
-import gtk
-
 import re
+
+import gtk
 
 from emmalib import dialogs
 from emmalib import glade_path
 
 
-class LocalSearch:
+class LocalSearch(object):
     """
     Local Search Dialog
     """
-    def __init__(self, emma):
-        self.emma = emma
+    def __init__(self):
         self.window = None
         self.entry = None
         self.start_at_first_row = None
         self.case_sensitive = None
-        self.glade_file = os.path.join(glade_path, 'dialogs', "LocalSearch.glade")
-        if not os.access(self.glade_file, os.R_OK):
-            print self.glade_file, "not found!"
+
+        glade_file = os.path.join(glade_path, 'dialogs', "LocalSearch.glade")
+        if not os.access(glade_file, os.R_OK):
+            print glade_file, "not found!"
             sys.exit(-1)
 
-        print "glade file: %r" % self.glade_file
-        self.xml = gtk.glade.XML(self.glade_file)
+        print "glade file: %r" % glade_file
+        self.xml = gtk.glade.XML(glade_file)
         self.xml.signal_autoconnect(self)
 
         # Local Search Window
@@ -43,8 +46,6 @@ class LocalSearch:
         :param again:
         :return:
         """
-
-        query_view = query.treeview
         self.start_at_first_row.set_active(False)
         if not again or not self.entry.get_text():
             self.entry.grab_focus()
@@ -55,36 +56,36 @@ class LocalSearch:
         regex = self.entry.get_text()
         if self.case_sensitive.get_active():
             regex = "(?i)" + regex
-        tm = query.model
-        fields = tm.get_n_columns()
-        _start = tm.get_iter_root()
+        query_model = query.model
+        fields = query_model.get_n_columns()
+        _start = query_model.get_iter_root()
         start_column_index = -1
         start_path = None
         if not self.start_at_first_row.get_active():
-            start_path, start_column = query_view.get_cursor()
+            start_path, start_column = query.treeview.get_cursor()
             if start_path:
-                _start = tm.get_iter(start_path)
+                _start = query_model.get_iter(start_path)
                 for k in range(fields):
-                    if query_view.get_column(k) == start_column:
+                    if query.treeview.get_column(k) == start_column:
                         start_column_index = k
                         break
             else:
                 start_path = None
         while _start:
             for k in range(fields):
-                v = tm.get_value(_start, k)
-                if v is None:
+                query_model_value = query_model.get_value(_start, k)
+                if query_model_value is None:
                     continue
-                if re.search(regex, v):
-                    path = tm.get_path(_start)
+                if re.search(regex, query_model_value):
+                    path = query_model.get_path(_start)
                     if start_path and start_path == path and k <= start_column_index:
                         continue  # skip!
-                    column = query_view.get_column(k)
-                    query_view.set_cursor(path, column)
-                    query_view.scroll_to_cell(path, column)
-                    query_view.grab_focus()
+                    column = query.treeview.get_column(k)
+                    query.treeview.set_cursor(path, column)
+                    query.treeview.scroll_to_cell(path, column)
+                    query.treeview.grab_focus()
                     return
-            _start = tm.iter_next(_start)
+            _start = query_model.iter_next(_start)
         dialogs.show_message(
             "local regex search",
             "sorry, no match found!\ntry to search from the beginning "

@@ -16,22 +16,22 @@ class ChangeLog(gtk.Window):
         self.set_position(gtk.WIN_POS_CENTER)
         self.resize(640, 480)
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.add(sw)
-        tv = gtk.TextView()
-        sw.add(tv)
+        scrolled_window = gtk.ScrolledWindow()
+        scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.add(scrolled_window)
+        text_view = gtk.TextView()
+        scrolled_window.add(text_view)
 
-        fp = file(os.path.join(emma_path, "../changelog"))
-        changelog = fp.read()
-        fp.close()
+        changelog_file = file(os.path.join(emma_path, "../changelog"))
+        changelog = changelog_file.read()
+        changelog_file.close()
 
-        tv.get_buffer().set_text(changelog.decode("latin1", "replace"))
+        text_view.get_buffer().set_text(changelog.decode("latin1", "replace"))
 
         self.connect('delete-event', self.on_changelog_delete)
 
-        tv.show()
-        sw.show()
+        text_view.show()
+        scrolled_window.show()
 
     @staticmethod
     def on_changelog_delete(window, _):
@@ -42,6 +42,3 @@ class ChangeLog(gtk.Window):
         """
         window.hide()
         return True
-
-
-

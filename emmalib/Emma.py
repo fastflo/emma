@@ -25,14 +25,17 @@ import gobject
 import gtk.gdk
 import gtk.glade
 
-import dialogs
 import widgets
 from Config import Config
 from KeyMap import KeyMap
 from Constants import *
 from ConnectionTreeView import ConnectionsTreeView
 from EventsManager import EventsManager
-from dialogs.LocalSearch import LocalSearch
+from emmalib.dialogs import show_message
+from emmalib.dialogs.ExecuteQueryFromDisk import ExecuteQueryFromDisk
+from emmalib.dialogs.LocalSearch import LocalSearch
+from emmalib.dialogs.About import About
+from emmalib.dialogs.ChangeLog import ChangeLog
 
 
 class Emma:
@@ -78,8 +81,8 @@ class Emma:
         #
         # init dialogs
         #
-        self.about_dialog = dialogs.About()
-        self.changelog_dialog = dialogs.ChangeLog()
+        self.about_dialog = About()
+        self.changelog_dialog = ChangeLog()
         self.local_search_dialog = None
         #
         # init event manager
@@ -117,7 +120,7 @@ class Emma:
         self.blob_view = widgets.TabBlobView(self)
         self.message_notebook.append_page(self.blob_view, gtk.Label('Blob View'))
 
-        self.local_search_dialog = LocalSearch(self)
+        self.local_search_dialog = LocalSearch()
 
         self.connections_tv = ConnectionsTreeView(self)
         self.mainwindow.connections_tv_container.add(self.connections_tv)
@@ -235,10 +238,10 @@ class Emma:
         @return:
         """
         if not self.connections_tv.current_host:
-            dialogs.show_message("execute query from disk", "no host selected!")
+            show_message("execute query from disk", "no host selected!")
             return
         if not self.execute_query_from_disk_dialog:
-            self.execute_query_from_disk_dialog = dialogs.ExecuteQueryFromDisk(self)
+            self.execute_query_from_disk_dialog = ExecuteQueryFromDisk(self)
         self.execute_query_from_disk_dialog.show()
 
     def assign_once(self, name, creator, *args):

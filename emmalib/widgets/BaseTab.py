@@ -1,3 +1,6 @@
+"""
+Base tab - used as parent for all Emma tabs
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -18,8 +21,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
+import os
 import gtk
-from emmalib.Constants import *
+
+from emmalib import icons_path
 
 
 class BaseTab(object):
@@ -30,7 +35,7 @@ class BaseTab(object):
         self.tab_label = gtk.Label('Tab Name')
         self.tab_label.show()
 
-        self.ui = None
+        self.my_ui = None
 
         self.tab_label_hbox = gtk.HBox(False, 4)
 
@@ -70,7 +75,7 @@ class BaseTab(object):
         """
         :return:
         """
-        return self.ui
+        return self.my_ui
 
     def get_label_ui(self):
         """

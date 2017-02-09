@@ -2,8 +2,7 @@
 Emma's about dialog
 """
 import gtk
-
-from emmalib.Constants import *
+from emmalib import version
 
 
 class About(gtk.AboutDialog):

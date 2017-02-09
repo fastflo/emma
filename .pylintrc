@@ -1,0 +1,3 @@
+[MASTER]
+extension-pkg-whitelist=gtk
+min-public-methods=0
