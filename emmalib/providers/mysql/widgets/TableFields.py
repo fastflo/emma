@@ -1,3 +1,6 @@
+"""
+Emma MySql provider Fields list
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -21,14 +24,16 @@
 import gtk
 import gobject
 
-from TableFieldsPopUp import TableFieldsPopUp
-from TableFieldDialog import TableFieldDialog
-from emmalib.providers.mysql.MySqlField import MySqlField
 from emmalib.dialogs import confirm
+from emmalib.providers.mysql.MySqlField import MySqlField
+from emmalib.providers.mysql.widgets.TableFieldsPopUp import TableFieldsPopUp
+from emmalib.providers.mysql.widgets.TableFieldDialog import TableFieldDialog
 
 
 class TableFields(gtk.ScrolledWindow):
-
+    """
+    Emma MySql provider Fields list
+    """
     def __init__(self, table):
         super(TableFields, self).__init__()
 
@@ -56,8 +61,12 @@ class TableFields(gtk.ScrolledWindow):
         self.pop_up.drop.connect('activate', self.on_drop_activate)
         self.add(self.tv_fields)
 
-    def on_drop_activate(self, *args):
-        path, column = self.tv_fields.get_cursor()
+    def on_drop_activate(self, *_):
+        """
+        @param _:
+        @return: None
+        """
+        path, _ = self.tv_fields.get_cursor()
         _iter = self.tv_fields_model.get_iter(path)
         _field_name = self.tv_fields_model.get_value(_iter, 2)
         if not confirm(
@@ -71,7 +80,10 @@ class TableFields(gtk.ScrolledWindow):
         self.table.drop_field(_field_name)
         self.refresh()
 
-    def on_add_activate(self, *args):
+    def on_add_activate(self, *_):
+        """
+        @param _:
+        """
         dialog = TableFieldDialog(MySqlField({}))
         answer = dialog.run()
         if answer == gtk.RESPONSE_OK:
@@ -81,8 +93,11 @@ class TableFields(gtk.ScrolledWindow):
             self.refresh()
         dialog.destroy()
 
-    def on_edit_activate(self, *args):
-        path, column = self.tv_fields.get_cursor()
+    def on_edit_activate(self, *_):
+        """
+        @param _:
+        """
+        path, _ = self.tv_fields.get_cursor()
         _iter = self.tv_fields_model.get_iter(path)
         _field_name = self.tv_fields_model.get_value(_iter, 2)
         for f in self.table.fields:
@@ -97,6 +112,9 @@ class TableFields(gtk.ScrolledWindow):
                 dialog.destroy()
 
     def refresh(self):
+        """
+        Refresh fields list
+        """
         for col in self.tv_fields.get_columns():
             self.tv_fields.remove_column(col)
         if self.tv_fields_model:
@@ -134,12 +152,24 @@ class TableFields(gtk.ScrolledWindow):
             )
             fn += 1
 
-    def row_toggled(self, cell, path, model):
+    @staticmethod
+    def row_toggled(cell, path, model):
+        """
+        @param cell:
+        @param path:
+        @param model:
+        @return:
+        """
         if not cell or not path or not model:
             return
         model[path][0] = not model[path][0]
 
     def on_button_release(self, tv, event):
+        """
+        @param tv:
+        @param event:
+        @return:
+        """
         if not tv or not event or not event.button == 3:
             return False
         self.pop_up.popup(None, None, None, event.button, event.time, tv)

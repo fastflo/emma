@@ -1,3 +1,6 @@
+"""
+Emma MySql provider Table toolbar
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -22,7 +25,9 @@ import gtk
 
 
 class TableToolbar(gtk.Toolbar):
-    
+    """
+    Emma MySql provider Table toolbar
+    """
     def __init__(self, tab_table):
         super(TableToolbar, self).__init__()
 
@@ -45,4 +50,3 @@ class TableToolbar(gtk.Toolbar):
 
         self.truncate.connect('clicked', self.tab_table.update)
         self.refresh.connect('clicked', self.tab_table.update)
-

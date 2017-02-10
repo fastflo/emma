@@ -1,3 +1,6 @@
+"""
+MySQL Table class container
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -8,26 +11,34 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Library General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 import gobject
 
-from MySqlField import MySqlField
-from MySqlIndex import MySqlIndex
+from emmalib.providers.mysql.MySqlField import MySqlField
+from emmalib.providers.mysql.MySqlIndex import MySqlIndex
 from emmalib.dialogs import confirm
 from emmalib import emma_instance
-import widgets
+from emmalib.providers.mysql.widgets import TableFields
+from emmalib.providers.mysql.widgets import TableIndexes
+from emmalib.providers.mysql.widgets import TableProperties
+from emmalib.providers.mysql.widgets import TableToolbar
 
 
 class MySqlTable(gobject.GObject):
+    """
+    :@param db
+    :@param props
+    :@param pros_description
+    """
     __gsignals__ = {
         'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
     }
@@ -75,7 +86,6 @@ class MySqlTable(gobject.GObject):
         result = self.handle.store_result()
         rows = result.fetch_row(0)
         self.props = rows[0]
-        # TODO - Fix incompatibility with method used to fill it in constructor
         self.props_dict = dict(zip(map(lambda v: v[0], result.describe()), rows[0]))
         self.name = self.props[0]
 
@@ -203,10 +213,11 @@ class MySqlTable(gobject.GObject):
         :param charset:
         :param collation:
         """
-        if self.host.query("ALTER TABLE %s DEFAULT CHARACTER SET %s COLLATE %s" % (
-                self.host.escape_table(self.name),
-                charset, collation
-        )):
+        if self.host.query(
+                "ALTER TABLE %s DEFAULT CHARACTER SET %s COLLATE %s" % (
+                    self.host.escape_table(self.name),
+                    charset, collation
+                )):
             self.refresh_properties()
             if emma_instance:
                 emma_instance.events.trigger('on_table_modified', self)
@@ -215,10 +226,8 @@ class MySqlTable(gobject.GObject):
         """
         :param field_name:
         """
-        if self.host.query(
-                        "ALTER TABLE `%s` DROP `%s`" %
-                        (self.host.escape_table(self.name), field_name)
-        ):
+        if self.host.query("ALTER TABLE `%s` DROP `%s`" % (self.host.escape_table(self.name),
+                                                           field_name)):
             self.refresh()
             if emma_instance:
                 emma_instance.events.trigger('on_table_modified', self)
@@ -232,7 +241,7 @@ class MySqlTable(gobject.GObject):
         :return:
         """
         if self.is_table:
-            return widgets.TableProperties(self)
+            return TableProperties(self)
         else:
             return False
 
@@ -241,7 +250,7 @@ class MySqlTable(gobject.GObject):
         :return:
         """
         if self.is_table:
-            return widgets.TableFields(self)
+            return TableFields(self)
         else:
             return False
 
@@ -250,7 +259,7 @@ class MySqlTable(gobject.GObject):
         :return:
         """
         if self.is_table:
-            return widgets.TableIndexes(self)
+            return TableIndexes(self)
         else:
             return False
 
@@ -260,7 +269,7 @@ class MySqlTable(gobject.GObject):
         :return:
         """
         if self.is_table:
-            toolbar = widgets.TableToolbar(tab_table)
+            toolbar = TableToolbar(tab_table)
             toolbar.refresh.connect('clicked', self.on_toolbar_refresh_table)
             toolbar.drop.connect('clicked', self.on_toolbar_drop_table)
             toolbar.truncate.connect('clicked', self.on_toolbar_truncate_table)
@@ -275,15 +284,15 @@ class MySqlTable(gobject.GObject):
         return 'Engine: %s, Rows: %s, Collation: %s, Comment: %s' % \
                (self.props[1], self.props[4], self.props[14], self.props[17])
 
-    def on_toolbar_refresh_table(self, *args):
+    def on_toolbar_refresh_table(self, _):
         """
-        :param args:
+        :param _:
         """
         self.refresh(True)
 
-    def on_toolbar_drop_table(self, *args):
+    def on_toolbar_drop_table(self, _):
         """
-        :param args:
+        :param _:
         :return:
         """
         if not confirm(
@@ -297,9 +306,9 @@ class MySqlTable(gobject.GObject):
                 emma_instance.events.trigger('on_table_modified', self)
                 emma_instance.events.trigger('on_table_dropped', self)
 
-    def on_toolbar_truncate_table(self, *args):
+    def on_toolbar_truncate_table(self, _):
         """
-        :param args:
+        :param _:
         :return:
         """
         if not confirm(

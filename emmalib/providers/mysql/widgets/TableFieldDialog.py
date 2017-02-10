@@ -1,7 +1,10 @@
+"""
+Emma MySql provider Field edit dialog
+"""
 import gtk
 from emmalib import emma_instance
 from emmalib.providers.mysql.MySqlField import MySqlField
-from collations import collations
+from emmalib.providers.mysql.widgets.collations import collations
 
 field_types_conf = {
     'TINYINT': {
@@ -231,6 +234,37 @@ field_types_conf = {
 }
 
 
+def mklbl(text):
+    """
+    :param text: str
+    :return: gtk.Label
+    """
+    lbl = gtk.Label(text + ':')
+    lbl.set_justify(gtk.JUSTIFY_RIGHT)
+    lbl.set_alignment(1, 0)
+    return lbl
+
+
+def mksep(tbl, r):
+    """
+    :param tbl:
+    :param r: int
+    """
+    tbl.attach(gtk.HSeparator(), 0, 4, r, r + 1, gtk.FILL, 0)
+
+
+def mkrow(tbl, child, label, r, o=0):
+    """
+    :param tbl:
+    :param child:
+    :param label:
+    :param r:
+    :param o:
+    """
+    tbl.attach(mklbl(label), 0 + o, 1 + o, r, r + 1, gtk.FILL, 0)
+    tbl.attach(child, 1 + o, 2 + o, r, r + 1, gtk.FILL, 0)
+
+
 class TableFieldDialog(gtk.Dialog):
     """
     Dialog to edit MySQL field
@@ -314,58 +348,67 @@ class TableFieldDialog(gtk.Dialog):
                     self.selcb(self.cb_collation, co)
                     # print co
 
+        tbl = self.build_fields()
+
+        self.vbox.pack_start(tbl)
+
+        self.show_all()
+
+    def build_fields(self):
+        """
+        Build table fields
+        @return: gtk.Table
+        """
         tbl = gtk.Table(4, 4)
         tbl.set_col_spacings(8)
         tbl.set_row_spacings(8)
 
         r = 0
-        tbl.attach(self.mklbl('Name'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(mklbl('Name'), 0, 1, r, r + 1, gtk.FILL, 0)
         tbl.attach(self.tb_name, 1, 4, r, r + 1, gtk.FILL, 0)
         r += 1
-        self.mksep(tbl, r)
+        mksep(tbl, r)
         r += 1
-        tbl.attach(self.mklbl('Type'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(mklbl('Type'), 0, 1, r, r + 1, gtk.FILL, 0)
         tbl.attach(self.cb_type, 1, 4, r, r + 1, gtk.FILL, 0)
         r += 1
-        self.mkrow(tbl, self.sp_size, 'Size', r)
-        self.mkrow(tbl, self.sp_prec, 'Precission', r, 2)
+        mkrow(tbl, self.sp_size, 'Size', r)
+        mkrow(tbl, self.sp_prec, 'Precission', r, 2)
         r += 1
-        self.mksep(tbl, r)
+        mksep(tbl, r)
         r += 1
-        self.mkrow(tbl, self.cb_null, 'Is NULL', r)
-        self.mkrow(tbl, self.cb_sign, 'Unsigned', r, 2)
+        mkrow(tbl, self.cb_null, 'Is NULL', r)
+        mkrow(tbl, self.cb_sign, 'Unsigned', r, 2)
         r += 1
-        self.mksep(tbl, r)
+        mksep(tbl, r)
         r += 1
-        self.mkrow(tbl, self.cb_auto_increment, 'Auto Increment', r)
-        self.mkrow(tbl, self.cb_primary, 'Primary key', r, 2)
+        mkrow(tbl, self.cb_auto_increment, 'Auto Increment', r)
+        mkrow(tbl, self.cb_primary, 'Primary key', r, 2)
         r += 1
-        self.mksep(tbl, r)
+        mksep(tbl, r)
         r += 1
-        tbl.attach(self.mklbl('Default'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(mklbl('Default'), 0, 1, r, r + 1, gtk.FILL, 0)
         tbl.attach(self.tb_default, 1, 4, r, r + 1, gtk.FILL, 0)
         r += 1
-        self.mksep(tbl, r)
+        mksep(tbl, r)
         r += 1
-        tbl.attach(self.mklbl('Charset'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(mklbl('Charset'), 0, 1, r, r + 1, gtk.FILL, 0)
         tbl.attach(self.cb_charset, 1, 4, r, r + 1, gtk.FILL, 0)
         r += 1
-        tbl.attach(self.mklbl('Collation'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(mklbl('Collation'), 0, 1, r, r + 1, gtk.FILL, 0)
         tbl.attach(self.cb_collation, 1, 4, r, r + 1, gtk.FILL, 0)
         r += 1
-        self.mksep(tbl, r)
+        mksep(tbl, r)
         r += 1
-        tbl.attach(self.mklbl('Values'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(mklbl('Values'), 0, 1, r, r + 1, gtk.FILL, 0)
         tbl.attach(self.tb_values, 1, 4, r, r + 1, gtk.FILL, 0)
         r += 1
-        self.mksep(tbl, r)
+        mksep(tbl, r)
         r += 1
-        tbl.attach(self.mklbl('Comment'), 0, 1, r, r + 1, gtk.FILL, 0)
+        tbl.attach(mklbl('Comment'), 0, 1, r, r + 1, gtk.FILL, 0)
         tbl.attach(self.tb_comment, 1, 4, r, r + 1, gtk.FILL, 0)
 
-        self.vbox.pack_start(tbl)
-
-        self.show_all()
+        return tbl
 
     def on_cb_type_changed(self, cb):
         """
@@ -398,35 +441,8 @@ class TableFieldDialog(gtk.Dialog):
         if self.cb_collation.get_active_text() is None:
             self.cb_collation.set_active(0)
 
-    def mkrow(self, tbl, child, label, r, o=0):
-        """
-        :param tbl:
-        :param child:
-        :param label:
-        :param r:
-        :param o:
-        """
-        tbl.attach(self.mklbl(label), 0 + o, 1 + o, r, r + 1, gtk.FILL, 0)
-        tbl.attach(child, 1 + o, 2 + o, r, r + 1, gtk.FILL, 0)
-
-    def mksep(self, tbl, r):
-        """
-        :param tbl:
-        :param r: int
-        """
-        tbl.attach(gtk.HSeparator(), 0, 4, r, r + 1, gtk.FILL, 0)
-
-    def mklbl(self, text):
-        """
-        :param text: str
-        :return: gtk.Label
-        """
-        lbl = gtk.Label(text + ':')
-        lbl.set_justify(gtk.JUSTIFY_RIGHT)
-        lbl.set_alignment(1, 0)
-        return lbl
-
-    def selcb(self, cb, text):
+    @staticmethod
+    def selcb(cb, text):
         """
         :param cb: gtk.ComboBox
         :param text: str

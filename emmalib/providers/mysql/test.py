@@ -1,3 +1,6 @@
+"""
+Emma MySql provider test
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -18,8 +21,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
-
-from emmalib.providers.mysql import MySqlHost
+from emmalib.providers.mysql.MySqlHost import MySqlHost
 
 h = MySqlHost(None, None, 'Local', 'localhost', 3306, 'root', 'root', 'test', 1000)
 

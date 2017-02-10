@@ -1,3 +1,6 @@
+"""
+Emma MySql provider Fields list popup
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -22,7 +25,9 @@ import gtk
 
 
 class TableFieldsPopUp(gtk.Menu):
-
+    """
+    Emma MySql provider Fields list popup
+    """
     def __init__(self):
         super(TableFieldsPopUp, self).__init__()
 
@@ -51,5 +56,13 @@ class TableFieldsPopUp(gtk.Menu):
         self.show_all()
 
     def popup(self, parent_menu_shell, parent_menu_item, func, button, activate_time, data=None):
+        """
+        @param parent_menu_shell:
+        @param parent_menu_item:
+        @param func:
+        @param button:
+        @param activate_time:
+        @param data:
+        """
         super(TableFieldsPopUp, self).popup(parent_menu_shell,
                                             parent_menu_item, func, button, activate_time, data)

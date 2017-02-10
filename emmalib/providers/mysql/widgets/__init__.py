@@ -1,3 +1,6 @@
+"""
+Emma MySql provider widgets
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -18,9 +21,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-from TableProperties import TableProperties
-from TableFields import TableFields
-from TableFieldsPopUp import TableFieldsPopUp
-from TableIndexes import TableIndexes
-from TableToolbar import TableToolbar
-from TableFieldDialog import TableFieldDialog
+from emmalib.providers.mysql.widgets.TableProperties import TableProperties
+from emmalib.providers.mysql.widgets.TableFields import TableFields
+from emmalib.providers.mysql.widgets.TableFieldsPopUp import TableFieldsPopUp
+from emmalib.providers.mysql.widgets.TableIndexes import TableIndexes
+from emmalib.providers.mysql.widgets.TableToolbar import TableToolbar
+from emmalib.providers.mysql.widgets.TableFieldDialog import TableFieldDialog

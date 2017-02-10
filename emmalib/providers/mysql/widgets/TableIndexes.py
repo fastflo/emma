@@ -1,3 +1,6 @@
+"""
+Emma MySql provider Indexes list
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -20,11 +23,14 @@
 
 import gtk
 import gobject
-from TableIndexesPopUp import TableIndexesPopUp
+
+from emmalib.providers.mysql.widgets.TableIndexesPopUp import TableIndexesPopUp
 
 
 class TableIndexes(gtk.ScrolledWindow):
-
+    """
+    Emma MySql provider Indexes list
+    """
     def __init__(self, table):
         super(TableIndexes, self).__init__()
 
@@ -48,19 +54,37 @@ class TableIndexes(gtk.ScrolledWindow):
 
         self.add(self.tv_indexes)
 
-    def on_add_activate(self, item):
+    @staticmethod
+    def on_add_activate(item):
+        """
+        @param item:
+        @return:
+        """
         if not item:
             return
 
-    def on_edit_activate(self, item):
+    @staticmethod
+    def on_edit_activate(item):
+        """
+        @param item:
+        @return:
+        """
         if not item:
             return
 
-    def on_drop_activate(self, item):
+    @staticmethod
+    def on_drop_activate(item):
+        """
+        @param item:
+        @return:
+        """
         if not item:
             return
 
     def refresh(self):
+        """
+        Refresh list
+        """
         for col in self.tv_indexes.get_columns():
             self.tv_indexes.remove_column(col)
         if self.tv_indexes_model:
@@ -79,6 +103,11 @@ class TableIndexes(gtk.ScrolledWindow):
             )
 
     def on_button_release(self, tv, event):
+        """
+        @param tv:
+        @param event:
+        @return:
+        """
         if not tv or not event or not event.button == 3:
             return False
         self.pop_up.popup(None, None, None, event.button, event.time, tv)

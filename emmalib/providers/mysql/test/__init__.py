@@ -1,0 +1,3 @@
+"""
+Emma MySql provider tests
+"""

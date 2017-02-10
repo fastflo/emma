@@ -1,3 +1,7 @@
+"""
+Emma MySql provider collations
+"""
+
 collations = {
     "armscii8": {
         "armscii8_bin": "Armenian, Binary",

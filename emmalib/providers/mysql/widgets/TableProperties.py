@@ -1,3 +1,6 @@
+"""
+Emma MySql provider Table properties widget
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -19,11 +22,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 import gtk
-from collations import collations
+from emmalib.providers.mysql.widgets.collations import collations
 
 
 class TableProperties(gtk.ScrolledWindow):
-
+    """
+    Emma MySql provider Table properties widget
+    """
     def __init__(self, table):
         super(TableProperties, self).__init__()
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -67,11 +72,10 @@ class TableProperties(gtk.ScrolledWindow):
         self.add(vptp)
         self.show_all()
 
-    #
-    #   Refresh table properties
-    #
-
     def update(self):
+        """
+        Refresh table properties
+        """
         for item in self.info_items_list:
             v = self.table.props_dict[item] if self.table.props_dict[item] is not None else ''
             self.info_items_entries[item].set_text(v)
@@ -93,11 +97,11 @@ class TableProperties(gtk.ScrolledWindow):
 
         self.selcb(self.cb_rowformat, self.table.props_dict['Row_format'])
 
-    #
-    #   Update table properties actions
-    #
-
     def on_cb_charset_changed(self, cb):
+        """
+        Update table properties actions
+        @param cb:
+        """
         at = cb.get_active_text()
         self.cb_collation.get_model().clear()
         for i in collations[at]:
@@ -108,6 +112,10 @@ class TableProperties(gtk.ScrolledWindow):
             self.cb_collation.set_active(0)
 
     def on_update_clicked(self, *args):
+        """
+        @param args:
+        @return:
+        """
         if not args:
             return
         do_update = False
@@ -134,6 +142,9 @@ class TableProperties(gtk.ScrolledWindow):
             self.update()
 
     def on_cb_engine_changed(self, cmb):
+        """
+        @param cmb:
+        """
         engine = cmb.get_active_text()
         self.cb_rowformat.get_model().clear()
         if engine == 'InnoDB':
@@ -151,11 +162,11 @@ class TableProperties(gtk.ScrolledWindow):
             else:
                 self.selcb(self.cb_rowformat, 'Dynamic')
 
-    #
-    #   Build UI
-    #
-
     def build_ltable(self):
+        """
+        Build UI
+        @return:
+        """
         tbl = gtk.Table(4, 2)
         tbl.set_col_spacings(4)
         tbl.set_row_spacings(4)
@@ -188,16 +199,30 @@ class TableProperties(gtk.ScrolledWindow):
         return vbox
 
     def mkrow(self, tbl, child, label, r):
+        """
+        @param tbl:
+        @param child:
+        @param label:
+        @param r:
+        """
         tbl.attach(self.mklbl(label), 0, 1, r, r+1, gtk.FILL, 0)
         tbl.attach(child, 1, 2, r, r+1, gtk.FILL, 0)
 
-    def mklbl(self, text):
+    @staticmethod
+    def mklbl(text):
+        """
+        @param text:
+        @return:
+        """
         lbl = gtk.Label(text+':')
         lbl.set_justify(gtk.JUSTIFY_RIGHT)
         lbl.set_alignment(1, 0)
         return lbl
 
     def build_rtable(self):
+        """
+        @return:
+        """
         tbl = gtk.Table(len(self.info_items_list), 2)
         tbl.set_col_spacings(4)
         tbl.set_row_spacings(4)
@@ -224,7 +249,12 @@ class TableProperties(gtk.ScrolledWindow):
 
         return vbox
 
-    def selcb(self, cb, text):
+    @staticmethod
+    def selcb(cb, text):
+        """
+        @param cb:
+        @param text:
+        """
         ix = 0
         for i in cb.get_model():
             if i[0] == text:

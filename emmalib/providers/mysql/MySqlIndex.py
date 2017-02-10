@@ -1,3 +1,6 @@
+"""
+Emma MySql provider table index
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -19,10 +22,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA	 02110-1301 USA
 
 
-class MySqlIndex:
+class MySqlIndex(object):
     """
     Class which wraps mysql index
     """
+
     def __init__(self, row):
         self.name = row['Key_name']
         if row['Non_unique'] == '0':

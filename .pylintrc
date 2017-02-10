@@ -4,8 +4,9 @@ extension-pkg-whitelist=gtk, gobject, _mysql
 
 # Emma has classes with constructor only - so 0 public methods should be allowed
 min-public-methods=0
+max-public-methods=128
 
-disable = locally-disabled
+disable = locally-disabled, invalid-name, too-many-arguments
 
 # Maximum number of attributes for a class (see R0902).
 max-attributes=16
