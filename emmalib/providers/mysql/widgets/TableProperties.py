@@ -107,7 +107,6 @@ class TableProperties(gtk.ScrolledWindow):
         for i in collations[at]:
             self.cb_collation.append_text(i)
         self.selcb(self.cb_collation, at+'_general_ci')
-        print self.cb_collation.get_active_text()
         if self.cb_collation.get_active_text() is None:
             self.cb_collation.set_active(0)
 
@@ -149,6 +148,8 @@ class TableProperties(gtk.ScrolledWindow):
         self.cb_rowformat.get_model().clear()
         if engine == 'InnoDB':
             self.cb_rowformat.append_text('Compact')
+            self.cb_rowformat.append_text('Compressed')
+            self.cb_rowformat.append_text('Dynamic')
             self.cb_rowformat.append_text('Redundant')
             if self.table.props_dict['Engine'] == 'InnoDB':
                 self.selcb(self.cb_rowformat, self.table.props_dict['Row_format'])

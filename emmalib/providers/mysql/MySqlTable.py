@@ -21,30 +21,25 @@ MySQL Table class container
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import gobject
-
+from emmalib import emma_instance
+from emmalib.dialogs import confirm
+from emmalib.EventsManager import EventsManager
 from emmalib.providers.mysql.MySqlField import MySqlField
 from emmalib.providers.mysql.MySqlIndex import MySqlIndex
-from emmalib.dialogs import confirm
-from emmalib import emma_instance
 from emmalib.providers.mysql.widgets import TableFields
 from emmalib.providers.mysql.widgets import TableIndexes
 from emmalib.providers.mysql.widgets import TableProperties
 from emmalib.providers.mysql.widgets import TableToolbar
 
 
-class MySqlTable(gobject.GObject):
+class MySqlTable(EventsManager):
     """
     :@param db
     :@param props
     :@param pros_description
     """
-    __gsignals__ = {
-        'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
-    }
-
     def __init__(self, db, props, props_description):
-        gobject.GObject.__init__(self)
+        super(MySqlTable, self).__init__()
         self.handle = db.handle
         self.host = db.host
         self.db = db
@@ -76,7 +71,7 @@ class MySqlTable(gobject.GObject):
             self.refresh_properties()
         self.refresh_fields()
         self.refresh_indexes()
-        self.emit('changed')
+        self.trigger('changed', self)
 
     def refresh_properties(self):
         """
@@ -115,15 +110,14 @@ class MySqlTable(gobject.GObject):
         """
         :return: str
         """
-        if not self.create_table:
-            self.db.host.select_database(self.db)
-            self.host.query("show create table `%s`" % self.name)
-            result = self.handle.store_result()
-            if not result:
-                print "can't get create table for %s at %s and %s" % (self.name, self, self.handle)
-                return ""
-            result = result.fetch_row(0)
-            self.create_table = result[0][1]
+        self.db.host.select_database(self.db)
+        self.host.query("show create table `%s`" % self.name)
+        result = self.handle.store_result()
+        if not result:
+            # print "can't get create table for %s at %s and %s" % (self.name, self, self.handle)
+            return ""
+        result = result.fetch_row(0)
+        self.create_table = result[0][1]
         return self.create_table
 
     def get_tree_row(self, field_name):
@@ -148,7 +142,7 @@ class MySqlTable(gobject.GObject):
         :param new_name: str
         :return: bool
         """
-        if self.host.query('RENAME TABLE `%s` TO `%s`' % (
+        if self.host.query('RENAME TABLE %s TO %s' % (
                 self.host.escape_table(self.name),
                 self.host.escape_table(new_name)
         )):
@@ -156,8 +150,7 @@ class MySqlTable(gobject.GObject):
             del self.db.tables[self.name]
             self.name = new_name
             self.refresh_properties()
-            if emma_instance:
-                emma_instance.events.trigger('on_table_modified', self)
+            self.trigger('changed', self)
             return True
 
     def alter_engine(self, new_engine):
@@ -169,8 +162,7 @@ class MySqlTable(gobject.GObject):
                 new_engine.upper()
         )):
             self.refresh_properties()
-            if emma_instance:
-                emma_instance.events.trigger('on_table_modified', self)
+            self.trigger('changed', self)
 
     def alter_row_format(self, new_row_format):
         """
@@ -181,8 +173,7 @@ class MySqlTable(gobject.GObject):
                 new_row_format.upper()
         )):
             self.refresh_properties()
-            if emma_instance:
-                emma_instance.events.trigger('on_table_modified', self)
+            self.trigger('changed', self)
 
     def alter_comment(self, new_comment):
         """
@@ -193,8 +184,7 @@ class MySqlTable(gobject.GObject):
                 new_comment
         )):
             self.refresh_properties()
-            if emma_instance:
-                emma_instance.events.trigger('on_table_modified', self)
+            self.trigger('changed', self)
 
     def alter_auto_increment(self, new_ai):
         """
@@ -205,8 +195,7 @@ class MySqlTable(gobject.GObject):
                 new_ai
         )):
             self.refresh_properties()
-            if emma_instance:
-                emma_instance.events.trigger('on_table_modified', self)
+            self.trigger('changed', self)
 
     def alter_collation(self, charset, collation):
         """
@@ -219,8 +208,7 @@ class MySqlTable(gobject.GObject):
                     charset, collation
                 )):
             self.refresh_properties()
-            if emma_instance:
-                emma_instance.events.trigger('on_table_modified', self)
+            self.trigger('changed', self)
 
     def drop_field(self, field_name):
         """
@@ -229,8 +217,7 @@ class MySqlTable(gobject.GObject):
         if self.host.query("ALTER TABLE `%s` DROP `%s`" % (self.host.escape_table(self.name),
                                                            field_name)):
             self.refresh()
-            if emma_instance:
-                emma_instance.events.trigger('on_table_modified', self)
+            self.trigger('changed', self)
 
     #
     #   WIDGETS
@@ -303,8 +290,8 @@ class MySqlTable(gobject.GObject):
             return
         if self.db.query("drop table `%s`" % self.name):
             if emma_instance:
-                emma_instance.events.trigger('on_table_modified', self)
-                emma_instance.events.trigger('on_table_dropped', self)
+                self.trigger('changed', self)
+                self.trigger('dropped', self)
 
     def on_toolbar_truncate_table(self, _):
         """
@@ -318,5 +305,4 @@ class MySqlTable(gobject.GObject):
                 None):
             return
         if self.db.query("truncate table `%s`" % self.name):
-            if emma_instance:
-                emma_instance.events.trigger('on_table_modified', self)
+            self.trigger('changed', self)

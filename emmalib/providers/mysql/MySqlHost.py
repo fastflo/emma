@@ -132,11 +132,11 @@ class MySqlHost(object):
             if self.connected:
                 db_name = self.current_db.name
                 self.current_db = None
-                print "try to reconnect after unpickling!"
+                # print "try to reconnect after unpickling!"
                 self.connect()
-                print "resulting handle:", self.handle
+                # print "resulting handle:", self.handle
             if self.connected:
-                print "unpickling databases!", self.handle
+                # print "unpickling databases!", self.handle
                 for _, database in self.databases.iteritems():
                     database.__init__(self)
                 self.use_db(db_name, True)
@@ -204,7 +204,7 @@ class MySqlHost(object):
         except:  # mysql_exceptions.OperationalError:
             self.connected = False
             msg = "%s: %s" % (sys.exc_type, sys.exc_value)
-            print msg
+            # print msg
             if self.msg_log:
                 self.msg_log(msg)
             return
@@ -311,7 +311,8 @@ class MySqlHost(object):
             if self.msg_log:
                 self.msg_log(message)
             else:
-                print message
+                # print message
+                pass
             if sys.exc_value[0] == 2013:
                 # lost connection
                 self.close()
@@ -352,8 +353,9 @@ class MySqlHost(object):
         try:
             self.current_db = self.databases[name]
         except KeyError:
-            print "Warning: used an unknown database %r! please refresh host!\n%s" % (
-                name, "".join(traceback.format_stack()))
+            # print "Warning: used an unknown database %r! please refresh host!\n%s" % (
+            #     name, "".join(traceback.format_stack()))
+            pass
 
     def select_database(self, database):
         """
@@ -374,7 +376,7 @@ class MySqlHost(object):
             else:
                 del old[row[0]]
         for database in old.keys():
-            print "remove database", database
+            # print "remove database", database
             del self.databases[database]
 
     def refresh_processlist(self):

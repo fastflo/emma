@@ -63,13 +63,13 @@ class RememberOrder(gtk.ToolButton):
             return
         table = tables[0]
 
-        print "---\ntable: %s order: %s" % (table, current_order)
+        # print "---\ntable: %s order: %s" % (table, current_order)
 
         config_name = "stored_order_db_%s_table_%s" % \
                       (self.emma.current_query.current_db.name, table)
-        print "config name %s" % config_name
+        # print "config name %s" % config_name
         self.emma.config.config[config_name] = str(current_order)
-        if not self.emma.current_query.current_db.name in self.emma.stored_orders:
+        if self.emma.current_query.current_db.name not in self.emma.stored_orders:
             self.emma.stored_orders[self.emma.current_query.current_db.name] = {}
         self.emma.stored_orders[self.emma.current_query.current_db.name][table] = current_order
         self.emma.config.save()

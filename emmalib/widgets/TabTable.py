@@ -38,7 +38,7 @@ class TabTable(BaseTab):
         self.table = table
         self.status_text = gtk.Label()
 
-        self.table.connect('changed', self.table_changed)
+        self.table.on('changed', self.table_changed)
 
         #
         #   DATA
@@ -93,15 +93,24 @@ class TabTable(BaseTab):
         self.ui = vbox
 
     def create_statusbar(self):
+        """
+        @return: gtk.HBox
+        """
         hbox = gtk.HBox()
         hbox.pack_start(self.status_text, False, True)
         return hbox
 
-    def update(self, *args):
+    def update(self, *_):
+        """
+        @param _:
+        """
         self.table.refresh()
         self.load()
 
     def load(self):
+        """
+        Load
+        """
         self.data_view.load_data(self.table.get_all_records())
         self.status_text.set_text(self.table.get_table_status_string())
         self.table_textview.get_buffer().set_text(self.table.get_create_table())
@@ -114,4 +123,9 @@ class TabTable(BaseTab):
                 self.table_indexes.refresh()
 
     def table_changed(self, table):
-        print 'Table `%s` fired CHANGED event!' % table.name
+        """
+        @param table: MySqlTable
+        """
+        self.table_textview.get_buffer().set_text(self.table.get_create_table())
+        self.tab_label.set_text('Table: %s' % table.name)
+        # print 'Table `%s` fired CHANGED event!' % table.name

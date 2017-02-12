@@ -297,6 +297,7 @@ class ConnectionsTreeView(gtk.TreeView):
                 force_expand = False
             self.redraw_table(table, i)
             iterators[name] = i
+            table.on('changed', lambda _table: self.redraw_table(_table, i))
         if not new_tables:
             return
         for name in new_tables:

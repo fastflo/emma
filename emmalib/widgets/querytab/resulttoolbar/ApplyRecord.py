@@ -32,7 +32,6 @@ class ApplyRecord(gtk.ToolButton):
             table, where, field, value, row_iter, fields = q.get_unique_where(
                 q.last_source, return_fields=True)
             if self.query.last_th.host.__class__.__name__ == "sqlite_host":
-                print (table, where, field, value, row_iter, fields)
                 keys = []
                 values = []
                 for key, value in self.query.kv_list:
@@ -49,23 +48,23 @@ class ApplyRecord(gtk.ToolButton):
                 return False
 
             insert_id = self.query.current_host.insert_id()
-            print "insert id: %r" % insert_id
+            # print "insert id: %r" % insert_id
             where_fields = map(lambda s: s.strip(), where.split(","))
-            print "where fields: %r" % (where_fields, )
-            print "select fields: %r" % (fields, )
-            print "from %r" % ((table, where, field, value, row_iter), )
+            # print "where fields: %r" % (where_fields, )
+            # print "select fields: %r" % (fields, )
+            # print "from %r" % ((table, where, field, value, row_iter), )
             if not where_fields:
-                print "no possible key found to retrieve newly created record"
+                # print "no possible key found to retrieve newly created record"
+                pass
             else:
                 th = self.query.current_host.current_db.tables[table]
                 wc = []
-                print 'where fields = ', where_fields
+                # print 'where fields = ', where_fields
                 for field in where_fields:
                     props = False
                     for field_object in th.fields:
                         if field_object.name == field:
                             props = field_object.row
-                            print props
                     if props:
                         auto_increment = props['Extra'].find("auto_increment") != -1
                         if auto_increment:
@@ -78,11 +77,11 @@ class ApplyRecord(gtk.ToolButton):
                             else:
                                 # use field default value (maybe none)
                                 value = props['Default']
-                                if not value is None:
+                                if value is not None:
                                     value = "'%s'" % self.query.current_host.escape(value)
                         wc.append("%s=%s" % (self.query.current_host.escape_field(field), value))
                 where = " and ".join(wc)
-                print "select where: %r" % where
+                # print "select where: %r" % where
                 if fields == ["*"]:
                     field_selector = "*"
                 else:
@@ -91,11 +90,12 @@ class ApplyRecord(gtk.ToolButton):
                     "select %s from `%s` where %s limit 1" % (field_selector, table, where))
                 result = self.query.current_host.handle.store_result().fetch_row(0)
                 if len(result) < 1:
-                    print "error: can't find modfied row!?"
+                    # print "error: can't find modfied row!?"
+                    pass
                 else:
                     row = result[0]
                     for index, value in enumerate(row):
-                        if not value is None:
+                        if value is not None:
                             value = value.decode(q.encoding)
                         q.model.set_value(q.append_iter, index, value)
         else:

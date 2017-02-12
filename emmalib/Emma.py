@@ -163,13 +163,13 @@ class Emma:
         Load plugins
         """
         def _load(_plugin_name):
-            print "loading plugin %r" % _plugin_name
+            # print "loading plugin %r" % _plugin_name
             if _plugin_name in self.plugins:
                 plugin = reload(self.plugins[_plugin_name])
             else:
                 plugin = __import__(_plugin_name)
 
-            print "PLUGIN:", plugin
+            # print "PLUGIN:", plugin
             self.plugins[_plugin_name] = plugin
             self.init_plugin(plugin)
         for path in self.plugin_pathes:

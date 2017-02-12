@@ -39,7 +39,7 @@ class MySqlDb(object):
             self.status_headers = []
             self.tables = {}
         else:
-            print "unpickling tables!", self.handle
+            # print "unpickling tables!", self.handle
             for name, table in self.tables.iteritems():
                 table.handle = self.handle
                 # self.id = id
@@ -54,10 +54,10 @@ class MySqlDb(object):
             result = self.handle.store_result()
             row = result.fetch_row()
             self.charset = row[0][1]
-            print "using database charset %r" % self.charset
+            # print "using database charset %r" % self.charset
         else:
             self.charset = self.host.charset
-            print "using server charset %r for this database" % self.charset
+            # print "using server charset %r for this database" % self.charset
         if not self.host.query("show table status"):
             return
         new_tables = []
@@ -78,7 +78,7 @@ class MySqlDb(object):
                 del old[row[0]]
 
         for table in old:
-            print "destroy table", table
+            # print "destroy table", table
             del self.tables[table]
         return new_tables
 

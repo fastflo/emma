@@ -499,16 +499,4 @@ class TableFieldDialog(gtk.Dialog):
         if comment != '':
             sql += " COMMENT  '%s' " % comment.replace("'", "''")
 
-        print sql
-
         return sql
-
-
-if __name__ == '__main__':
-
-    f = MySqlField({})
-    w = TableFieldDialog(f)
-    answer = w.run()
-    if answer == gtk.RESPONSE_OK:
-        print w.get_sql('table_name')
-    w.destroy()

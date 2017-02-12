@@ -23,10 +23,10 @@ class LocalSearch(object):
 
         glade_file = os.path.join(glade_path, 'dialogs', "LocalSearch.glade")
         if not os.access(glade_file, os.R_OK):
-            print glade_file, "not found!"
+            # print glade_file, "not found!"
             sys.exit(-1)
 
-        print "glade file: %r" % glade_file
+        # print "glade file: %r" % glade_file
         self.xml = gtk.glade.XML(glade_file)
         self.xml.signal_autoconnect(self)
 

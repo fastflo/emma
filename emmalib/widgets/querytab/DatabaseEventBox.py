@@ -37,8 +37,6 @@ class DatabaseEventBox(gtk.EventBox):
         @param event:
         @return:
         """
-        print ebox
-        print event
         qeury = self.query
         host = qeury.current_host
         database = qeury.current_db
@@ -57,7 +55,7 @@ class DatabaseEventBox(gtk.EventBox):
                 break
             i = self.emma.connections_tv.connections_model.iter_next(i)
         else:
-            print "host not found in connections list!"
+            # print "host not found in connections list!"
             qeury.current_host = qeury.current_db = None
             qeury.update_db_label()
             return
@@ -75,7 +73,7 @@ class DatabaseEventBox(gtk.EventBox):
                 break
             k = self.emma.connections_tv.connections_model.iter_next(k)
         else:
-            print "database not found in connections list!"
+            # print "database not found in connections list!"
             qeury.current_db = None
             qeury.update_db_label()
             self.emma.connections_tv.set_cursor(host_path)

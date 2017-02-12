@@ -3,7 +3,7 @@ Emma's global event manager
 """
 
 
-class EventsManager:
+class EventsManager(object):
     """
     Emma's global event manager
     """
@@ -25,11 +25,11 @@ class EventsManager:
         :param event_name: str
         :param args: []
         """
-        print '---'
-        print 'EventManager.trigger : ', event_name
-        print '---'
+        # print '---'
+        # print 'EventManager.trigger : ', event_name
+        # print '---'
         if event_name in self.__handlers__:
-            print 'Count of handlers: ', len(self.__handlers__[event_name])
+            # print 'Count of handlers: ', len(self.__handlers__[event_name])
             for event in self.__handlers__[event_name]:
                 if len(args) > 0:
                     event(*args)

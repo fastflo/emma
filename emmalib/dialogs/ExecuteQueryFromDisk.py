@@ -200,7 +200,8 @@ class ExecuteQueryFromDisk:
             update_ui(False, fp.tell())
             if not limit_db or found_db:
                 if exclude and exclude_regex.match(query):
-                    print "skipping query %r" % query[0:80]
+                    # print "skipping query %r" % query[0:80]
+                    pass
                 elif not host.query(query, True, append_to_log) and stop_on_error:
                     show_message(
                         "execute query from disk",
@@ -328,7 +329,5 @@ class ExecuteQueryFromDisk:
 
 
 if __name__ == '__main__':
-    print 'Self run'
-
     instance = ExecuteQueryFromDisk(None)
     gtk.main()

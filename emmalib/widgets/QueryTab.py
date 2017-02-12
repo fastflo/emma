@@ -293,7 +293,7 @@ class QueryTab(BaseTab):
         """
         selection = tv.get_selection()
 
-        print selection.get_selected_rows()
+        # print selection.get_selected_rows()
 
         if event.button != 3 or selection.count_selected_rows() == 0:
             return False
@@ -320,18 +320,18 @@ class QueryTab(BaseTab):
         if label is None:
             return
         if self.last_auto_name is None:
-            print "no last_auto_name"
             label.set_text(new_auto_name)
             self.last_auto_name = new_auto_name
             return
         current_name = label.get_text()
         if self.last_auto_name in current_name:
             if current_name != new_auto_name:
-                print "setting new %r from old %r" % (new_auto_name, current_name)
+                # print "setting new %r from old %r" % (new_auto_name, current_name)
                 label.set_text(current_name.replace(self.last_auto_name, new_auto_name))
                 self.last_auto_name = new_auto_name
         else:
-            print "last auto name %r not in %r!" % (self.last_auto_name, current_name)
+            # print "last auto name %r not in %r!" % (self.last_auto_name, current_name)
+            pass
         return
 
     def destroy(self):
@@ -439,7 +439,7 @@ class QueryTab(BaseTab):
         :param button: gtk.Button
         :param page_index: str
         """
-        print button, page_index
+        # print button, page_index
         self.emma.main_notebook.close_query_tab(page_index)
 
     def is_query_editable(self, query, result=None):
@@ -552,7 +552,7 @@ class QueryTab(BaseTab):
         tables = table_list.split(",")
 
         if len(tables) > 1:
-            print "sorry, i can't edit queries with more than one source-table:", tables
+            # print "sorry, i can't edit queries with more than one source-table:", tables
             return None, None, None, None, None
 
         # get table_name
@@ -583,10 +583,10 @@ class QueryTab(BaseTab):
         new_tables = []
         self.last_th = None
         if not self.current_host:
-            print "Host not selected"
+            # print "Host not selected"
             return None, None, None, None, None
         if not self.current_host.current_db:
-            print "Database not selected"
+            # print "Database not selected"
             return None, None, None, None, None
         while 1:
             try:
@@ -595,8 +595,8 @@ class QueryTab(BaseTab):
             except:
                 tries += 1
                 if tries > 1:
-                    print "query not editable, because table %r is not found in db %r" % \
-                          (table, self.current_host.current_db)
+                    # print "query not editable, because table %r is not found in db %r" % \
+                    #       (table, self.current_host.current_db)
                     return None, None, None, None, None
                 new_tables = self.current_host.current_db.refresh()
                 continue
@@ -673,8 +673,8 @@ class QueryTab(BaseTab):
                 possible_key = "e.g.'%s' would be useful!" % possible_primary
             elif possible_unique:
                 possible_key = "e.g.'%s' would be useful!" % possible_unique
-            print "no edit-key found. try to name a key-field in your select-clause. (%r)" % \
-                  possible_key
+            # print "no edit-key found. try to name a key-field in your select-clause. (%r)" % \
+            #       possible_key
             return table, None, None, None, None
 
         value = ""
@@ -738,7 +738,7 @@ class QueryTab(BaseTab):
             limit
         )
         if self.current_host.query(update_query, encoding=self.encoding):
-            print "set new value: %r" % new_value
+            # print "set new value: %r" % new_value
             self.model.set_value(row_iter, col_num, new_value)
             return True
         return False

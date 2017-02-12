@@ -222,7 +222,7 @@ class FieldConditions(gtk.Window):
 
         try:
             new_order = self.stored_orders[self.current_host.current_db.name][current_table.name]
-            print "found stored order: %r" % (new_order,)
+            # print "found stored order: %r" % (new_order,)
             query = t
             try:
                 r = self.query_order_re

@@ -98,7 +98,6 @@ class QueryTabResultPopup(gtk.Menu):
     def activated(self, item):
         q = self.query
         path, column = q.treeview.get_cursor()
-        print path, column
         _iter = q.model.get_iter(path)
 
         if item.name == "copy_field_value":
@@ -107,7 +106,6 @@ class QueryTabResultPopup(gtk.Menu):
                 if column == q.treeview.get_column(col_num):
                     break
             else:
-                print "column not found!"
                 return
             value = q.model.get_value(_iter, col_num)
             self.query.emma.clipboard.set_text(value)
@@ -119,8 +117,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if value:
                     value += self.query.emma.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(_iter, col_num)
-                print v
-                if not v is None:
+                if v is not None:
                     value += v
             self.query.emma.clipboard.set_text(value)
             self.query.emma.pri_clipboard.set_text(value)
@@ -131,7 +128,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if value:
                     value += self.query.emma.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(_iter, col_num)
-                if not v is None:
+                if v is not None:
                     v = v.replace("\"", "\\\"")
                     value += '"%s"' % v
             self.query.emma.clipboard.set_text(value)
@@ -142,7 +139,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if column == q.treeview.get_column(col_num):
                     break
             else:
-                print "column not found!"
+                # print "column not found!"
                 return
             value = ""
             _iter = q.model.get_iter_first()
@@ -150,7 +147,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if value:
                     value += self.query.emma.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(_iter, col_num)
-                if not v is None:
+                if v is not None:
                     value += v
                 _iter = q.model.iter_next(_iter)
             self.query.emma.clipboard.set_text(value)
@@ -161,7 +158,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if column == q.treeview.get_column(col_num):
                     break
             else:
-                print "column not found!"
+                # print "column not found!"
                 return
             value = ""
             _iter = q.model.get_iter_first()
@@ -169,7 +166,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if value:
                     value += self.query.emma.config.get("copy_record_as_csv_delim")
                 v = q.model.get_value(_iter, col_num)
-                if not v is None:
+                if v is not None:
                     v = v.replace("\"", "\\\"")
                     value += '"%s"' % v
                 _iter = q.model.iter_next(_iter)
@@ -189,7 +186,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if column == q.treeview.get_column(col_num):
                     break
             else:
-                print "column not found!"
+                # print "column not found!"
                 return
             table, where, field, value, row_iter = q.get_unique_where(q.last_source, path, col_num)
             update_query = "update `%s` set `%s`=NULL where %s limit 1" % (table, field, where)
@@ -201,7 +198,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if column == q.treeview.get_column(col_num):
                     break
             else:
-                print "column not found!"
+                # print "column not found!"
                 return
             table, where, field, value, row_iter = q.get_unique_where(q.last_source, path, col_num)
             update_query = "update `%s` set `%s`=now() where %s limit 1" % (table, field, where)
@@ -211,7 +208,7 @@ class QueryTabResultPopup(gtk.Menu):
                 "select `%s` from `%s` where %s limit 1" % (field, table, where))
             result = self.query.current_host.handle.store_result().fetch_row(0)
             if len(result) < 1:
-                print "error: can't find modfied row!?"
+                # print "error: can't find modfied row!?"
                 return
             q.model.set_value(row_iter, col_num, result[0][0])
         elif item.name == "set_value_unix_timestamp":
@@ -220,7 +217,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if column == q.treeview.get_column(col_num):
                     break
             else:
-                print "column not found!"
+                # print "column not found!"
                 return
             table, where, field, value, row_iter = q.get_unique_where(q.last_source, path, col_num)
             update_query = "update `%s` set `%s`=unix_timestamp(now()) where %s limit 1" \
@@ -231,7 +228,7 @@ class QueryTabResultPopup(gtk.Menu):
                 "select `%s` from `%s` where %s limit 1" % (field, table, where))
             result = self.query.current_host.handle.store_result().fetch_row(0)
             if len(result) < 1:
-                print "error: can't find modfied row!?"
+                # print "error: can't find modfied row!?"
                 return
             q.model.set_value(row_iter, col_num, result[0][0])
         elif item.name == "set_value_as_password":
@@ -240,7 +237,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if column == q.treeview.get_column(col_num):
                     break
             else:
-                print "column not found!"
+                # print "column not found!"
                 return
             table, where, field, value, row_iter = q.get_unique_where(q.last_source, path, col_num)
             update_query = "update `%s` set `%s`=password('%s') where %s limit 1" % \
@@ -256,7 +253,7 @@ class QueryTabResultPopup(gtk.Menu):
                 "select `%s` from `%s` where %s limit 1" % (field, table, where))
             result = self.query.current_host.handle.store_result().fetch_row(0)
             if len(result) < 1:
-                print "error: can't find modfied row!?"
+                # print "error: can't find modfied row!?"
                 return
             q.model.set_value(row_iter, col_num, result[0][0])
         elif item.name == "set_value_to_sha":
@@ -265,7 +262,7 @@ class QueryTabResultPopup(gtk.Menu):
                 if column == q.treeview.get_column(col_num):
                     break
             else:
-                print "column not found!"
+                # print "column not found!"
                 return
             table, where, field, value, row_iter = q.get_unique_where(q.last_source, path, col_num)
             update_query = "update `%s` set `%s`=sha1('%s') where %s limit 1" % \
@@ -282,6 +279,6 @@ class QueryTabResultPopup(gtk.Menu):
             )
             result = self.query.current_host.handle.store_result().fetch_row(0)
             if len(result) < 1:
-                print "error: can't find modfied row!?"
+                # print "error: can't find modfied row!?"
                 return
             q.model.set_value(row_iter, col_num, result[0][0])
