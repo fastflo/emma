@@ -70,8 +70,6 @@ class ConnectionsTreeView(gtk.TreeView):
 
         self.connection_window = ConnectionWindow(emma)
 
-        self.emma.events.on('on_table_modified', self.on_table_modified)
-
         self.load_from_config()
 
     def on_table_modified(self, table):
@@ -311,13 +309,13 @@ class ConnectionsTreeView(gtk.TreeView):
         :param table:
         :param _iter:
         """
-        if table.expanded:
-            self.expand_row(self.connections_model.get_path(_iter), False)
         i = self.connections_model.iter_children(_iter)
         while i and self.connections_model.iter_is_valid(i):
             self.connections_model.remove(i)
         for field in table.fields:
             self.connections_model.append(_iter, ((field.name, field.type),))
+        if table.expanded:
+            self.expand_row(self.connections_model.get_path(_iter), False)
 
     def render_connections_pixbuf(self, column, cell, model, itr):
         """
@@ -365,27 +363,30 @@ class ConnectionsTreeView(gtk.TreeView):
         #   HOST level
         #
         if d == 0:
+            hostname = o.name
             if o.connected:
                 databases_count = o.databases.__len__()
-                cell.set_property("text", "%s (%s)" % (o.name, databases_count))
+                cell.set_property("text", "%s (%s)" % (hostname, databases_count))
                 cell.set_property("weight-set", True)
                 cell.set_property("weight", 700)
             else:
-                cell.set_property("text", "%s" % o.name)
+                cell.set_property("text", "%s" % hostname)
                 cell.set_property("weight-set", True)
                 cell.set_property("weight", 400)
         #
         #   DATABASE level
         #
         elif d == 1:
-            cell.set_property("text", "%s" % o.name)
+            dbname = o.name
+            cell.set_property("text", "%s" % dbname)
             cell.set_property("weight-set", True)
             cell.set_property("weight", 400)
         #
         #   TABLE level
         #
         elif d == 2:
-            cell.set_property("text", "%s" % o.name)
+            tablename = o.name
+            cell.set_property("text", "%s" % tablename)
             cell.set_property("weight-set", True)
             cell.set_property("weight", 400)
         #
@@ -459,12 +460,15 @@ class ConnectionsTreeView(gtk.TreeView):
             table.refresh()
             self.redraw_table(table, _iter)
         elif what == "truncate_table":
+            hostname = table.db.host.name.replace('&', '&amp;')
+            dbname = table.db.name.replace('&', '&amp;')
+            tablename = table.name.replace('&', '&amp;')
             if not dialogs.confirm("truncate table",
                                    "do you really want to truncate the <b>%s</b> "
                                    "table in database <b>%s</b> on <b>%s</b>?" % (
-                                           table.name,
-                                           table.db.name,
-                                           table.db.host.name
+                                           tablename,
+                                           dbname,
+                                           hostname
                                    ),
                                    self.emma.mainwindow):
                 return
@@ -472,12 +476,15 @@ class ConnectionsTreeView(gtk.TreeView):
                 table.refresh()
                 self.redraw_table(table, _iter)
         elif what == "drop_table":
+            hostname = table.db.host.name.replace('&', '&amp;')
+            dbname = table.db.name.replace('&', '&amp;')
+            tablename = table.name.replace('&', '&amp;')
             if not dialogs.confirm("drop table",
                                    "do you really want to DROP the <b>%s</b> table in database "
                                    "<b>%s</b> on <b>%s</b>?" % (
-                                           table.name,
-                                           table.db.name,
-                                           table.db.host.name
+                                           tablename,
+                                           dbname,
+                                           hostname
                                    ),
                                    self.emma.mainwindow):
                 return
@@ -508,13 +515,15 @@ class ConnectionsTreeView(gtk.TreeView):
             new_tables = db.refresh()
             self.redraw_db(db, _iter, new_tables)
         elif what == "drop_database":
+            hostname = db.host.name.replace('&', '&amp;')
+            dbname = db.name.replace('&', '&amp;')
             if not dialogs.confirm("drop database",
                                    "do you really want to drop the <b>%s</b> "
                                    "database on <b>%s</b>?" % (
-                                           db.name, db.host.name), self.emma.mainwindow):
+                                           dbname, hostname), self.emma.mainwindow):
                 return
             host = db.host
-            if host.query("drop database`%s`" % db.name):
+            if host.query("drop database`%s`" % db.name, False, True):
                 host.refresh()
                 self.redraw_host(host, self.emma.connections_tv.get_host_iter(host))
         elif what == "new_table":
@@ -577,8 +586,9 @@ class ConnectionsTreeView(gtk.TreeView):
             self.connection_window.host = host
             self.connection_window.show("edit")
         elif what == "delete_connection":
+            hostname = host.name.replace('&', '&amp;')
             if not dialogs.confirm(
-                    "Delete host", "Do you really want to drop the host <b>%s</b>?" % host.name,
+                    "Delete host", "Do you really want to drop the host <b>%s</b>?" % hostname,
                     self.emma.mainwindow):
                 return
             host.close()

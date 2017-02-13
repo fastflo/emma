@@ -38,6 +38,7 @@ class MySqlTable(EventsManager):
     :@param props
     :@param pros_description
     """
+
     def __init__(self, db, props, props_description):
         super(MySqlTable, self).__init__()
         self.handle = db.handle
@@ -142,10 +143,10 @@ class MySqlTable(EventsManager):
         :param new_name: str
         :return: bool
         """
-        if self.host.query('RENAME TABLE %s TO %s' % (
-                self.host.escape_table(self.name),
-                self.host.escape_table(new_name)
-        )):
+        oldname = self.host.escape_table(self.name)
+        newname = self.host.escape_table(new_name)
+        query = 'RENAME TABLE %s TO %s' % (oldname, newname)
+        if self.host.query(query, False, True):
             self.db.tables[new_name] = self
             del self.db.tables[self.name]
             self.name = new_name
@@ -203,9 +204,9 @@ class MySqlTable(EventsManager):
         :param collation:
         """
         if self.host.query(
-                "ALTER TABLE %s DEFAULT CHARACTER SET %s COLLATE %s" % (
-                    self.host.escape_table(self.name),
-                    charset, collation
+                        "ALTER TABLE %s DEFAULT CHARACTER SET %s COLLATE %s" % (
+                        self.host.escape_table(self.name),
+                        charset, collation
                 )):
             self.refresh_properties()
             self.trigger('changed', self)
@@ -284,8 +285,8 @@ class MySqlTable(EventsManager):
         """
         if not confirm(
                 "Drop table",
-                "do you really want to DROP the <b>%s</b> table in database "
-                "<b>%s</b> on <b>%s</b>?" % (self.name, self.db.name, self.db.host.name),
+                        "do you really want to DROP the <b>%s</b> table in database "
+                        "<b>%s</b> on <b>%s</b>?" % (self.name, self.db.name, self.db.host.name),
                 None):
             return
         if self.db.query("drop table `%s`" % self.name):
@@ -300,8 +301,8 @@ class MySqlTable(EventsManager):
         """
         if not confirm(
                 "Truncate table",
-                "Do You really want to TRUNCATE the <b>%s</b> table in database "
-                "<b>%s</b> on <b>%s</b>?" % (self.name, self.db.name, self.db.host.name),
+                        "Do You really want to TRUNCATE the <b>%s</b> table in database "
+                        "<b>%s</b> on <b>%s</b>?" % (self.name, self.db.name, self.db.host.name),
                 None):
             return
         if self.db.query("truncate table `%s`" % self.name):

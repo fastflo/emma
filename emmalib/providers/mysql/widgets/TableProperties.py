@@ -22,6 +22,8 @@ Emma MySql provider Table properties widget
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 import gtk
+
+from emmalib.dialogs import error
 from emmalib.providers.mysql.widgets.collations import collations
 
 
@@ -119,8 +121,14 @@ class TableProperties(gtk.ScrolledWindow):
             return
         do_update = False
         if self.tb_name.get_text() != self.table.props_dict['Name']:
-            if self.table.rename(self.tb_name.get_text()):
-                do_update = True
+            if len(self.tb_name.get_text()) == 0:
+                error('Table name cannot be empty')
+            else:
+                try:
+                    if self.table.rename(self.tb_name.get_text()):
+                        do_update = True
+                except Exception as e:
+                    error(e.message)
         if self.cb_engine.get_active_text() != self.table.props_dict['Engine']:
             if self.table.alter_engine(self.cb_engine.get_active_text()):
                 do_update = True

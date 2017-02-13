@@ -409,6 +409,8 @@ class MySqlHost(object):
         :param field: str
         :return: str
         """
+        if len(field) == 0:
+            return ''
         # todo encode unicode strings here!
         # if already encoded:
         if "\x00" in field or "\0xff" in field:
