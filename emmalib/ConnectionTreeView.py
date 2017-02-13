@@ -460,15 +460,12 @@ class ConnectionsTreeView(gtk.TreeView):
             table.refresh()
             self.redraw_table(table, _iter)
         elif what == "truncate_table":
-            hostname = table.db.host.name.replace('&', '&amp;')
-            dbname = table.db.name.replace('&', '&amp;')
-            tablename = table.name.replace('&', '&amp;')
             if not dialogs.confirm("truncate table",
                                    "do you really want to truncate the <b>%s</b> "
                                    "table in database <b>%s</b> on <b>%s</b>?" % (
-                                           tablename,
-                                           dbname,
-                                           hostname
+                                           table.get_escaped_name(),
+                                           table.db.get_escaped_name(),
+                                           table.db.host.get_escaped_name(),
                                    ),
                                    self.emma.mainwindow):
                 return
@@ -476,15 +473,12 @@ class ConnectionsTreeView(gtk.TreeView):
                 table.refresh()
                 self.redraw_table(table, _iter)
         elif what == "drop_table":
-            hostname = table.db.host.name.replace('&', '&amp;')
-            dbname = table.db.name.replace('&', '&amp;')
-            tablename = table.name.replace('&', '&amp;')
             if not dialogs.confirm("drop table",
                                    "do you really want to DROP the <b>%s</b> table in database "
                                    "<b>%s</b> on <b>%s</b>?" % (
-                                           tablename,
-                                           dbname,
-                                           hostname
+                                           table.get_escaped_name(),
+                                           table.db.get_escaped_name(),
+                                           table.db.host.get_escaped_name(),
                                    ),
                                    self.emma.mainwindow):
                 return

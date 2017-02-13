@@ -448,6 +448,12 @@ class MySqlHost(object):
             raise Exception("table name too long: %r / %d" % (table, len(table)))
         return self.escape_field(table)
 
+    def get_escaped_name(self):
+        """
+        :@return : str
+        """
+        return self.name.replace('&', '&amp;').replace('<', '&lt;')
+
 
 def result2hash(host, cols=True):
     """

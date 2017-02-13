@@ -91,3 +91,9 @@ class MySqlDb(object):
         """
         self.host.select_database(self)
         return self.host.query(query, check_use, append_to_log)
+
+    def get_escaped_name(self):
+        """
+        :@return : str
+        """
+        return self.name.replace('&', '&amp;').replace('<', '&lt;')

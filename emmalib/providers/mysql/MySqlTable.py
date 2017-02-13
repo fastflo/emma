@@ -78,7 +78,7 @@ class MySqlTable(EventsManager):
         """
         Refresh table properties
         """
-        self.host.query("show table status like '%s'" % self.name)
+        self.host.query("show table status like '%s'" % self.host.escape_table(self.name))
         result = self.handle.store_result()
         rows = result.fetch_row(0)
         self.props = rows[0]
@@ -90,7 +90,7 @@ class MySqlTable(EventsManager):
         :return: None
         """
         self.fields = []
-        res = self.host.query_dict("show full columns from %s" % self.host.escape_table(self.name))
+        res = self.host.query_dict("show full columns from `%s`" % self.host.escape_table(self.name))
         if not res:
             return
         for row in res['rows']:
@@ -101,7 +101,7 @@ class MySqlTable(EventsManager):
         :return: None
         """
         self.indexes = []
-        res = self.host.query_dict('SHOW INDEX FROM %s' % self.host.escape_table(self.name))
+        res = self.host.query_dict('SHOW INDEX FROM `%s`' % self.host.escape_table(self.name))
         if not res:
             return
         for row in res['rows']:
@@ -112,7 +112,7 @@ class MySqlTable(EventsManager):
         :return: str
         """
         self.db.host.select_database(self.db)
-        self.host.query("show create table `%s`" % self.name)
+        self.host.query("show create table `%s`" % self.host.escape_table(self.name))
         result = self.handle.store_result()
         if not result:
             # print "can't get create table for %s at %s and %s" % (self.name, self, self.handle)
@@ -132,7 +132,7 @@ class MySqlTable(EventsManager):
         """
         :return: dict
         """
-        return self.host.query_dict('SELECT * FROM `%s`' % self.name)
+        return self.host.query_dict('SELECT * FROM `%s`' % self.host.escape_table(self.name))
 
     #
     # ALTER TABLE
@@ -145,7 +145,7 @@ class MySqlTable(EventsManager):
         """
         oldname = self.host.escape_table(self.name)
         newname = self.host.escape_table(new_name)
-        query = 'RENAME TABLE %s TO %s' % (oldname, newname)
+        query = 'RENAME TABLE `%s` TO `%s`' % (oldname, newname)
         if self.host.query(query, False, True):
             self.db.tables[new_name] = self
             del self.db.tables[self.name]
@@ -158,7 +158,7 @@ class MySqlTable(EventsManager):
         """
         :param new_engine:
         """
-        if self.host.query('ALTER TABLE `%s` ENGINE=%s' % (
+        if self.host.query('ALTER TABLE `%s` ENGINE=`%s`' % (
                 self.host.escape_table(self.name),
                 new_engine.upper()
         )):
@@ -169,7 +169,7 @@ class MySqlTable(EventsManager):
         """
         :param new_row_format:
         """
-        if self.host.query('ALTER TABLE `%s` ROW_FORMAT=%s' % (
+        if self.host.query('ALTER TABLE `%s` ROW_FORMAT=`%s`' % (
                 self.host.escape_table(self.name),
                 new_row_format.upper()
         )):
@@ -180,7 +180,7 @@ class MySqlTable(EventsManager):
         """
         :param new_comment:
         """
-        if self.host.query("ALTER TABLE %s COMMENT='%s'" % (
+        if self.host.query("ALTER TABLE `%s` COMMENT='%s'" % (
                 self.host.escape_table(self.name),
                 new_comment
         )):
@@ -191,7 +191,7 @@ class MySqlTable(EventsManager):
         """
         :param new_ai:
         """
-        if self.host.query("ALTER TABLE %s AUTO_INCREMENT=%s" % (
+        if self.host.query("ALTER TABLE `%s` AUTO_INCREMENT=%s" % (
                 self.host.escape_table(self.name),
                 new_ai
         )):
@@ -204,9 +204,9 @@ class MySqlTable(EventsManager):
         :param collation:
         """
         if self.host.query(
-                        "ALTER TABLE %s DEFAULT CHARACTER SET %s COLLATE %s" % (
-                        self.host.escape_table(self.name),
-                        charset, collation
+                        "ALTER TABLE `%s` DEFAULT CHARACTER SET %s COLLATE %s" % (
+                            self.host.escape_table(self.name),
+                            charset, collation
                 )):
             self.refresh_properties()
             self.trigger('changed', self)
@@ -285,8 +285,12 @@ class MySqlTable(EventsManager):
         """
         if not confirm(
                 "Drop table",
-                        "do you really want to DROP the <b>%s</b> table in database "
-                        "<b>%s</b> on <b>%s</b>?" % (self.name, self.db.name, self.db.host.name),
+                "do you really want to DROP the <b>%s</b> table in database "
+                "<b>%s</b> on <b>%s</b>?" % (
+                        self.get_escaped_name(),
+                        self.db.get_escaped_name(),
+                        self.db.host.get_escaped_name()
+                ),
                 None):
             return
         if self.db.query("drop table `%s`" % self.name):
@@ -301,9 +305,19 @@ class MySqlTable(EventsManager):
         """
         if not confirm(
                 "Truncate table",
-                        "Do You really want to TRUNCATE the <b>%s</b> table in database "
-                        "<b>%s</b> on <b>%s</b>?" % (self.name, self.db.name, self.db.host.name),
+                "Do You really want to TRUNCATE the <b>%s</b> table in database "
+                "<b>%s</b> on <b>%s</b>?" % (
+                        self.get_escaped_name(),
+                        self.db.get_escaped_name(),
+                        self.db.host.get_escaped_name()
+                ),
                 None):
             return
         if self.db.query("truncate table `%s`" % self.name):
             self.trigger('changed', self)
+
+    def get_escaped_name(self):
+        """
+        :@return : str
+        """
+        return self.name.replace('&', '&amp;').replace('<', '&lt;')
