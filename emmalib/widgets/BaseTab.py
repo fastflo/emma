@@ -1,7 +1,5 @@
-"""
-Base tab - used as parent for all Emma tabs
-"""
 # -*- coding: utf-8 -*-
+"""
 # emma
 #
 # Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
@@ -20,7 +18,7 @@ Base tab - used as parent for all Emma tabs
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
-
+"""
 import os
 import gtk
 
@@ -35,6 +33,7 @@ class BaseTab(object):
         self.tab_label = gtk.Label('Tab Name')
         self.tab_label.show()
 
+        self.is_active = False
         self.ui = None
 
         self.tab_label_hbox = gtk.HBox(False, 4)
@@ -88,3 +87,10 @@ class BaseTab(object):
         :return: gtk.Button
         """
         return self.tab_label_close_button
+
+    def set_active(self, is_active):
+        """
+        Controls if tab is active or not
+        :param is_active: bool
+        """
+        self.is_active = is_active

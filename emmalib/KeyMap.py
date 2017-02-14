@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""
 # emma
 #
 # Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
@@ -17,22 +18,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+"""
 
-import gtk
-import gobject
 from gtk import keysyms
 
+from emmalib.EventsManager import EventsManager
 
-class KeyMap(gobject.GObject):
 
+class KeyMap(EventsManager):
     """
-
+    Emma Keymap handler
     @param emma: Emma
     """
-    __gsignals__ = {
-        'key-press': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.gdk.Event,)),
-        'key-release': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gtk.gdk.Event,)),
-    }
 
     def __init__(self, emma):
         """
@@ -47,34 +44,33 @@ class KeyMap(gobject.GObject):
         self.left_control_key_is_pressed = False
         self.right_control_key_is_pressed = False
 
-    def on_mainwindow_key_press_event(self, _window, event):
+    def on_mainwindow_key_press_event(self, _, event):
         """
-
-        @param _window:
+        Handle KEYPRESS event
+        @param _:
         @param event:
         """
-        self.emit('key-press', event)
         if event.keyval == keysyms.Control_L:
             self.left_control_key_is_pressed = True
         if event.keyval == keysyms.Control_R:
             self.right_control_key_is_pressed = True
 
-    def on_mainwindow_key_release_event(self, _window, event):
+    def on_mainwindow_key_release_event(self, _, event):
         """
-
-        @param _window:
+        Handle KEYRELEASE event
+        @param _:
         @param event:
         @return:
         """
-        self.emit('key-release', event)
         #
         #   QueryTab stuff
         #
         if event.keyval == keysyms.F9:
-            self.emma.events.trigger('execute_query')
+            self.trigger('keymap_execute_query')
+            return False
 
         if event.keyval == keysyms.Return and self.if_ctrl():
-            self.emma.events.trigger('execute_query')
+            self.trigger('keymap_execute_query')
             return False
 
         if event.keyval == keysyms.t and self.if_ctrl():
