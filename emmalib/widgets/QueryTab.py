@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""
 # emma
 #
 # Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
@@ -17,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
-
+"""
 import gobject
 import gtk
 import gtksourceview2
@@ -46,7 +47,6 @@ class QueryTab(BaseTab):
     """
     @param emma: Emma
     """
-
     def __init__(self, emma):
         super(QueryTab, self).__init__()
 
@@ -609,7 +609,7 @@ class QueryTab(BaseTab):
         for i in new_tables:
             self.current_host.current_db.tables[i].refresh(False)
 
-        if not th.fields and not table in new_tables:
+        if not th.fields and table not in new_tables:
             th.refresh(False)
 
         row_iter = None
@@ -637,7 +637,7 @@ class QueryTab(BaseTab):
                         c = fields.index(db_field_object.name)
                     except:
                         pass
-                if not c is None:
+                if c is not None:
                     pri_okay = 1
                     if path:
                         value = self.model.get_value(row_iter, c)
@@ -657,7 +657,7 @@ class QueryTab(BaseTab):
                         c = fields.index(db_field_object.name)
                     except:
                         pass
-                if not c is None:
+                if c is not None:
                     uni_okay = 1
                     if path:
                         value = self.model.get_value(row_iter, c)

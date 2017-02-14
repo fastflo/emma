@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-#
 # emma
 #
 # Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
@@ -31,15 +30,16 @@ from emmalib.widgets import TabTable
 
 class MainNotebook(gtk.Notebook):
     """
-    @param emma: Emma
+    :param emma: Emma
     """
+
     def __init__(self, emma):
         super(MainNotebook, self).__init__()
         self.emma = emma
         self.queries = []
         self.query_count = 0
         self.tabs = []
-        self.connect('switch_page', self.main_notebook_on_change_page)
+        self.connect('switch-page', self.on_switch_page)
         self.set_scrollable(True)
         self.emma.events.on('on_table_dropped', self.on_table_dropped)
 
@@ -52,24 +52,27 @@ class MainNotebook(gtk.Notebook):
                 if tab.table == table:
                     self.close_generic_tab(None, tab)
 
-    #
-    #   Set emma.current_query properly
-    #   to keep backward compatibiluty for now
-    #
-
-    def main_notebook_on_change_page(self, np, pointer, page):
-        page_ui = self.get_nth_page(page)
+    def on_switch_page(self, *args):
+        """
+        Set emma.current_query properly
+        to keep backward compatibiluty for now
+        :param args:
+        """
+        page_ui = self.get_nth_page(args[2])
         for q in self.queries:
             if q.ui == page_ui:
+                if 'set_active' in dir(q):
+                    q.set_active(True)
                 self.emma.current_query = q
                 q.database_event_box.on_click(None, None)
-                return
-
-    #
-    #   QueryTab
-    #
+            else:
+                if 'set_active' in dir(q):
+                    q.set_active(False)
 
     def add_query_tab(self):
+        """
+        Add empty qury tab
+        """
         q = QueryTab(self.emma)
         self.query_count += 1
         self.emma.current_query = q
@@ -78,10 +81,15 @@ class MainNotebook(gtk.Notebook):
         self.set_tab_reorderable(q.get_ui(), True)
         q.get_tab_close_button().connect('clicked', self.close_query_tab, q)
         self.set_current_page(new_page_index)
-        self.emma.current_query.textview.grab_focus()
+        q.textview.grab_focus()
         self.tabs.append(q)
 
     def close_query_tab(self, button, tab_class):
+        """
+        :param button: gtk.Widget
+        :param tab_class:
+        :return:
+        """
         if not tab_class:
             return False
         if len(self.queries) == 1:
@@ -102,12 +110,23 @@ class MainNotebook(gtk.Notebook):
         return False
 
     def add_process_list_tab(self, host):
+        """
+        :param host:
+        """
+        # TODO: move to providers
         self.add_generic_tab(TabProcessList(self.emma, host))
 
     def add_tables_list_tab(self):
+        """
+        Adds "Tables List" tab
+        """
+        # TODO: move to providers
         self.add_generic_tab(TabTablesList(self.emma))
 
     def add_generic_tab(self, tab_class):
+        """
+        :param tab_class: type
+        """
         ui = tab_class.get_ui()
         label = tab_class.get_label_ui()
         new_page_num = self.append_page(ui, label)
@@ -117,6 +136,11 @@ class MainNotebook(gtk.Notebook):
         self.tabs.append(tab_class)
 
     def close_generic_tab(self, button, tab_class):
+        """
+        :param button:
+        :param tab_class:
+        :return:
+        """
         if not tab_class:
             return
         page_num = self.page_num(tab_class.get_ui())
@@ -126,6 +150,9 @@ class MainNotebook(gtk.Notebook):
         gc.collect()
 
     def close_current_tab(self):
+        """
+        :return:
+        """
         page_num = self.get_current_page()
         if page_num < 0:
             return
