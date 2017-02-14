@@ -78,7 +78,8 @@ class MySqlTable(EventsManager):
         """
         Refresh table properties
         """
-        self.host.query("show table status like '%s'" % self.host.escape_table(self.name))
+        _qeury = "show table status like '%s'" % self.name
+        self.host.query(_qeury)
         result = self.handle.store_result()
         rows = result.fetch_row(0)
         self.props = rows[0]

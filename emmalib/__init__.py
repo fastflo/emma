@@ -56,7 +56,9 @@ from Emma import Emma
 
 
 def usage():
-    
+    """
+    Show usage in console
+    """
     print """usage: emma [-h|--help] [-d|--debug] [-l output_log [-f|--flush]]
  -h|--help     show this help message
  -d|--debug    output debug information on stdout
@@ -67,6 +69,11 @@ def usage():
 
 
 def start(args):
+    """
+    Start Emma
+    @param args:
+    @return:
+    """
     global emma_instance
 
     debug_output = False

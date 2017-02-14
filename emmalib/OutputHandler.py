@@ -22,7 +22,10 @@ import sys
 import datetime
 
 
-class OutputHandler:
+class OutputHandler(object):
+    """
+    Emma's output handler
+    """
     def __init__(self, print_stdout=False, log_file=None, log_flush=False):
         self.stdout = sys.stdout
         self.print_stdout = print_stdout
@@ -35,6 +38,10 @@ class OutputHandler:
         self.debug = print_stdout or log_file
 
     def write(self, s):
+        """
+        @param s: str
+        @return:
+        """
         if self.print_stdout:
             self.stdout.write(s)
             if self.log_flush:
@@ -43,7 +50,7 @@ class OutputHandler:
             s = s.strip("\r\n")
             if not s:
                 # do not write empty lines to logfile
-                return 
+                return
             timestamp = str(datetime.datetime.now())[0:22]
             self.log_fp.write(
                 "%s %s\n" % (timestamp, s.replace("\n", "\n " + (" " * len(timestamp)))))

@@ -19,6 +19,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 import gtk
+
+import gobject
+
 from MainNotebook import MainNotebook
 from MainMenu import MainMenu
 
@@ -87,6 +90,8 @@ class MainWindow(gtk.Window):
         self.show_all()
         self.connections_tv_spinner.hide()
 
+        gobject.timeout_add(1000, self.update_statusbar)
+
     def on_toggle_message_notebook_visible(self):
         """
         Handle event of visibility toggle
@@ -94,3 +99,19 @@ class MainWindow(gtk.Window):
         self.message_notebook.set_visible(
             not self.message_notebook.get_visible()
         )
+
+    def update_statusbar(self, *args):
+        """
+        @param args:
+        @return:
+        """
+        import psutil
+        import os
+        process = psutil.Process(os.getpid())
+        ci = self.status_bar.get_context_id("MEM:")
+        self.status_bar.remove_all(ci)
+        pmi = process.memory_info()
+        print "PMI:", pmi
+        self.status_bar.push(ci, "MEM: %0.2f Mb" % (pmi.rss/(1024*1024)))
+        print 'update_statusbar', args
+        return True
