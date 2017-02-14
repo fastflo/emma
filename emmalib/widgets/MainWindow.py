@@ -100,7 +100,7 @@ class MainWindow(gtk.Window):
             not self.message_notebook.get_visible()
         )
 
-    def update_statusbar(self, *args):
+    def update_statusbar(self):
         """
         @param args:
         @return:
@@ -111,7 +111,5 @@ class MainWindow(gtk.Window):
         ci = self.status_bar.get_context_id("MEM:")
         self.status_bar.remove_all(ci)
         pmi = process.memory_info()
-        print "PMI:", pmi
         self.status_bar.push(ci, "MEM: %0.2f Mb" % (pmi.rss/(1024*1024)))
-        print 'update_statusbar', args
         return True

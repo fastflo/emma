@@ -129,3 +129,10 @@ class TabTable(BaseTab):
         self.table_textview.get_buffer().set_text(self.table.get_create_table())
         self.tab_label.set_text('Table: %s' % table.name)
         # print 'Table `%s` fired CHANGED event!' % table.name
+
+    def destroy(self):
+        self.data_view.lo
+        self.data_view.destroy()
+        del self.table
+        del self.notebook
+        del self.data_view

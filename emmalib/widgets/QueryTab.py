@@ -344,9 +344,7 @@ class QueryTab(BaseTab):
         del self.treeview
         del self.model
         del self.textview
-        self.treeview = None
-        self.model = None
-        self.textview = None
+        del self.query_toolbar
         self.update_db_label()
 
     def set(self, text):
