@@ -22,6 +22,7 @@
 """
 import gc
 import gtk
+
 from TabProcessList import TabProcessList
 from TabTablesList import TabTablesList
 from QueryTab import QueryTab
@@ -147,6 +148,8 @@ class MainNotebook(gtk.Notebook):
         self.remove_page(page_num)
         i = self.tabs.index(tab_class)
         del self.tabs[i]
+        tab_class.destroy()
+        del tab_class
         gc.collect()
 
     def close_current_tab(self):

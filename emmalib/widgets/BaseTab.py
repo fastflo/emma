@@ -94,3 +94,16 @@ class BaseTab(object):
         :param is_active: bool
         """
         self.is_active = is_active
+
+    def destroy(self):
+        """
+        Cleanup
+        """
+        del self.is_active
+        del self.tab_label
+        del self.tab_label_close_button
+        del self.tab_label_close_img
+        del self.tab_label_hbox
+        del self.tab_label_icon
+        self.ui.destroy()
+        del self.ui

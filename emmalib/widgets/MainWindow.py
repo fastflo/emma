@@ -102,14 +102,18 @@ class MainWindow(gtk.Window):
 
     def update_statusbar(self):
         """
-        @param args:
         @return:
         """
-        import psutil
-        import os
-        process = psutil.Process(os.getpid())
-        ci = self.status_bar.get_context_id("MEM:")
-        self.status_bar.remove_all(ci)
-        pmi = process.memory_info()
-        self.status_bar.push(ci, "MEM: %0.2f Mb" % (pmi.rss/(1024*1024)))
+        # from pympler.asizeof import asizeof
+        # import psutil
+        # import os
+        # process = psutil.Process(os.getpid())
+        # ci = self.status_bar.get_context_id("MEM:")
+        # self.status_bar.remove_all(ci)
+        # pmi = process.memory_info()
+        # rss = "RSS mem: %i Mb" % pmi.rss
+        # ctw = "ctw %i" % asizeof(self.emma.connections_tv)
+        # mnb = "mnb %i" % asizeof(self.emma.main_notebook)
+        # msb = "msb %i" % asizeof(self.emma.sql_log)
+        # self.status_bar.push(ci, rss+", "+ctw+", "+mnb+", "+msb)
         return True

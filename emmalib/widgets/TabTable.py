@@ -19,6 +19,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 import gtk
+
+import gc
+
 from BaseTab import BaseTab
 from ResultView import ResultView
 
@@ -27,7 +30,6 @@ class TabTable(BaseTab):
     """
     @param emma: Emma
     """
-
     def __init__(self, emma, table):
         super(TabTable, self).__init__()
 
@@ -90,6 +92,8 @@ class TabTable(BaseTab):
         vbox.pack_end(self.create_statusbar(), False, True)
         vbox.show_all()
 
+        self.table_data_result = {}
+
         self.ui = vbox
 
     def create_statusbar(self):
@@ -111,7 +115,8 @@ class TabTable(BaseTab):
         """
         Load
         """
-        self.data_view.load_data(self.table.get_all_records())
+        self.table_data_result = self.table.get_all_records()
+        self.data_view.load_data(self.table_data_result)
         self.status_text.set_text(self.table.get_table_status_string())
         self.table_textview.get_buffer().set_text(self.table.get_create_table())
         if self.table_properties:
@@ -131,8 +136,20 @@ class TabTable(BaseTab):
         # print 'Table `%s` fired CHANGED event!' % table.name
 
     def destroy(self):
-        self.data_view.lo
+        """
+        Cleanup
+        """
         self.data_view.destroy()
-        del self.table
-        del self.notebook
         del self.data_view
+        del self.emma
+        del self.notebook
+        del self.status_text
+        del self.table
+        del self.table_data_result
+        del self.table_fields
+        del self.table_indexes
+        del self.table_properties
+        del self.table_textview
+        del self.toolbar
+        super(TabTable, self).destroy()
+        gc.collect()
