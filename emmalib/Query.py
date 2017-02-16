@@ -130,10 +130,15 @@ def get_order_from_query(query):
 
 
 def is_query_appendable(query):
+    """
+    @rtype: ()
+    @type query: str
+    @param query:
+    @return:
+    """
     pat = r'(?i)("(?:[^\\]|\\.)*?")|(\'(?:[^\\]|\\.)*?\')|(`(?:[^\\]|\\.)*?`)|(union)|(select[ \r\n\t]+(.*)[ \r\n\t]+from[ \r\n\t]+(.*))'
     r = re.compile(pat)
     _start = 0
-    result = False
     while 1:
         result = re.search(r, query[_start:])
         if not result:

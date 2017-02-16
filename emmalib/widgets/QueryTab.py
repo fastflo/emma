@@ -9,24 +9,25 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Library General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 """
-import gobject
-import gtk
-import gtksourceview2
 import os
 import re
 import time
 import traceback
+import gobject
+import gtk
 from gtk import keysyms
+
+import gtksourceview2
 
 import pango
 
@@ -34,9 +35,9 @@ from emmalib import Query
 from emmalib import dialogs
 from emmalib.Constants import icons_path
 
-from emmalib.widgets import BaseTab
-from querytab.QueryTabResultPopup import QueryTabResultPopup
-from querytab.QueryTabTreeView import QueryTabTreeView
+from emmalib.widgets.BaseTab import BaseTab
+from emmalib.widgets.querytab.QueryTabResultPopup import QueryTabResultPopup
+from emmalib.widgets.querytab.QueryTabTreeView import QueryTabTreeView
 from emmalib.widgets.querytab.DatabaseEventBox import DatabaseEventBox
 from emmalib.widgets.querytab.EncodingEventBox import EncodingEventBox
 from emmalib.widgets.querytab.ResultToolbar import ResultToolbar
@@ -47,6 +48,7 @@ class QueryTab(BaseTab):
     """
     @param emma: Emma
     """
+
     def __init__(self, emma):
         super(QueryTab, self).__init__()
 
@@ -535,7 +537,7 @@ class QueryTab(BaseTab):
         :return:
         """
         result = Query.is_query_appendable(query)
-        if not result:
+        if isinstance(result, bool):
             return None, None, None, None, None
 
         field_list = result.group(6)

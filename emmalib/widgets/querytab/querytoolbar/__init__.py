@@ -1,1 +1,3 @@
-__author__ = 'nick'
+"""
+Emma QueryTab's toolbar widgets
+"""

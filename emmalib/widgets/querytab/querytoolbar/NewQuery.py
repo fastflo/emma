@@ -1,3 +1,6 @@
+"""
+New Query
+"""
 import gtk
 
 

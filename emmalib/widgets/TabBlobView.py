@@ -1,3 +1,6 @@
+"""
+TabBlobView
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -19,17 +22,19 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 import os
-import gtk
 import sys
+import gtk
 
 from emmalib.dialogs import show_message, confirm
 
 
 class TabBlobView(gtk.VBox):
+    """
+    @type emma: emmalib.Emma.Emma
+    @param emma: Emma
+    """
+
     def __init__(self, emma):
-        """
-        @param emma: Emma
-        """
         super(TabBlobView, self).__init__()
 
         self.emma = emma
@@ -72,6 +77,11 @@ class TabBlobView(gtk.VBox):
         self.show_all()
 
     def on_blob_update_clicked(self, _):
+        """
+        @rtype: None
+        @param _:
+        @return:
+        """
         q = self.emma.current_query
         path, column = q.treeview.get_cursor()
         if not q.model:
@@ -80,24 +90,32 @@ class TabBlobView(gtk.VBox):
         b = self.tv.get_buffer()
         new_value = b.get_text(b.get_start_iter(), b.get_end_iter())
 
+        col_num = 0
         col_max = q.model.get_n_columns()
+        if col_max == 0:
+            return
         for col_num in range(col_max):
             if column == q.treeview.get_column(col_num):
                 break
-        else:
-            return
         crs = column.get_cell_renderers()
         return q.on_query_change_data(crs[0],
                                       path, new_value, col_num,
                                       force_update=self.encoding != q.encoding)
 
     def on_blob_wrap_check_clicked(self, button):
+        """
+        @param button:
+        """
         if button.get_active():
             self.tv.set_wrap_mode(gtk.WRAP_WORD)
         else:
             self.tv.set_wrap_mode(gtk.WRAP_NONE)
 
     def on_blob_load_clicked(self, _):
+        """
+        @param _:
+        @return:
+        """
         d = self.emma.assign_once(
             "load dialog",
             gtk.FileChooserDialog,
@@ -124,6 +142,10 @@ class TabBlobView(gtk.VBox):
         self.tv.get_buffer().set_text(query_text)
 
     def on_blob_save_clicked(self, _):
+        """
+        @param _:
+        @return:
+        """
         d = self.emma.assign_once(
             "save dialog",
             gtk.FileChooserDialog,
@@ -157,4 +179,3 @@ class TabBlobView(gtk.VBox):
         except:
             show_message("save blob contents",
                          "error writing query to file %s: %s" % (filename, sys.exc_value))
-

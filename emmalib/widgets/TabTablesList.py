@@ -1,3 +1,6 @@
+"""
+TabTablesList
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -20,12 +23,14 @@
 
 import gtk
 import gobject
-from BaseTab import BaseTab
-from ResultCellRenders import *
+
+from emmalib.widgets.BaseTab import BaseTab
+from emmalib.widgets.ResultCellRenders import render_mysql_string
 
 
 class TabTablesList(BaseTab):
     """
+    @type emma: emmalib.Emma.Emma
     @param emma: Emma
     """
     def __init__(self, emma):
@@ -63,7 +68,7 @@ class TabTablesList(BaseTab):
         :param args:
         :return:
         """
-        if not self.emma.current_query:
+        if not self.emma.current_query or args is None:
             return
         elif self.emma.current_query.current_host:
             self.emma.current_host = self.emma.current_query.current_host

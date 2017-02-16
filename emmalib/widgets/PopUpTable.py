@@ -1,3 +1,6 @@
+"""
+PopUpTable
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -23,7 +26,9 @@ import gobject
 
 
 class PopUpTable(gtk.Menu):
-
+    """
+    PopUpTable
+    """
     __gsignals__ = {
         'item-selected': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_OBJECT,))
     }
@@ -69,5 +74,7 @@ class PopUpTable(gtk.Menu):
         self.show_all()
 
     def activated(self, item):
+        """
+        @param item:
+        """
         self.emit('item-selected', item)
-        pass

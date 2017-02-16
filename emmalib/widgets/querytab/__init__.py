@@ -1,0 +1,3 @@
+"""
+QueryTab widgets
+"""

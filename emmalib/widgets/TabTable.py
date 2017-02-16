@@ -1,3 +1,6 @@
+"""
+TabTable
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -18,16 +21,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
+import gc
 import gtk
 
-import gc
-
-from BaseTab import BaseTab
-from ResultView import ResultView
+from emmalib.widgets.BaseTab import BaseTab
+from emmalib.widgets.ResultView import ResultView
 
 
 class TabTable(BaseTab):
     """
+    @type emma: emmalib.Emma.Emma
     @param emma: Emma
     """
     def __init__(self, emma, table):

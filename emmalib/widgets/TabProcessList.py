@@ -1,3 +1,6 @@
+"""
+TabProcessList
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -20,18 +23,22 @@
 
 import gtk
 import gobject
-from BaseTab import BaseTab
+from emmalib.widgets.BaseTab import BaseTab
 
-from PopUpProcessList import PopUpProcessList
+from emmalib.widgets.PopUpProcessList import PopUpProcessList
 from emmalib import dialogs
 
-from ResultCellRenders import *
+from emmalib.widgets.ResultCellRenders import render_mysql_string
 
 
 class TabProcessList(BaseTab):
+    """
+    @param emma: Emma
+    """
     def __init__(self, emma, host):
         """
-        @param emma: Emma
+        @type host: MySqlHost
+        @type emma: emmalib.Emma
         """
         super(TabProcessList, self).__init__()
 
@@ -69,12 +76,21 @@ class TabProcessList(BaseTab):
         self.refresh()
 
     def refresh(self, *args):
-        if not self.host:
+        """
+        @type args: tuple
+        @param args:
+        @return:
+        """
+        if not self.host or args is None:
             return
+        print 'refresh'
         self.host.refresh_processlist()
         self.redraw()
 
     def redraw(self):
+        """
+        @return: None
+        """
         if not self.host.processlist:
             return
         fields, rows = self.host.processlist
@@ -101,9 +117,18 @@ class TabProcessList(BaseTab):
 
         return
 
-    def on_kill_process(self, *args):
-        path, column = self.treeview.get_cursor()
-        if not path or not self.host:
+    def on_kill_process(self, _popup, _item):
+        """
+        @type _item: gtk.ImageMenuItem
+        @param _item:
+        @type _popup: PopUpProcessList
+        @param _popup:
+        @return:
+        """
+        if not _popup or not _item or not self.host:
+            return
+        path, _ = self.treeview.get_cursor()
+        if not path:
             return
         _iter = self.model.get_iter(path)
         process_id = self.model.get_value(_iter, 0)
@@ -113,6 +138,11 @@ class TabProcessList(BaseTab):
                                  "kill process_id %s!" % process_id)
 
     def on_processlist_button_release(self, tv, event):
+        """
+        @param tv:
+        @param event:
+        @return:
+        """
         if not event.button == 3:
             return False
         res = tv.get_path_at_pos(int(event.x), int(event.y))
@@ -121,6 +151,10 @@ class TabProcessList(BaseTab):
         self.popup.popup(None, None, None, event.button, event.time)
 
     def on_processlist_refresh_value_change(self, button):
+        """
+        @param button:
+        @return:
+        """
         value = button.get_value()
         if self.processlist_timer_running:
             return
@@ -129,6 +163,10 @@ class TabProcessList(BaseTab):
         gobject.timeout_add(int(value * 1000), self.on_processlist_refresh_timeout, button)
 
     def on_processlist_refresh_timeout(self, button):
+        """
+        @param button:
+        @return:
+        """
         value = button.get_value()
         if value < 0.1:
             self.processlist_timer_running = False

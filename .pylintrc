@@ -1,12 +1,12 @@
 [MASTER]
 # Add gtk to whitelist
-extension-pkg-whitelist=gtk, gobject, _mysql
+extension-pkg-whitelist=gtk, gobject, _mysql, pango, gtksourceview2
 
 # Emma has classes with constructor only - so 0 public methods should be allowed
 min-public-methods=0
 max-public-methods=128
 
-disable = locally-disabled, invalid-name, too-many-arguments
+disable = locally-disabled, invalid-name, too-many-arguments, bare-except
 
 # Maximum number of attributes for a class (see R0902).
 max-attributes=16

@@ -1,3 +1,6 @@
+"""
+Result cell render
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -20,8 +23,18 @@
 
 
 def render_mysql_string(column, cell, model, _iter, _id):
+    """
+    @param column: gtk.TreeViewColumn
+    @param cell:
+    @param model:
+    @param _iter:
+    @param _id:
+    """
+    if not column:
+        return
+    print column
     o = model.get_value(_iter, _id)
-    if not o is None:
+    if o is not None:
         cell.set_property("foreground", None)
         cell.set_property("background", None)
         cell.set_property("text", o)

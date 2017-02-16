@@ -22,10 +22,13 @@
 import gtk
 import gobject
 import dialogs
-import widgets
 import gtk.glade
-from ConnectionWindow import ConnectionWindow
+from emmalib.ConnectionWindow import ConnectionWindow
 from Constants import *
+from widgets.PopUpDatabase import PopUpDatabase
+from widgets.PopUpHost import PopUpHost
+from widgets.PopUpTable import PopUpTable
+from widgets.TabTable import TabTable
 
 
 class ConnectionsTreeView(gtk.TreeView):
@@ -61,11 +64,11 @@ class ConnectionsTreeView(gtk.TreeView):
         self.connect("button-release-event", self.on_connections_button_release)
         self.connect("cursor-changed", self.on_connections_tv_cursor_changed)
 
-        self.pop_up_host = widgets.PopUpHost()
+        self.pop_up_host = PopUpHost()
         self.pop_up_host.connect('item-selected', self.on_host_popup)
-        self.pop_up_database = widgets.PopUpDatabase()
+        self.pop_up_database = PopUpDatabase()
         self.pop_up_database.connect('item-selected', self.on_db_popup)
-        self.pop_up_table = widgets.PopUpTable()
+        self.pop_up_table = PopUpTable()
         self.pop_up_table.connect('item-selected', self.on_table_popup)
 
         self.connection_window = ConnectionWindow(emma)
@@ -154,7 +157,7 @@ class ConnectionsTreeView(gtk.TreeView):
             host.select_database(o.db)
             table = o
             self.emma.current_query.set_current_db(table.db)
-            self.emma.main_notebook.add_generic_tab(widgets.TabTable(self.emma, table))
+            self.emma.main_notebook.add_generic_tab(TabTable(self.emma, table))
         else:
             print "No Handler for tree-depth", depth
         return

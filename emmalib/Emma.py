@@ -25,7 +25,6 @@ import gobject
 import gtk.gdk
 import gtk.glade
 
-import widgets
 from Config import Config
 from KeyMap import KeyMap
 from Constants import *
@@ -36,9 +35,13 @@ from emmalib.dialogs.ExecuteQueryFromDisk import ExecuteQueryFromDisk
 from emmalib.dialogs.LocalSearch import LocalSearch
 from emmalib.dialogs.About import About
 from emmalib.dialogs.ChangeLog import ChangeLog
+from emmalib.widgets.MainWindow import MainWindow
+from emmalib.widgets.TabBlobView import TabBlobView
+from emmalib.widgets.TabMsgLog import TabMsgLog
+from emmalib.widgets.TabSqlLog import TabSqlLog
 
 
-class Emma:
+class Emma(object):
     """
     Main Emma Class
     """
@@ -94,7 +97,7 @@ class Emma:
         Start Emma process
         """
 
-        self.mainwindow = widgets.MainWindow(self)
+        self.mainwindow = MainWindow(self)
         self.mainwindow.connect('destroy', lambda *args: gtk.main_quit())
 
         self.key_map = KeyMap(self)
@@ -110,14 +113,14 @@ class Emma:
         self.main_notebook = self.mainwindow.main_notebook
 
         # init Message log
-        self.msg_log = widgets.TabMsgLog(self)
+        self.msg_log = TabMsgLog(self)
         self.message_notebook.prepend_page(self.msg_log, gtk.Label('Message Log'))
 
         # init SQL log
-        self.sql_log = widgets.TabSqlLog(self)
+        self.sql_log = TabSqlLog(self)
         self.message_notebook.prepend_page(self.sql_log, gtk.Label('SQL Log'))
 
-        self.blob_view = widgets.TabBlobView(self)
+        self.blob_view = TabBlobView(self)
         self.message_notebook.append_page(self.blob_view, gtk.Label('Blob View'))
 
         self.local_search_dialog = LocalSearch()

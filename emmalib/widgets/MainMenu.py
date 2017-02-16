@@ -1,3 +1,6 @@
+"""
+Main Menu
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -166,7 +169,6 @@ class MainMenu(gtk.MenuBar):
         :param item:
         """
         self.emit('item-selected', item)
-        pass
 
     def on_reload_plugins_activate(self, item):
         """
@@ -204,6 +206,3 @@ class MainMenu(gtk.MenuBar):
         """
         self.emit('item-selected', item)
         gtk.main_quit()
-
-
-

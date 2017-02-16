@@ -2,21 +2,22 @@
 Result tool bar
 """
 import gtk
-from resulttoolbar.AddRecord import AddRecord
-from resulttoolbar.RememberOrder import RememberOrder
-from resulttoolbar.ApplyRecord import ApplyRecord
-from resulttoolbar.DeleteRecord import DeleteRecord
-from resulttoolbar.LocalSearch import LocalSearch
-from resulttoolbar.RemoveOrder import RemoveOrder
-from resulttoolbar.SaveResultCsv import SaveResultCsv
-from resulttoolbar.SaveResultSql import SaveResultSql
-from resulttoolbar.SetRequltFont import SetResultFont
+from emmalib.widgets.querytab.resulttoolbar.AddRecord import AddRecord
+from emmalib.widgets.querytab.resulttoolbar.RememberOrder import RememberOrder
+from emmalib.widgets.querytab.resulttoolbar.ApplyRecord import ApplyRecord
+from emmalib.widgets.querytab.resulttoolbar.DeleteRecord import DeleteRecord
+from emmalib.widgets.querytab.resulttoolbar.LocalSearch import LocalSearch
+from emmalib.widgets.querytab.resulttoolbar.RemoveOrder import RemoveOrder
+from emmalib.widgets.querytab.resulttoolbar.SaveResultCsv import SaveResultCsv
+from emmalib.widgets.querytab.resulttoolbar.SaveResultSql import SaveResultSql
+from emmalib.widgets.querytab.resulttoolbar.SetRequltFont import SetResultFont
 
 
 class ResultToolbar(gtk.Toolbar):
     """
     Result tool bar
     """
+
     def __init__(self, query, emma):
         """
         @param query: QueryTab
@@ -56,4 +57,3 @@ class ResultToolbar(gtk.Toolbar):
         self.insert(self.apply_record, 0)
         self.insert(self.delete_record, 0)
         self.insert(self.add_record, 0)
-

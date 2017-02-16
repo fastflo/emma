@@ -1,3 +1,6 @@
+"""
+QueryTabTreeView
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -22,9 +25,10 @@ import gtk
 
 
 class QueryTabTreeView(gtk.TreeView):
+    """
+    @param emma: Emma
+    """
+
     def __init__(self, emma=None):
-        """
-        @param emma: Emma
-        """
         self.emma = emma
         super(QueryTabTreeView, self).__init__()

@@ -2,7 +2,7 @@
 Encoding event box
 """
 import gtk
-from QueryTabPopupEncoding import QueryTabPopupEncoding
+from emmalib.widgets.querytab.QueryTabPopupEncoding import QueryTabPopupEncoding
 
 
 class EncodingEventBox(gtk.EventBox):
@@ -45,6 +45,3 @@ class EncodingEventBox(gtk.EventBox):
         if not self.query_encoding_menu:
             self.query_encoding_menu = QueryTabPopupEncoding(self.query)
         self.query_encoding_menu.popup(None, None, None, event.button, event.time)
-
-
-

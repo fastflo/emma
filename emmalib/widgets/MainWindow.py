@@ -1,3 +1,6 @@
+"""
+MainWindow
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -20,10 +23,8 @@
 
 import gtk
 
-import gobject
-
-from MainNotebook import MainNotebook
-from MainMenu import MainMenu
+from emmalib.widgets.MainNotebook import MainNotebook
+from emmalib.widgets.MainMenu import MainMenu
 
 
 class MainWindow(gtk.Window):
@@ -90,7 +91,7 @@ class MainWindow(gtk.Window):
         self.show_all()
         self.connections_tv_spinner.hide()
 
-        gobject.timeout_add(1000, self.update_statusbar)
+        # gobject.timeout_add(1000, self.update_statusbar)
 
     def on_toggle_message_notebook_visible(self):
         """
@@ -100,20 +101,20 @@ class MainWindow(gtk.Window):
             not self.message_notebook.get_visible()
         )
 
-    def update_statusbar(self):
-        """
-        @return:
-        """
-        # from pympler.asizeof import asizeof
-        # import psutil
-        # import os
-        # process = psutil.Process(os.getpid())
-        # ci = self.status_bar.get_context_id("MEM:")
-        # self.status_bar.remove_all(ci)
-        # pmi = process.memory_info()
-        # rss = "RSS mem: %i Mb" % pmi.rss
-        # ctw = "ctw %i" % asizeof(self.emma.connections_tv)
-        # mnb = "mnb %i" % asizeof(self.emma.main_notebook)
-        # msb = "msb %i" % asizeof(self.emma.sql_log)
-        # self.status_bar.push(ci, rss+", "+ctw+", "+mnb+", "+msb)
-        return True
+    # def update_statusbar(self):
+    #     """
+    #     @return:
+    #     """
+    #     # from pympler.asizeof import asizeof
+    #     # import psutil
+    #     # import os
+    #     # process = psutil.Process(os.getpid())
+    #     # ci = self.status_bar.get_context_id("MEM:")
+    #     # self.status_bar.remove_all(ci)
+    #     # pmi = process.memory_info()
+    #     # rss = "RSS mem: %i Mb" % pmi.rss
+    #     # ctw = "ctw %i" % asizeof(self.emma.connections_tv)
+    #     # mnb = "mnb %i" % asizeof(self.emma.main_notebook)
+    #     # msb = "msb %i" % asizeof(self.emma.sql_log)
+    #     # self.status_bar.push(ci, rss+", "+ctw+", "+mnb+", "+msb)
+    #     return True

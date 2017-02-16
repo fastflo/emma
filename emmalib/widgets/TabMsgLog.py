@@ -1,3 +1,6 @@
+"""
+TabMsgLog
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -18,18 +21,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import gtk
 import time
+import gtk
 import gobject
 
-from PopUpTabMsgLog import PopUpTabMsgLog
+from emmalib.widgets.PopUpTabMsgLog import PopUpTabMsgLog
 
 
 class TabMsgLog(gtk.ScrolledWindow):
+    """
+    @type emma: emmalib.Emma.Emma
+    @param emma: Emma
+    """
+
     def __init__(self, emma):
-        """
-        @param emma: Emma
-        """
         super(TabMsgLog, self).__init__()
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.emma = emma
@@ -48,6 +53,10 @@ class TabMsgLog(gtk.ScrolledWindow):
         self.show_all()
 
     def log(self, log):
+        """
+        @param log:
+        @return:
+        """
         if not log:
             return
         log.replace(
@@ -66,6 +75,11 @@ class TabMsgLog(gtk.ScrolledWindow):
         self.emma.message_notebook.set_current_page(self.emma.message_notebook.page_num(self))
 
     def on_msg_tv_button_press_event(self, tv, event):
+        """
+        @param tv:
+        @param event:
+        @return:
+        """
         if not event.button == 3:
             return False
         res = tv.get_path_at_pos(int(event.x), int(event.y))
@@ -76,5 +90,9 @@ class TabMsgLog(gtk.ScrolledWindow):
         return True
 
     def menu_item_selected(self, menu, item):
-        if item.name == "clear_messages":
+        """
+        @param menu:
+        @param item:
+        """
+        if menu and item.name == "clear_messages":
             self.model.clear()

@@ -1,3 +1,6 @@
+"""
+QueryTabResultPopup
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -26,6 +29,7 @@ class QueryTabResultPopup(gtk.Menu):
     @param query: QueryTab
     @param is_single_row: Bool
     """
+
     def __init__(self, query, is_single_row):
         super(QueryTabResultPopup, self).__init__()
 
@@ -83,10 +87,19 @@ class QueryTabResultPopup(gtk.Menu):
         self.show_all()
 
     def add_sep(self):
+        """
+        Add separator
+        """
         sep = gtk.SeparatorMenuItem()
         self.append(sep)
 
     def add_imi(self, stock, name, title):
+        """
+        @param stock:
+        @param name:
+        @param title:
+        @return:
+        """
         item = gtk.ImageMenuItem(stock)
         item.set_name(name)
         item.set_label(title)
@@ -96,6 +109,10 @@ class QueryTabResultPopup(gtk.Menu):
         return item
 
     def activated(self, item):
+        """
+        @param item:
+        @return:
+        """
         q = self.query
         path, column = q.treeview.get_cursor()
         _iter = q.model.get_iter(path)

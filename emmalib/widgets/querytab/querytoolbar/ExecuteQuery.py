@@ -13,11 +13,11 @@ Emit events:
     execute_query_empty
     execute_query_not_empty
 """
-import gobject
-import gtk
 import gc
 import re
 import time
+import gobject
+import gtk
 
 from emmalib.dialogs import error
 from emmalib.Query import read_query, is_query_appendable, get_order_from_query
@@ -43,9 +43,9 @@ class ExecuteQuery(gtk.ToolButton):
         self.connect('clicked', self.on_clicked)
         self.emma.events.on('execute_query', self.on_event)
 
-    def on_event(self, *args):
+    def on_event(self, *_):
         """
-        @param args:
+        @param _:
         """
         self.on_clicked(None, None)
 
@@ -301,7 +301,7 @@ class ExecuteQuery(gtk.ToolButton):
                     @param f:
                     @return:
                     """
-                    if type(f) == str:
+                    if isinstance(f, str):
                         f = f.decode(self.query.encoding, "replace")
                     elif f is None:
                         pass
@@ -310,7 +310,7 @@ class ExecuteQuery(gtk.ToolButton):
                     return f
                 self.query.model.append(map(to_string, row))
                 cnt += 1
-                if not cnt % 100 == 0:
+                if (cnt % 100) != 0:
                     continue
 
                 now = time.time()

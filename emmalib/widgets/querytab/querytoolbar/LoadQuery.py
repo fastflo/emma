@@ -1,7 +1,11 @@
-import gtk
+"""
+Load Query
+"""
+
 import os
 from stat import S_ISREG
 import sys
+import gtk
 from emmalib import dialogs
 
 
@@ -10,6 +14,7 @@ class LoadQuery(gtk.ToolButton):
     @param query: QueryTab
     @param emma: Emma
     """
+
     def __init__(self, query, emma):
         super(LoadQuery, self).__init__()
         self.emma = emma

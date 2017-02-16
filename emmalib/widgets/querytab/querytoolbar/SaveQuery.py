@@ -1,6 +1,10 @@
-import gtk
+"""
+Save Query
+"""
+
 import os
 import sys
+import gtk
 from emmalib import dialogs
 
 
@@ -9,6 +13,7 @@ class SaveQuery(gtk.ToolButton):
     @param query: QueryTab
     @param emma: Emma
     """
+
     def __init__(self, query, emma):
         super(SaveQuery, self).__init__()
         self.emma = emma
@@ -47,7 +52,8 @@ class SaveQuery(gtk.ToolButton):
             if not dialogs.confirm(
                     "Overwrite file?",
                     "%s already exists! Do you want to overwrite it?" % filename,
-                    self.emma.mainwindow):
+                    self.emma.mainwindow
+            ):
                 return
         b = self.query.textview.get_buffer()
         query_text = b.get_text(b.get_start_iter(), b.get_end_iter())

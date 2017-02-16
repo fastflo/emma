@@ -1,12 +1,15 @@
+"""
+Query Toolbar
+"""
 import gtk
-from CloseQuery import CloseQuery
-from RenameQuery import RenameQuery
-from NewQuery import NewQuery
+from emmalib.widgets.querytab.querytoolbar.CloseQuery import CloseQuery
+from emmalib.widgets.querytab.querytoolbar.RenameQuery import RenameQuery
+from emmalib.widgets.querytab.querytoolbar.NewQuery import NewQuery
 # from SetFont import SetFont
 # from LoadQuery import LoadQuery
 # from SaveQuery import SaveQuery
 # from ReExBox import ReExBox
-from ExecuteQuery import ExecuteQuery
+from emmalib.widgets.querytab.querytoolbar.ExecuteQuery import ExecuteQuery
 
 
 class QueryToolbar(gtk.Toolbar):

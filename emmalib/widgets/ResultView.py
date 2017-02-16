@@ -1,3 +1,6 @@
+"""
+ResultView
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -20,7 +23,8 @@
 
 import gtk
 import gobject
-from ResultCellRenders import *
+
+from emmalib.widgets.ResultCellRenders import render_mysql_string
 
 
 class ResultView(gtk.ScrolledWindow):
@@ -99,26 +103,26 @@ class ResultView(gtk.ScrolledWindow):
                 if result['types'][ci] == gobject.TYPE_LONG:
                     if self.enable_sorting:
                         if row[col] is None:
-                            v = 0
+                            v_long = long(0)
                         else:
-                            v = long(row[col])
-                        model_row.append(v)
+                            v_long = long(row[col])
+                        model_row.append(v_long)
                     model_row.append(row[col])
                 elif result['types'][ci] == gobject.TYPE_INT:
                     if self.enable_sorting:
                         if row[col] is None:
-                            v = 0
+                            v_int = 0
                         else:
-                            v = int(row[col])
-                        model_row.append(v)
+                            v_int = int(row[col])
+                        model_row.append(v_int)
                     model_row.append(row[col])
                 elif result['types'][ci] == gobject.TYPE_FLOAT:
                     if self.enable_sorting:
                         if row[col] is None:
-                            v = 0
+                            v_float = float(0)
                         else:
-                            v = float(row[col])
-                        model_row.append(v)
+                            v_float = float(row[col])
+                        model_row.append(v_float)
                     model_row.append(row[col])
                 elif result['types'][ci] == gobject.TYPE_STRING:
                     if row[col] is None:
@@ -127,7 +131,7 @@ class ResultView(gtk.ScrolledWindow):
                         #
                         model_row.append(None)
                     else:
-                        if type(row[col]) != str:
+                        if isinstance(row[col], str):
                             row[col] = str(row[col])
                         try:
                             #

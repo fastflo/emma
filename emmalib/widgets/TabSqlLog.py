@@ -1,3 +1,6 @@
+"""
+TabSqlLog
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -18,18 +21,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-import gtk
 import time
 import gobject
+import gtk
 
-from PopUpTabSqlLog import PopUpTabSqlLog
+from emmalib.widgets.PopUpTabSqlLog import PopUpTabSqlLog
 
 
 class TabSqlLog(gtk.ScrolledWindow):
+    """
+    @param emma: Emma
+    """
+
     def __init__(self, emma):
-        """
-        @param emma: Emma
-        """
         super(TabSqlLog, self).__init__()
         self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.emma = emma
@@ -49,6 +53,10 @@ class TabSqlLog(gtk.ScrolledWindow):
         self.show_all()
 
     def log(self, log):
+        """
+        @param log:
+        @return:
+        """
         olog = log
         max_len = int(self.emma.config.get("query_log_max_entry_length"))
         if len(log) > max_len:
@@ -69,13 +77,28 @@ class TabSqlLog(gtk.ScrolledWindow):
         self.emma.message_notebook.set_current_page(self.emma.message_notebook.page_num(self))
         self.emma.process_events()
 
-    def on_sql_log_activate(self, *args):
-        tv, path, tvc = args
+    def on_sql_log_activate(self, tv, path, tvc):
+        """
+        @type tvc: gtk.TreeViewColumn
+        @type path: tuple
+        @type tv: gtk.TreeVie
+        @return: bool
+        """
+        if not tvc:
+            return
         query = tv.get_model()[path][2]
         self.emma.current_query.textview.get_buffer().set_text(query)
         return True
 
     def on_sql_log_button_press(self, tv, event):
+        """
+        @type event: gtk.gdk.Event
+        @type tv: gtk.TreeView
+        @param tv:
+        @param event:
+        @return:
+        """
+        print "on_sql_log_button_press", tv, event
         if not event.button == 3:
             return False
         res = tv.get_path_at_pos(int(event.x), int(event.y))
@@ -86,11 +109,19 @@ class TabSqlLog(gtk.ScrolledWindow):
         return True
 
     def menu_item_selected(self, menu, item):
+        """
+        @type menu: gtk.Menu
+        @param menu: Element from PopUpTabSqlLog
+        @param item:
+        @return: bool
+        """
+        if not menu:
+            return False
         if item.name == "clear_all_entries":
             self.model.clear()
             return True
 
-        path, column = self.tv.get_cursor()
+        path, _ = self.tv.get_cursor()
 
         if not path:
             return False

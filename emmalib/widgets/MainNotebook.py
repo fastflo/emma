@@ -1,5 +1,7 @@
-# -*- coding: utf-8 -*-
 """
+MainNotebook
+"""
+# -*- coding: utf-8 -*-
 # emma
 #
 # Copyright (C) 2006 Florian Schmidt (flo@fastflo.de)
@@ -19,13 +21,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #
-"""
 import gc
 import gtk
 
-from TabProcessList import TabProcessList
-from TabTablesList import TabTablesList
-from QueryTab import QueryTab
+from emmalib.widgets.TabProcessList import TabProcessList
+from emmalib.widgets.TabTablesList import TabTablesList
+from emmalib.widgets.QueryTab import QueryTab
 from emmalib.widgets import TabTable
 
 
@@ -49,7 +50,7 @@ class MainNotebook(gtk.Notebook):
         :param table:
         """
         for tab in self.tabs:
-            if type(tab) == TabTable:
+            if isinstance(tab, TabTable):
                 if tab.table == table:
                     self.close_generic_tab(None, tab)
 
@@ -85,9 +86,9 @@ class MainNotebook(gtk.Notebook):
         q.textview.grab_focus()
         self.tabs.append(q)
 
-    def close_query_tab(self, button, tab_class):
+    def close_query_tab(self, _, tab_class):
         """
-        :param button: gtk.Widget
+        :param _: should be gtk button
         :param tab_class:
         :return:
         """
@@ -136,9 +137,9 @@ class MainNotebook(gtk.Notebook):
         self.set_current_page(new_page_num)
         self.tabs.append(tab_class)
 
-    def close_generic_tab(self, button, tab_class):
+    def close_generic_tab(self, _, tab_class):
         """
-        :param button:
+        :param _:
         :param tab_class:
         :return:
         """
@@ -162,7 +163,7 @@ class MainNotebook(gtk.Notebook):
         current_tab = self.get_nth_page(page_num)
         for tab in self.tabs:
             if tab.get_ui() == current_tab:
-                if type(tab) is QueryTab:
+                if isinstance(tab, QueryTab):
                     self.close_query_tab(None, tab)
                 else:
                     self.close_generic_tab(None, tab)

@@ -8,6 +8,7 @@ class DatabaseEventBox(gtk.EventBox):
     """
     Database event box
     """
+
     def __init__(self, query, emma):
         """
         @param query: QueryTab
@@ -37,6 +38,8 @@ class DatabaseEventBox(gtk.EventBox):
         @param event:
         @return:
         """
+        if not ebox and not event:
+            return
         qeury = self.query
         host = qeury.current_host
         database = qeury.current_db
@@ -84,5 +87,3 @@ class DatabaseEventBox(gtk.EventBox):
         #                                    row_align=0.125, col_align=0.0)
         self.emma.connections_tv.set_cursor(path)
         return
-
-

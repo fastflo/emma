@@ -1,3 +1,7 @@
+"""
+Rename Query
+"""
+
 import gtk
 from emmalib import dialogs
 
@@ -7,6 +11,7 @@ class RenameQuery(gtk.ToolButton):
     @param query: QueryTab
     @param emma: Emma
     """
+
     def __init__(self, query, emma):
         super(RenameQuery, self).__init__()
         self.emma = emma
@@ -43,4 +48,3 @@ class RenameQuery(gtk.ToolButton):
         @param new_name:
         """
         self.query.get_label().set_text(new_name)
-

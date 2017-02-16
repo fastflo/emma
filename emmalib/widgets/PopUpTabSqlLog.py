@@ -1,3 +1,6 @@
+"""
+PopUpTabSqlLog
+"""
 # -*- coding: utf-8 -*-
 # emma
 #
@@ -23,7 +26,9 @@ import gobject
 
 
 class PopUpTabSqlLog(gtk.Menu):
-
+    """
+    PopUpTabSqlLog
+    """
     __gsignals__ = {
         'item-selected': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (gobject.TYPE_OBJECT,))
     }
@@ -62,5 +67,7 @@ class PopUpTabSqlLog(gtk.Menu):
         self.show_all()
 
     def activated(self, item):
+        """
+        @param item:
+        """
         self.emit('item-selected', item)
-        pass
